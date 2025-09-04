@@ -13,20 +13,11 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     try {
-      if (
-        error.response?.status === 401 &&
-        error.config.url !== "/users/logout"
-      ) {
-        //remove cookie and logout
+      if (error.response?.status === 401) {
         useAuth.getState().setLogout();
-        await axiosInstance.delete("/users/logout");
-        //redirect to login page
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
       }
     } catch (e) {
-      console.log(e);
+      //pass
     }
     return Promise.reject(error);
   }
