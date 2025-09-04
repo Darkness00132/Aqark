@@ -19,7 +19,7 @@ interface AuthState {
 
 const useAuth = create(
   persist<AuthState>(
-    (set, get) => ({
+    (set) => ({
       user: null,
       isAuth: false,
       setLoggedIn: () => {

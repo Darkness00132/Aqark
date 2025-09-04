@@ -4,7 +4,6 @@ import useAuth from "@/store/useAuth";
 import { useEffect } from "react";
 
 export default function AuthInitializer() {
-  const isAuth = useAuth((state) => state.user);
   const user = useAuth((state) => state.user);
   const { refetch } = useProfile();
   useEffect(() => {

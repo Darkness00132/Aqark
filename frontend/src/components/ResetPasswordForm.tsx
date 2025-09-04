@@ -1,15 +1,16 @@
 "use client";
-import { useSearchParams } from "next/navigation";
 import useResetPassword from "@/hooks/useResetPassword";
 import { z } from "zod";
 import { resetPasswordSchema } from "@/lib/zodSchemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-export default function ResetPasswordForm() {
+export default function ResetPasswordForm({
+  resetPasswordToken,
+}: {
+  resetPasswordToken: string | undefined;
+}) {
   const { mutate, isPending } = useResetPassword();
-  const searchParams = useSearchParams();
-  const resetPasswordToken = searchParams.get("resetPasswordToken") ?? "";
 
   const {
     register,
@@ -24,11 +25,7 @@ export default function ResetPasswordForm() {
   }
 
   return (
-    <form
-      className="flex flex-col gap-3"
-      onSubmit={handleSubmit(onSubmit)}
-      aria-disabled={isPending}
-    >
+    <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
       <input
         type="password"
         placeholder="كلمة المرور الجديدة"

@@ -3,6 +3,7 @@ import axiosInstance from "@/axiosInstance/axiosInstance";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 interface User {
   name: string;
@@ -26,7 +27,7 @@ export default function useSignup() {
       );
       router.push("/login");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
         error?.response?.data?.message || "فشل انشاء الحساب يرجى حاولة مجددا"
       );

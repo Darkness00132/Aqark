@@ -17,7 +17,7 @@ export default function SignupForm() {
     if (isAuth) {
       router.push("/");
     }
-  }, [isAuth]);
+  }, [isAuth, router]);
 
   const { mutate, isPending } = useSignup();
   const {
@@ -35,7 +35,6 @@ export default function SignupForm() {
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="card-body flex flex-col justify-center p-4 space-y-2"
-      aria-disabled={isPending}
     >
       <h2 className="text-2xl font-bold mb-2">انشئ حساب جديد!</h2>
       <p className="text-gray-600 mb-4">

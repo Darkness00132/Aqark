@@ -4,6 +4,7 @@ import useAuth from "@/store/useAuth";
 import axiosInstance from "@/axiosInstance/axiosInstance";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 
 interface User {
   email: string;
@@ -28,7 +29,7 @@ export default function useLogin() {
       toast.success(data?.message || "تم تسجيل دخول مرحبًا بك");
       router.push("/");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
         error?.response?.data?.message || "فشل تسجيل الدخول يرجى محاولة مجددا "
       );

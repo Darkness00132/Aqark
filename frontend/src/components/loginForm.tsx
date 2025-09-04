@@ -17,7 +17,7 @@ export default function LoginForm() {
     if (isAuth) {
       router.push("/");
     }
-  }, [isAuth]);
+  }, [isAuth, router]);
 
   const { mutate, isPending } = useLogin();
 
@@ -34,7 +34,7 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} aria-disabled={isPending}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <h2 className="text-2xl font-bold mb-2">مرحباً بك مرة أخرى!</h2>
       <p className="text-gray-600 mb-4">
         قم بتسجيل الدخول للوصول إلى حسابك واستمتع بتجربة رائعة.

@@ -1,5 +1,6 @@
 import axiosInstance from "@/axiosInstance/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 
 export default function useForgetPassword() {
@@ -16,7 +17,7 @@ export default function useForgetPassword() {
         message || "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني"
       );
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
         error?.response?.data?.message || "حدث مشكلة ما يرجى محاولة مجددا"
       );
