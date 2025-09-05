@@ -85,16 +85,16 @@ userContoller.login = asyncHandler(async (req, res) => {
 
   const token = await user.generateAuthToken();
 
-  res.cookie("jwt-auth", token, {
-    httpOnly: true,
-    signed: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    secure: process.env.PRODUCTION === "true",
-    sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
-    domain: process.env.PRODUCTION === "true" ? ".vercel.app" : undefined,
-  });
+  // res.cookie("jwt-auth", token, {
+  //   httpOnly: true,
+  //   signed: true,
+  //   maxAge: 7 * 24 * 60 * 60 * 1000,
+  //   secure: process.env.PRODUCTION === "true",
+  //   sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+  //   domain: process.env.PRODUCTION === "true" ? "aqark" : undefined,
+  // });
 
-  res.status(200).json({ message: "تم تسجيل الدخول بنجاح" });
+  res.status(200).json({ message: "تم تسجيل الدخول بنجاح" }, token);
 });
 
 userContoller.getProfile = asyncHandler(async (req, res) => {
@@ -147,15 +147,20 @@ userContoller.resetPassword = asyncHandler(async (req, res) => {
 });
 
 userContoller.logout = asyncHandler(async (req, res) => {
-  const userToken = req.signedCookies["jwt-auth"];
-  req.user.tokens = req.user.tokens.filter((token) => token !== userToken);
+  // const userToken = req.signedCookies["jwt-auth"];
 
-  res.clearCookie("jwt-auth", {
-    httpOnly: true,
-    secure: process.env.PRODUCTION === "true",
-    sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
-    domain: process.env.PRODUCTION === "true" ? ".vercel.app" : undefined,
-  });
+  const authHeader = req.headers.authorization;
+  const userToken = authHeader && authHeader.split(" ")[1];
+
+  req.user.tokens = req.user.tokens.filter((token) => token !== userToken);
+  await req.user.save();
+
+  // res.clearCookie("jwt-auth", {
+  //   httpOnly: true,
+  //   secure: process.env.PRODUCTION === "true",
+  //   sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+  //   domain: process.env.PRODUCTION === "true" ? ".vercel.app" : undefined,
+  // });
   return res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
 });
 

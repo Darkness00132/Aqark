@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { connect } = require("mongoose");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 // const tokens = require("./utils/csrfTokens.js");
 const rateLimit = require("express-rate-limit");
@@ -46,7 +46,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
-app.use(cookieParser(process.env.SECRET_COOKIE));
+// app.use(cookieParser(process.env.SECRET_COOKIE));
 app.use(helmet.noSniff());
 app.use(helmet.dnsPrefetchControl({ allow: false }));
 app.use(helmet.referrerPolicy({ policy: "no-referrer-when-downgrade" }));

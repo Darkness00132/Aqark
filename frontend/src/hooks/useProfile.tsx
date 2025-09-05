@@ -6,10 +6,10 @@ import useAuth from "@/store/useAuth";
 export default function useProfile() {
   const setLoggedIn = useAuth((state) => state.setLoggedIn);
   const user = useAuth((state) => state.user);
-  const isAuth = useAuth((state) => state.isAuth);
   const setProfile = useAuth((state) => state.setProfile);
+
   return useQuery({
-    queryKey: ["profile", isAuth],
+    queryKey: ["profile"],
     queryFn: async () => {
       try {
         const response = await axiosInstance.get("/users/profile");
@@ -20,7 +20,8 @@ export default function useProfile() {
         throw e;
       }
     },
-    enabled: user === null || isAuth,
+    enabled: user === null,
     retry: false,
+    refetchOnWindowFocus: false,
   });
 }

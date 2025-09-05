@@ -46,17 +46,18 @@ router.get(
   }),
   async (req, res) => {
     const token = await req.user.generateAuthToken();
-    res.cookie("jwt-auth", token, {
-      httpOnly: true,
-      signed: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: process.env.PRODUCTION === "true",
-      sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
-      domain: process.env.PRODUCTION === "true" ? ".vercel.app" : undefined,
-    });
+    // res.cookie("jwt-auth", token, {
+    //   httpOnly: true,
+    //   signed: true,
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    //   secure: process.env.PRODUCTION === "true",
+    //   sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+    //   domain: process.env.PRODUCTION === "true" ? ".vercel.app" : undefined,
+    // });
 
     welcomeEmail("delivered@resend.dev");
-    res.redirect(process.env.FRONTEND_URL + "/profile");
+    // res.redirect(process.env.FRONTEND_URL + "/profile");
+    res.redirect(`${process.env.FRONTEND_URL}/profile?token=${token}`);
   }
 );
 

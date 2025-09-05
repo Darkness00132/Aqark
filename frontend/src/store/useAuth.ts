@@ -11,9 +11,11 @@ interface User {
 interface AuthState {
   user: User | null;
   isAuth: boolean;
+  token: string;
   setLoggedIn(): void;
   setSignup(): void;
   setProfile(user: User): void;
+  setToken(token: string): void;
   setLogout(): void;
 }
 
@@ -22,6 +24,7 @@ const useAuth = create(
     (set) => ({
       user: null,
       isAuth: false,
+      token: "",
       setLoggedIn: () => {
         set({ isAuth: true });
       },
@@ -31,8 +34,11 @@ const useAuth = create(
       setProfile: (user) => {
         set({ user: user });
       },
+      setToken: (token: string) => {
+        set({ token });
+      },
       setLogout: () => {
-        set({ isAuth: false, user: null });
+        set({ isAuth: false, user: null, token: "" });
       },
     }),
     {

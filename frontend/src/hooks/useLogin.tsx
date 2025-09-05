@@ -14,6 +14,7 @@ interface User {
 export default function useLogin() {
   const router = useRouter();
   const setLoggedIn = useAuth((state) => state.setLoggedIn);
+  const setToken = useAuth((state) => state.setToken);
 
   return useMutation({
     mutationKey: ["login"],
@@ -26,6 +27,7 @@ export default function useLogin() {
       return response.data;
     },
     onSuccess: (data) => {
+      setToken(data.token)
       toast.success(data?.message || "تم تسجيل دخول مرحبًا بك");
       router.push("/");
     },
