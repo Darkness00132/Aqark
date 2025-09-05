@@ -4,7 +4,7 @@ import { FaFacebookF, FaYoutube, FaTiktok } from "react-icons/fa";
 export default function Footer() {
   return (
     <footer className="footer footer-horizontal footer-center bg-base-200 text-base-content p-5">
-      <nav className="grid grid-flow-col">
+      <nav className="grid grid-flow-col self-center">
         <Link href="/about" className="link link-hover btn btn-soft">
           من نحن
         </Link>
