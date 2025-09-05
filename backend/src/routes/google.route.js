@@ -16,14 +16,23 @@ passport.use(
       try {
         let user = await User.findOne({ googleId: profile.id });
         if (!user) {
-          user = await User.create({
-            googleId: profile.id,
-            name: profile.displayName,
+          const existUser = await User.findOne({
             email: profile.emails[0].value,
-            avatar: profile.photos?.[0]?.value || "",
-            role: "user",
-            isVerified: true,
           });
+          if (existUser) {
+            existUser.googleId = profile.id;
+            await existUser.save();
+            user = existUser;
+          } else {
+            user = await User.create({
+              googleId: profile.id,
+              name: profile.displayName,
+              email: profile.emails[0].value,
+              avatar: profile.photos?.[0]?.value || "",
+              role: "user",
+              isVerified: true,
+            });
+          }
         }
         return done(null, user);
       } catch (e) {
