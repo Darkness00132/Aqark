@@ -61,12 +61,6 @@ export default function Header() {
                 ملف الشخصى
               </Link>
             </li>
-            <li>
-              <Link href="/setting">الاعدادات</Link>
-            </li>
-            <li>
-              <Link href="/logout">تسجيل خروج</Link>
-            </li>
           </ul>
         </div>
       </div>

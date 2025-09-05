@@ -94,7 +94,7 @@ userContoller.login = asyncHandler(async (req, res) => {
   //   domain: process.env.PRODUCTION === "true" ? "aqark" : undefined,
   // });
 
-  res.status(200).json({ message: "تم تسجيل الدخول بنجاح" }, token);
+  res.status(200).json({ message: "تم تسجيل الدخول بنجاح", token });
 });
 
 userContoller.getProfile = asyncHandler(async (req, res) => {
