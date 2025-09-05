@@ -49,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" data-theme="fantasy">
+    <html lang="ar" data-theme="winter">
       <body className={`${geistCairo.className} antialiased`} dir="rtl">
         <Provider>
           <Header />
