@@ -8,6 +8,7 @@ import {
   verifyEmail,
   forgetPassword,
   resetPassword,
+  updateProfile,
   logout,
 } from "../controller/user.controller.js";
 
@@ -24,6 +25,8 @@ router.get("/verifyEmail", verifyEmail);
 router.post("/forgetPassword", forgetPassword);
 
 router.post("/resetPassword", resetPassword);
+
+router.put("/profile", auth, updateProfile);
 
 router.delete("/logout", auth, logout);
 
