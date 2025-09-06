@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  modularizeImports: {
+    "react-icons": {
+      transform: "react-icons/{{member}}",
+    },
+    zustand: {
+      transform: "zustand/{{member}}",
+    },
+  },
 };
 
 export default nextConfig;
