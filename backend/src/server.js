@@ -4,7 +4,7 @@ const { connect } = require("mongoose");
 // const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 // const tokens = require("./utils/csrfTokens.js");
-const rateLimit = require("express-rate-limit");
+// const rateLimit = require("express-rate-limit");
 const xss = require("xss");
 require("dotenv").config();
 
@@ -53,17 +53,17 @@ app.use(helmet.referrerPolicy({ policy: "no-referrer-when-downgrade" }));
 app.use(
   helmet.hsts({ maxAge: 63072000, includeSubDomains: true, preload: true })
 );
-app.set("trust proxy", 1);
-app.use(
-  rateLimit({
-    windowMs: 60 * 1000,
-    max: 30,
-    message: "Too many requests, please try again later.",
-    standardHeaders: true,
-    legacyHeaders: false,
-  })
-);
 app.disable("x-powered-by");
+// app.set("trust proxy", 1);
+// app.use(
+//   rateLimit({
+//     windowMs: 60 * 1000,
+//     max: 30,
+//     message: "Too many requests, please try again later.",
+//     standardHeaders: true,
+//     legacyHeaders: false,
+//   })
+// );
 
 // MongoDB connection
 connect(process.env.MONGODB_URI)
