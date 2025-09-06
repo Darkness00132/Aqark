@@ -19,6 +19,7 @@ export default function Signup() {
             alt="Hero section"
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
+            fetchPriority="high"
             priority
             className="object-cover object-center rounded-r-xl"
           />
