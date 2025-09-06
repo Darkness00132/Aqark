@@ -142,5 +142,5 @@ app.use((err, req, res, next) => {
   });
 });
 
-module.exports = app;
-// app.listen(PORT);
+// module.exports = app;
+app.listen(PORT);
