@@ -11,30 +11,19 @@ export const metadata: Metadata = {
 
 export default function Signup() {
   return (
-    <div className="flex flex-col mb-5 md:my-2 md:mt-5 items-center min-h-screen bg-base-100">
-      <div className="card shadow-xl shadow-base-content rounded-xl w-[70%] bg-base-100 grid my-4 grid-cols-1 md:grid-cols-2">
-        <div className="relative h-64 md:h-auto">
-          <Image
-            src="/bg.png"
-            alt="Hero section"
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            fetchPriority="high"
-            priority
-            className="object-cover object-center rounded-r-xl"
-          />
+    <div className="flex flex-col mb-5 md:my-2 md:mt-5 items-center justify-center min-h-screen bg-base-100">
+      <div className="card shadow-lg shadow-gray-500 rounded-xl bg-base-300 w-[90%] sm:w-auto">
+        <div className="card-body flex flex-col justify-center items-center">
+          <SignupForm />
+          <p className="divider">او</p>
+          <a
+            href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
+            className="btn btn-wide bg-white text-black border-[#e5e5e5] flex items-center gap-2 shadow hover:shadow-md transition duration-200"
+          >
+            انشاء حساب باستعمال جوجل
+            <FcGoogle size={28} />
+          </a>
         </div>
-        <SignupForm />
-      </div>
-
-      <div className="w-[70%] flex justify-center">
-        <a
-          href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
-          className="btn btn-wide bg-white text-black border-[#e5e5e5] flex items-center gap-2 shadow hover:shadow-md transition duration-200"
-        >
-          انشاء حساب باستعمال جوجل
-          <FcGoogle size={28} />
-        </a>
       </div>
     </div>
   );

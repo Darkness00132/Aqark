@@ -1,11 +1,10 @@
 const resend = require("../utils/resend");
-
 async function forgetPasswordEmail(resetPasswordToken, email) {
-  const { data, error } = await resend.emails.send({
-    from: process.env.EMAIL,
-    to: [email],
-    subject: "إعادة تعيين كلمة المرور",
-    html: `
+    const { data, error } = await resend.emails.send({
+        from: process.env.EMAIL,
+        to: [email],
+        subject: "إعادة تعيين كلمة المرور",
+        html: `
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
         <head>
@@ -65,11 +64,9 @@ async function forgetPasswordEmail(resetPasswordToken, email) {
         </body>
       </html>
     `,
-  });
-
-  if (error) {
-    return console.error({ error });
-  }
+    });
+    if (error) {
+        return console.error({ error });
+    }
 }
-
-module.exports = forgetPasswordEmail;
+export default forgetPasswordEmail;

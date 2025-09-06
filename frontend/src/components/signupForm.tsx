@@ -32,20 +32,17 @@ export default function SignupForm() {
     mutate(data);
   }
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="card-body flex flex-col justify-center p-4 space-y-2"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
       <h2 className="text-2xl font-bold mb-2">انشئ حساب جديد!</h2>
-      <p className="text-gray-600 mb-4">
+      <p className="text-gray-600 dark:text-gray-400 mb-2">
         قم بإنشاء حسابك للوصول إلى جميع ميزات الموقع والاستمتاع بتجربة رائعة.
       </p>
 
-      <fieldset className="fieldset">
+      <fieldset className="fieldset w-full">
         <legend className="fieldset-legend">ما هو اسمك ؟</legend>
         <input
           type="text"
-          className={`input ${errors.name && "input-error"}`}
+          className={`input ${errors.name && "input-error"} w-full`}
           placeholder="اكتب هنا"
           {...register("name")}
         />
@@ -54,22 +51,22 @@ export default function SignupForm() {
         )}
       </fieldset>
 
-      <fieldset className="fieldset">
+      <fieldset className="fieldset w-full">
         <legend className="fieldset-legend">ايميل خاص بك</legend>
         <input
           type="email"
-          className={`input ${errors.email && "input-error"}`}
+          className={`input ${errors.email && "input-error"} w-full`}
           placeholder="example@gmail.com"
           {...register("email")}
         />
         {errors.email && <p className="text-error">{errors.email.message}</p>}
       </fieldset>
 
-      <fieldset className="fieldset">
+      <fieldset className="fieldset w-full">
         <legend className="fieldset-legend">انشاء كلمة سر قوية</legend>
         <input
           type="password"
-          className={`input ${errors.password && "input-error"}`}
+          className={`input ${errors.password && "input-error"} w-full`}
           placeholder="••••••••"
           {...register("password")}
         />
@@ -78,13 +75,13 @@ export default function SignupForm() {
         )}
       </fieldset>
 
-      <fieldset className="space-x-1">
+      <fieldset className="space-x-2 space-y-1 w-full">
         <legend>نوع المستخدم</legend>
         <label>
           <input
             type="radio"
             value="user"
-            className="radio radio-secondary bg-base-100"
+            className="radio radio-primary bg-base-100"
             defaultChecked
             {...register("role")}
           />{" "}
@@ -94,7 +91,7 @@ export default function SignupForm() {
           <input
             type="radio"
             value="landlord"
-            className="radio radio-secondary bg-base-100"
+            className="radio radio-primary bg-base-100"
             {...register("role")}
           />{" "}
           هتنشر عقارات
@@ -103,9 +100,9 @@ export default function SignupForm() {
       </fieldset>
 
       <button
-        className={`btn btn-secondary btn-wide mt-4 ${
+        className={`btn btn-primary btn-wide mt-4 ${
           isPending && "btn-disabled"
-        }`}
+        } self-center`}
         disabled={isPending}
       >
         انشاء حساب

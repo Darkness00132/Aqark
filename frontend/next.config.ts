@@ -15,9 +15,6 @@ const nextConfig: NextConfig = {
     "react-icons": {
       transform: "react-icons/{{member}}",
     },
-    zustand: {
-      transform: "zustand/{{member}}",
-    },
   },
 };
 

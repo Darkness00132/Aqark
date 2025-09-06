@@ -12,24 +12,17 @@ export default function Header() {
     <header className="navbar bg-base-200 shadow-sm">
       <div className="flex-1">
         <Link href="/" className="btn btn-ghost text-xl">
-          {/* <Image priority src="/bg.png" alt="logo" width={35} height={35} /> */}
-          <h1 className="font-bold text-2xl">عقارك</h1>
+          <Image
+            priority
+            src="/favicon.ico"
+            alt="logo"
+            width={35}
+            height={35}
+          />
+          <h1 className="font-bold text-xl sm:text-2xl">عقارك</h1>
         </Link>
       </div>
       <div className="flex gap-2">
-        {isAuth ? (
-          <button
-            className={`btn btn-ghost ${isPending && "btn-disabled"}`}
-            onClick={() => mutate()}
-            disabled={isPending}
-          >
-            تسجيل خروج{" "}
-          </button>
-        ) : (
-          <Link href="/login" className="btn btn-ghost">
-            سجل دخول
-          </Link>
-        )}
         <input
           type="text"
           placeholder="ابحث عن عقارك"
@@ -57,10 +50,27 @@ export default function Header() {
             className="menu menu-sm dropdown-content bg-base-200 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
             <li>
-              <Link href="/profile" className="justify-between">
-                ملف الشخصى
-              </Link>
+              {isAuth ? (
+                <button
+                  className={`btn btn-ghost ${isPending && "btn-disabled"}`}
+                  onClick={() => mutate()}
+                  disabled={isPending}
+                >
+                  تسجيل خروج{" "}
+                </button>
+              ) : (
+                <Link href="/login" className="btn btn-ghost">
+                  سجل دخول
+                </Link>
+              )}
             </li>
+            {isAuth && (
+              <li>
+                <Link href="/profile" className="justify-between">
+                  ملف الشخصى
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </div>

@@ -1,6 +1,6 @@
 const resend = require("../utils/resend");
 
-async function passwordChangedEmail(email) {
+async function passwordChangedEmail(email: string) {
   const { data, error } = await resend.emails.send({
     from: process.env.EMAIL,
     to: [email],
@@ -59,4 +59,4 @@ async function passwordChangedEmail(email) {
   }
 }
 
-module.exports = passwordChangedEmail;
+export default passwordChangedEmail;

@@ -1,10 +1,31 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-const signupSchema = Joi.object({
+export interface SignupBody {
+  name: string;
+  email: string;
+  password: string;
+  role: "user" | "landlord";
+}
+
+export interface LoginBody {
+  email: string;
+  enteredPassword: string;
+}
+
+export interface ForgetPasswordBody {
+  email: string;
+}
+
+export interface ResetPasswordBody {
+  password: string;
+  resetPasswordToken: string;
+}
+
+export const signupSchema = Joi.object<SignupBody>({
   name: Joi.string().min(3).max(30).required(),
   email: Joi.string().email().required().messages({
-    "string.min": "كلمة المرور يجب ألا تقل عن 6 أحرف",
-    "any.required": "يجب إدخال كلمة المرور",
+    "string.email": "البريد الإلكتروني غير صالح",
+    "any.required": "يجب إدخال البريد الإلكتروني",
   }),
   password: Joi.string().min(6).required().messages({
     "string.min": "كلمة المرور يجب ألا تقل عن 6 أحرف",
@@ -16,7 +37,7 @@ const signupSchema = Joi.object({
   }),
 });
 
-const loginSchema = Joi.object({
+export const loginSchema = Joi.object<LoginBody>({
   email: Joi.string().email().required().messages({
     "string.email": "البريد الإلكتروني غير صالح",
     "any.required": "يجب إدخال البريد الإلكتروني",
@@ -27,23 +48,17 @@ const loginSchema = Joi.object({
   }),
 });
 
-const forgetPasswordSchema = Joi.object({
+export const forgetPasswordSchema = Joi.object<ForgetPasswordBody>({
   email: Joi.string().email().required().messages({
     "string.email": "البريد الإلكتروني غير صالح",
     "any.required": "يجب إدخال البريد الإلكتروني",
   }),
 });
 
-const resetPasswordSchema = Joi.object({
+export const resetPasswordSchema = Joi.object<ResetPasswordBody>({
   password: Joi.string().min(6).required().messages({
     "string.min": "كلمة المرور يجب ألا تقل عن 6 أحرف",
     "any.required": "يجب إدخال كلمة المرور",
   }),
   resetPasswordToken: Joi.string().required(),
 });
-module.exports = {
-  signupSchema,
-  loginSchema,
-  forgetPasswordSchema,
-  resetPasswordSchema,
-};

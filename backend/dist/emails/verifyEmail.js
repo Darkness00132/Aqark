@@ -1,11 +1,10 @@
 const resend = require("../utils/resend");
-
 async function verifyEmail(verifyUrl, email) {
-  const { data, error } = await resend.emails.send({
-    from: process.env.EMAIL,
-    to: [email],
-    subject: "تأكيد البريد الإلكتروني الخاص بك",
-    html: `
+    const { data, error } = await resend.emails.send({
+        from: process.env.EMAIL,
+        to: [email],
+        subject: "تأكيد البريد الإلكتروني الخاص بك",
+        html: `
       <!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <head>
@@ -65,11 +64,9 @@ async function verifyEmail(verifyUrl, email) {
   </body>
 </html>
     `,
-  });
-
-  if (error) {
-    return console.error({ error });
-  }
+    });
+    if (error) {
+        return console.error({ error });
+    }
 }
-
-module.exports = verifyEmail;
+export default verifyEmail;

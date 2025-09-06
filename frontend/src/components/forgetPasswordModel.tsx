@@ -25,7 +25,7 @@ export default function ForgetPasswordModal() {
   return (
     <>
       <p>
-        لا تتذكر كلمة السر؟{" "}
+        لا تتذكر كلمة السر ؟{" "}
         <button
           onClick={openModal}
           className="text-blue-800 font-bold hover:underline ml-1"

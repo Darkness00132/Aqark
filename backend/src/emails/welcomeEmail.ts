@@ -1,6 +1,6 @@
 const resend = require("../utils/resend");
 
-async function WelcomeEmail(email) {
+async function WelcomeEmail(email: string) {
   const { data, error } = await resend.emails.send({
     from: process.env.EMAIL,
     to: [email],
@@ -71,4 +71,4 @@ async function WelcomeEmail(email) {
   }
 }
 
-module.exports = WelcomeEmail;
+export default WelcomeEmail;

@@ -2,5 +2,5 @@
 @import "tw-animate-css";
 @custom-variant dark (&:where(.dark, .dark *));
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, winter, dracula;
+  themes: light --default, dark --prefersdark, winter, luxury;
 }
