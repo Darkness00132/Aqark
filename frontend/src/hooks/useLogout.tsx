@@ -8,8 +8,8 @@ export default function useLogout() {
   return useMutation({
     mutationKey: ["logout"],
     mutationFn: async () => {
-      setLogout();
       await axiosInstance.delete("/users/logout");
+      setLogout();
     },
     onSuccess: () => {
       if (typeof window !== "undefined") window.location.href = "/login";

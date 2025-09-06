@@ -20,13 +20,28 @@ export default function Footer() {
       </nav>
       <nav>
         <div className="grid grid-flow-col gap-3 text-2xl">
-          <a href="#" target="_blank" rel="noopener noreferrer ">
+          <a
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer "
+            aria-label="our facebook"
+          >
             <FaFacebookF className="text-blue-600 text-4xl" />
           </a>
-          <a href="#" target="_blank" rel="noopener noreferrer">
+          <a
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="our tiktok"
+          >
             <FaTiktok className="text-black text-4xl" />
           </a>
-          <a href="#" target="_blank" rel="noopener noreferrer">
+          <a
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="our youtube"
+          >
             <FaYoutube className="text-red-600 text-4xl" />
           </a>
         </div>

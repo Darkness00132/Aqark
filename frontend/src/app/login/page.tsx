@@ -8,36 +8,13 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "تسجيل الدخول",
   description:
-    "قم بتسجيل الدخول إلى حسابك على عقارك للوصول لإعلانات الملاك بسهولة.",
-  openGraph: {
-    title: "تسجيل الدخول",
-    description:
-      "قم بتسجيل الدخول للوصول لجميع الإعلانات والملاك في مكان واحد.",
-    url: "https://yourdomain.com/login",
-    siteName: "عقارك",
-    type: "website",
-    images: [
-      {
-        url: "https://yourdomain.com/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "تسجيل الدخول",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "تسجيل الدخول",
-    description:
-      "قم بتسجيل الدخول للوصول لجميع الإعلانات والملاك في مكان واحد.",
-    images: ["https://yourdomain.com/og-image.png"],
-  },
+    "قم بتسجيل الدخول إلى حسابك على موقع عقارك للوصول لإعلانات العقارات بسهولة.",
 };
 
 export default async function Login() {
   return (
     <div className="flex flex-col mb-5 md:my-2 items-center min-h-screen bg-base-100">
-      <div className="card shadow-xl shadow-cyan-200 bg-gray-100 rounded-xl w-[70%] grid my-10 grid-cols-1 md:grid-cols-2 overflow-hidden">
+      <div className="card shadow-xl shadow-base-content bg-base-100 rounded-xl w-[70%] grid my-10 grid-cols-1 md:grid-cols-2 overflow-hidden">
         <div className="relative h-64 md:h-auto">
           <Image
             src="/bg.png"
@@ -56,7 +33,7 @@ export default async function Login() {
               لا تملك حساب بعد؟{" "}
               <Link
                 href="/signup"
-                className="text-blue-600 hover:underline ml-1"
+                className="text-blue-800 font-bold hover:underline ml-1"
               >
                 إنشاء حساب جديد
               </Link>

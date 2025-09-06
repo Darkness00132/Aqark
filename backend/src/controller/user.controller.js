@@ -29,16 +29,20 @@ userContoller.signup = asyncHandler(async (req, res) => {
     email,
     password,
     role,
+    isVerified: true,
     verificationToken: crypto.randomBytes(32).toString("hex"),
     verificationTokenExpires: Date.now() + 10 * 60 * 1000,
   });
 
-  const protocol = req.protocol;
-  const host = req.get("host");
-  const verifyUrl = `${protocol}://${host}/api/users/verifyEmail?verificationToken=${user.verificationToken}`;
-  await verifyEmail(verifyUrl, "delivered@resend.dev");
+  // const protocol = req.protocol;
+  // const host = req.get("host");
+  // const verifyUrl = `${protocol}://${host}/api/users/verifyEmail?verificationToken=${user.verificationToken}`;
+  // await verifyEmail(verifyUrl, "delivered@resend.dev");
+  const token = await user.generateAuthToken();
 
-  res.status(201).json({ message: "تم انشاء حساب بنجاح يرجى تحقق من ايميلك" });
+  res
+    .status(201)
+    .json({ message: "تم انشاء حساب بنجاح يرجى تحقق من ايميلك", token });
 });
 
 userContoller.verifyEmail = asyncHandler(async (req, res) => {
@@ -152,7 +156,7 @@ userContoller.logout = asyncHandler(async (req, res) => {
   const authHeader = req.headers.authorization;
   const userToken = authHeader && authHeader.split(" ")[1];
 
-  req.user.tokens = req.user.tokens.filter((token) => token !== userToken);
+  req.user.tokens = req.user.tokens.filter((t) => t.token !== userToken);
   await req.user.save();
 
   // res.clearCookie("jwt-auth", {

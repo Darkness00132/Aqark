@@ -11,24 +11,24 @@ const geistCairo = Cairo({ subsets: ["arabic"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "كل الملاك في مكان واحد، كل إعلاناتهم عندك قدامك.",
+    default: "كل العقارات في مكان واحد، كل إعلاناتهم عندك قدامك.",
     template: "%s | Aqark",
   },
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL("https://aqark.vercel.app"),
   description:
-    "اعثر على جميع الملاك وإعلاناتهم في مكان واحد بسهولة وسرعة. وفر وقتك وتواصل مباشرة مع الملاك.",
+    "اعثر على جميع العقارات وإعلاناتهم في مكان واحد بسهولة وسرعة. وفر وقتك وتواصل مباشرة مع اصحاب العقارات.",
   openGraph: {
-    title: "كل الملاك في مكان واحد | Aqark",
+    title: "كل العقارات في مكان واحد | Aqark",
     description:
-      "اعثر على جميع الملاك وإعلاناتهم في مكان واحد بسهولة وسرعة. وفر وقتك وتواصل مباشرة مع الملاك.",
-    url: "http://localhost:3000",
+      "اعثر على جميع العقارات وإعلاناتهم في مكان واحد بسهولة وسرعة. وفر وقتك وتواصل مباشرة مع اصحاب العقارات.",
+    url: "https://aqark.vercel.app",
     siteName: "Aqark",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Aqark - كل الملاك في مكان واحد",
+        alt: "Aqark - كل العقارات في مكان واحد",
       },
     ],
     locale: "ar-EG",
@@ -36,21 +36,34 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "كل الملاك في مكان واحد | Aqark",
+    title: "كل العقارات في مكان واحد | Aqark",
     description:
-      "اعثر على جميع الملاك وإعلاناتهم في مكان واحد بسهولة وسرعة. وفر وقتك وتواصل مباشرة مع الملاك.",
+      "اعثر على جميع العقارات في مكان واحد بسهولة وسرعة. وفر وقتك وتواصل مباشرة مع اصحاب العقارات.",
     images: ["/og-image.png"],
+  },
+  icons: {
+    icon: [
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: ["/favicon.ico"],
+  },
+  manifest: "/site.webmanifest",
+  appleWebApp: {
+    title: "Aqark",
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="ar" data-theme="winter">
-      <body className={`${geistCairo.className} antialiased`} dir="rtl">
+    <html lang="ar" data-theme="winter" dir="rtl">
+      <body className={`${geistCairo.className} antialiased`}>
         <Provider>
           <Header />
           <main className="min-h-screen">

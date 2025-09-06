@@ -2,11 +2,19 @@ const { Schema, model } = require("mongoose");
 const { hash, verify } = require("argon2");
 const { sign } = require("jsonwebtoken");
 const { isEmail, isStrongPassword } = require("validator");
+const { v4: uuid } = require("uuid");
 
 const userSchema = Schema(
   {
+    publicId: {
+      type: String,
+      unique: true,
+      index: true,
+      default: uuid, // auto-generate
+    },
     googleId: {
       type: String,
+      index: true,
     },
     name: {
       type: String,
@@ -18,6 +26,7 @@ const userSchema = Schema(
       required: true,
       trim: true,
       unique: true,
+      index: true,
       validate: {
         validator(value) {
           return isEmail(value);
@@ -70,12 +79,14 @@ const userSchema = Schema(
     ],
     verificationToken: {
       type: String,
+      index: true,
     },
     verificationTokenExpire: {
       type: Date,
     },
     resetPasswordToken: {
       type: String,
+      index: true,
     },
     resetPasswordTokenExpire: {
       type: Date,

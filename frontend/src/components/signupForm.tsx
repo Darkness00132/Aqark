@@ -114,7 +114,10 @@ export default function SignupForm() {
       <div className="flex flex-col gap-2 mt-2 text-sm">
         <p>
           لديك حساب بالفعل؟{" "}
-          <Link href="/login" className="text-blue-600 hover:underline ml-1">
+          <Link
+            href="/login"
+            className="text-blue-800 font-bold hover:underline ml-1"
+          >
             سجل دخول هنا
           </Link>
         </p>
