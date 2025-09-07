@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import User from "../models/user.model.js";
-import { signupSchema, loginSchema, forgetPasswordSchema, resetPasswordSchema, } from "../utils/validate.js";
+import { signupSchema, loginSchema, forgetPasswordSchema, resetPasswordSchema, updateProfileSchema, } from "../utils/validate.js";
 import asyncHandler from "../utils/asyncHnadler.js";
 export const signup = asyncHandler(async (req, res) => {
     const { error, value } = signupSchema.validate(req.body);
@@ -99,6 +99,24 @@ export const resetPassword = asyncHandler(async (req, res) => {
     await user.save();
     // await passwordChangedEmail("delivered@resend.dev");
     res.status(200).json({ message: "تم تغيير كلمة مرور بنجاح" });
+});
+export const updateProfile = asyncHandler(async (req, res) => {
+    const { value, error } = updateProfileSchema.validate(req.body);
+    if (error)
+        return res.status(400).json({ message: error.details[0]?.message });
+    const { name, role, avatar, password, enteredPassword } = value;
+    if (name)
+        req.user.name = name;
+    if (role)
+        req.user.role = role;
+    if (enteredPassword) {
+        const isMatch = await req.user.matchPassword(password);
+        if (!isMatch)
+            return res.status(400).json({ message: "كلمة مرور خاطئة" });
+        req.user.password = enteredPassword;
+    }
+    await req.user.save();
+    return res.status(200).json({ message: "تم تحديث ملفك الشخصى بنجاح" });
 });
 export const logout = asyncHandler(async (req, res) => {
     // const userToken = req.signedCookies["jwt-auth"];
