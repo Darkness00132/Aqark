@@ -17,7 +17,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: "http://localhost:5000/auth/google/callback",
+      callbackURL: "https://aqark-api.vercel.app/auth/google/callback",
       passReqToCallback: true,
     },
     async (req: Request, accessToken, refreshToken, profile, done) => {
