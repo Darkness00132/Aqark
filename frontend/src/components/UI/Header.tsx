@@ -19,13 +19,13 @@ export default function Header() {
             width={35}
             height={35}
           />
-          <h1 className="font-bold text-xl sm:text-2xl">عقارك</h1>
+          <h1 className="font-extrabold text-xl sm:text-3xl">Aqark</h1>
         </Link>
       </div>
       <div className="flex gap-2">
         <input
           type="text"
-          placeholder="ابحث عن عقارك"
+          placeholder="ابحث عن عقار"
           className="input input-bordered w-24 md:w-auto"
         />
         <div className="dropdown dropdown-end">
@@ -52,21 +52,23 @@ export default function Header() {
             <li>
               {isAuth ? (
                 <button
-                  className={`btn btn-ghost ${isPending && "btn-disabled"}`}
+                  className={`text-base justify-center ${
+                    isPending && "text-gray-500"
+                  }`}
                   onClick={() => mutate()}
                   disabled={isPending}
                 >
                   تسجيل خروج{" "}
                 </button>
               ) : (
-                <Link href="/login" className="btn btn-ghost">
+                <Link href="/login" className="text-base justify-center">
                   سجل دخول
                 </Link>
               )}
             </li>
             {isAuth && (
               <li>
-                <Link href="/profile" className="justify-between">
+                <Link href="/profile" className="text-base justify-center">
                   ملف الشخصى
                 </Link>
               </li>

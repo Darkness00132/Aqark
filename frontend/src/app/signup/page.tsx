@@ -1,6 +1,5 @@
 import SignupForm from "@/components/signupForm";
 import { Metadata } from "next";
-import Image from "next/image";
 import { FcGoogle } from "react-icons/fc";
 
 export const metadata: Metadata = {
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function Signup() {
   return (
-    <div className="flex flex-col mb-5 md:my-2 md:mt-5 items-center justify-center min-h-screen bg-base-100">
+    <div className="flex flex-col mb-5 md:my-2 md:mt-5 items-center mt-5 min-h-screen bg-base-100">
       <div className="card shadow-lg shadow-gray-500 rounded-xl bg-base-300 w-[90%] sm:w-auto">
         <div className="card-body flex flex-col justify-center items-center">
           <SignupForm />

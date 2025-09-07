@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { FcGoogle } from "react-icons/fc";
-import Image from "next/image";
 import LoginForm from "@/components/loginForm";
 import ForgetPasswordModal from "@/components/forgetPasswordModel";
 import Link from "next/link";
@@ -13,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function Login() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen max-w-screen bg-base-100">
+    <div className="flex flex-col items-center mt-5 min-h-screen max-w-screen bg-base-100">
       <div className="card shadow-lg shadow-gray-500 bg-base-300 rounded-xl w-[90%] sm:w-auto">
         <div className="card-body flex flex-col space-y-2">
           <LoginForm />
