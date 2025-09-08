@@ -76,8 +76,8 @@ router.get(
       res.cookie("jwt-auth", token, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 7, //saved for 7days
-        secure: process.env.PRODUCTION === "true",
-        sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+        secure: true,
+        sameSite: "none",
       });
 
       res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
