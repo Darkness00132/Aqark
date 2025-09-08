@@ -129,5 +129,5 @@ app.use((err: any, _req: any, res: any, _next: any) => {
     .json({ message: err.message || "Something went wrong" });
 });
 
-export default app;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// export default app;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
