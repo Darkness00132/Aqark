@@ -5,14 +5,35 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { connect } from "mongoose";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 import helmet from "helmet";
 import xss from "xss";
-
 import googleRouter from "./routes/google.route.js";
 import userRouter from "./routes/user.route.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
+
+const rateLimiter = new RateLimiterMemory({
+  points: 20, // 20 requests
+  duration: 60, // per 60 seconds
+});
+
+app.use(async (req, res, next) => {
+  try {
+    // Ensure IP is a string fallback
+    const ip =
+      typeof req.ip === "string"
+        ? req.ip
+        : req.headers["x-forwarded-for"]?.toString() || "unknown";
+
+    await rateLimiter.consume(ip);
+    next();
+  } catch (err) {
+    // Make sure you send a proper object with normal prototype
+    res.status(429).json({ message: "طلبات كثيرة جدا" });
+  }
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,6 +58,7 @@ app.use((req, _res, next) => {
   req.params = sanitizeNoMongo(req.params);
   next();
 });
+app.set("trust proxy", 1);
 
 app.use(
   cors({
