@@ -67,6 +67,7 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
     maxAge: 1000 * 60 * 60 * 24 * 7, //saved for 7days
     secure: process.env.PRODUCTION === "true",
     sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+    priority: "high",
   });
 
   res.status(201).json({ message: "تم انشاء حساب بنجاح يرجى تحقق من ايميلك" });
@@ -121,6 +122,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     maxAge: 1000 * 60 * 60 * 24 * 7, //saved for 7days
     secure: process.env.PRODUCTION === "true",
     sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+    priority: "high",
   });
 
   res.status(200).json({ message: "تم تسجيل الدخول بنجاح" });
