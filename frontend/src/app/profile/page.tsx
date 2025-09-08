@@ -1,8 +1,7 @@
-"use client";
 import { Metadata } from "next";
 import ProfileForm from "@/components/profileForm";
 
-export const metaData: Metadata = {
+export const metadata: Metadata = {
   title: "الملف الشخصى",
   description: "",
 };

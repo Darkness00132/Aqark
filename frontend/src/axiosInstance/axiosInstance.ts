@@ -12,13 +12,10 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    try {
-      if (error.response?.status === 401) {
-        useAuth.getState().setLogout();
-      }
-    } catch (e) {
-      //pass
+    if (error.response?.status === 401) {
+      useAuth.getState().setLogout();
     }
+
     return Promise.reject(error);
   }
 );

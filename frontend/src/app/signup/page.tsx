@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function Signup({
   searchParams,
 }: {
-  searchParams: { role: string };
+  searchParams: Promise<{ role: string }>;
 }) {
   const params = await searchParams;
   const role = params.role;

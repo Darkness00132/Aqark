@@ -7,7 +7,8 @@ export default function ProfileForm() {
 
   return (
     <div className="mt-5">
-      <AvatarUplaod user={user} />
+      <AvatarUplaod userAvatar={user?.avatar} />
+      <form></form>
     </div>
   );
 }

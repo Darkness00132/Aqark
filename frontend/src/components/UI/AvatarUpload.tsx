@@ -2,7 +2,11 @@ import Image from "next/image";
 import { FiUploadCloud } from "react-icons/fi";
 import { ChangeEvent, useRef } from "react";
 
-export default function AvatarUplaod({ user }: { user: any }) {
+export default function AvatarUplaod({
+  userAvatar,
+}: {
+  userAvatar: string | undefined;
+}) {
   const avatar = useRef<HTMLInputElement>(null);
 
   function handleAvatarUpload(e: ChangeEvent<HTMLInputElement>) {
@@ -15,7 +19,7 @@ export default function AvatarUplaod({ user }: { user: any }) {
       onClick={() => avatar.current?.click()}
     >
       <Image
-        src={user?.avatar || "/avatar.jpg"}
+        src={userAvatar || "/avatar.jpg"}
         alt="user avatar"
         width={250}
         height={250}

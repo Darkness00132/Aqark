@@ -3,7 +3,7 @@ import AuthInitializer from "@/components/UI/AuthInitializer";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { login: string };
+  searchParams: Promise<{ login?: string }>;
 }) {
   const params = await searchParams;
   return (
