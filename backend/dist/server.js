@@ -89,5 +89,5 @@ app.use((err, _req, res, _next) => {
         .status(err.status || 500)
         .json({ message: err.message || "Something went wrong" });
 });
-// export default app;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+export default app;
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
