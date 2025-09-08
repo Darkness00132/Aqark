@@ -17,16 +17,21 @@ export const signup = asyncHandler(async (req, res) => {
         role,
         isVerified: true,
         verificationToken: crypto.randomBytes(32).toString("hex"),
-        verificationTokenExpires: new Date(Date.now() + 10 * 60 * 1000),
+        verificationTokenExpire: new Date(Date.now() + 10 * 60 * 1000),
     });
     // const protocol = req.protocol;
     // const host = req.get("host");
     // const verifyUrl = `${protocol}://${host}/api/users/verifyEmail?verificationToken=${user.verificationToken}`;
     // await verifyEmail(verifyUrl, "delivered@resend.dev");
+    //change when get domain
     const token = await user.generateAuthToken();
-    res
-        .status(201)
-        .json({ message: "تم انشاء حساب بنجاح يرجى تحقق من ايميلك", token });
+    res.cookie("jwt-auth", token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7, //saved for 7days
+        secure: process.env.PRODUCTION === "true",
+        sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+    });
+    res.status(201).json({ message: "تم انشاء حساب بنجاح يرجى تحقق من ايميلك" });
 });
 export const verifyEmail = asyncHandler(async (req, res) => {
     const { verificationToken } = req.query;
@@ -60,8 +65,13 @@ export const login = asyncHandler(async (req, res) => {
     if (!isMatch)
         return res.status(400).json({ message: "كلمة مرور خاطئة" });
     const token = await user.generateAuthToken();
-    // res.cookie("jwt-auth", token, { ... });
-    res.status(200).json({ message: "تم تسجيل الدخول بنجاح", token });
+    res.cookie("jwt-auth", token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7, //saved for 7days
+        secure: process.env.PRODUCTION === "true",
+        sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+    });
+    res.status(200).json({ message: "تم تسجيل الدخول بنجاح" });
 });
 export const getProfile = asyncHandler(async (req, res) => {
     res.status(200).json({ user: req.user });
@@ -119,11 +129,13 @@ export const updateProfile = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: "تم تحديث ملفك الشخصى بنجاح" });
 });
 export const logout = asyncHandler(async (req, res) => {
-    // const userToken = req.signedCookies["jwt-auth"];
-    const authHeader = req.headers.authorization;
-    const userToken = authHeader && authHeader.split(" ")[1];
+    const userToken = req.cookies["jwt-auth"];
     req.user.tokens = req.user.tokens.filter((t) => t.token !== userToken);
     await req.user.save();
-    // res.clearCookie("jwt-auth", { ... });
+    res.clearCookie("jwt-auth", {
+        httpOnly: true,
+        secure: process.env.PRODUCTION === "true",
+        sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+    });
     res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
 });
