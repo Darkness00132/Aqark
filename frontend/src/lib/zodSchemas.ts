@@ -47,7 +47,6 @@ export const signupSchema = z.object({
     .refine((val) => /[^A-Za-z0-9]/.test(val), {
       message: "يجب أن تحتوي كلمة السر على رمز خاص واحد على الأقل",
     }),
-  role: z.enum(["user", "landlord"]),
 });
 
 export const resetPasswordSchema = z.object({

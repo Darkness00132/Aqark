@@ -10,17 +10,13 @@ export interface AuthRequest extends Request {
 
 const auth = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "غير مصرح لك بالدخول" });
-    }
-    const token = authHeader.split(" ")[1] ?? "";
+    const token = req.cookies["jwt-auth"];
 
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      return res.status(500).json({ message: "JWT secret not set" });
+    if (!token) {
+      return res.status(401).json({ message: "غير مصرح لك بدخول" });
     }
-    const decoded: any = jwt.verify(token, secret);
+
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
 
     const user = await User.findById(decoded.id);
     if (!user) {
@@ -31,10 +27,5 @@ const auth = asyncHandler(
     next();
   }
 );
-
-// const token = req.signedCookies["jwt-auth"];
-// if (!token) {
-//   return res.status(401).json({ message: "غير مصرح لك بالدخول" });
-// }
 
 export default auth;

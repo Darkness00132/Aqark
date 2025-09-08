@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 dotenv.config();
-
 import { Router } from "express";
 import type { Request, Response, NextFunction } from "express";
 import passport from "passport";
@@ -22,6 +21,7 @@ passport.use(
     },
     async (req: Request, accessToken, refreshToken, profile, done) => {
       try {
+        const role = req.query.state || "user";
         let user = await User.findOne({ googleId: profile.id });
         if (!user) {
           const existUser = await User.findOne({
@@ -37,14 +37,14 @@ passport.use(
               name: profile.displayName,
               email: profile.emails?.[0]?.value,
               avatar: profile.photos?.[0]?.value || "",
-              role: "user",
+              role,
               isVerified: true,
             });
           }
         }
         return done(undefined, user);
       } catch (e) {
-        done(e as Error, undefined);
+        done(e, undefined);
       }
     }
   )
@@ -53,24 +53,34 @@ passport.use(
 // Routes
 router.get(
   "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  (req: Request, res: Response, next: NextFunction) => {
+    const role = typeof req.query.role === "string" ? req.query.role : "user";
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      state: role,
+    })(req, res, next);
+  }
 );
 
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "/login",
+    failureRedirect: process.env.FRONTEND_URL + "/login",
   }),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const token = await req.user.generateAuthToken();
-
-      // Example sending welcome email
       // welcomeEmail("delivered@resend.dev");
 
-      // Redirect with token
-      res.redirect(`${process.env.FRONTEND_URL}/profile?token=${token}`);
+      res.cookie("jwt-auth", token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7, //saved for 7days
+        secure: process.env.PRODUCTION === "true",
+        sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+      });
+
+      res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
     } catch (err) {
       next(err);
     }

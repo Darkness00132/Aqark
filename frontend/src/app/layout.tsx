@@ -3,7 +3,6 @@ import { Cairo } from "next/font/google";
 import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
-import AuthInitializer from "@/components/AuthInitializer";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
@@ -62,14 +61,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" data-theme="dark" className="dark" dir="rtl">
+    <html lang="ar" data-theme="winter" className="" dir="rtl">
       <body className={`${geistCairo.className} antialiased`}>
         <Provider>
           <Header />
-          <main className="min-h-screen">
-            <AuthInitializer />
-            {children}
-          </main>
+          <main className="min-h-screen">{children}</main>
           <Footer />
         </Provider>
         <SpeedInsights />

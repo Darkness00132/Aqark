@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import { connect } from "mongoose";
 import helmet from "helmet";
@@ -44,7 +45,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
-
+app.use(cookieParser(process.env.SECRET_COOKIE));
 app.use(helmet.noSniff());
 app.use(helmet.dnsPrefetchControl({ allow: false }));
 app.use(helmet.referrerPolicy({ policy: "no-referrer-when-downgrade" }));
@@ -106,5 +107,5 @@ app.use((err: any, _req: any, res: any, _next: any) => {
     .json({ message: err.message || "Something went wrong" });
 });
 
-export default app;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// export default app;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

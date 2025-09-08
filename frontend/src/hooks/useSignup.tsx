@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
-import useAuth from "@/store/useAuth";
 
 interface User {
   name: string;
@@ -15,8 +14,6 @@ interface User {
 
 export default function useSignup() {
   const router = useRouter();
-  const setToken = useAuth((state) => state.setToken);
-  const setSignup = useAuth((state) => state.setSignup);
   return useMutation({
     mutationKey: ["signup"],
     mutationFn: async (data: User) => {
@@ -24,10 +21,8 @@ export default function useSignup() {
       return response.data;
     },
     onSuccess: (data) => {
-      setToken(data.token);
-      setSignup();
-      toast.success("تم إنشاء الحساب");
-      router.push("/");
+      toast.success(data.message || "تم إنشاء الحساب");
+      router.push("/?login=success");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(

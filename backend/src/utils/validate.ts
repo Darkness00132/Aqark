@@ -24,6 +24,10 @@ export interface LoginBody {
   enteredPassword: string;
 }
 
+export interface googleAuth {
+  role: string;
+}
+
 export interface ForgetPasswordBody {
   email: string;
 }

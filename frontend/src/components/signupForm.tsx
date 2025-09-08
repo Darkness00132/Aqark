@@ -9,7 +9,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function SignupForm() {
+export default function SignupForm({ role }: { role: string }) {
   const router = useRouter();
   const isAuth = useAuth((state) => state.isAuth);
 
@@ -29,7 +29,7 @@ export default function SignupForm() {
   });
 
   function onSubmit(data: z.infer<typeof signupSchema>) {
-    mutate(data);
+    mutate({ ...data, role });
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
@@ -73,30 +73,6 @@ export default function SignupForm() {
         {errors.password && (
           <p className="text-error">{errors.password.message}</p>
         )}
-      </fieldset>
-
-      <fieldset className="space-x-2 space-y-1 w-full">
-        <legend>نوع المستخدم</legend>
-        <label>
-          <input
-            type="radio"
-            value="user"
-            className="radio radio-primary bg-base-100"
-            defaultChecked
-            {...register("role")}
-          />{" "}
-          بتدور على عقار
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="landlord"
-            className="radio radio-primary bg-base-100"
-            {...register("role")}
-          />{" "}
-          هتنشر عقارات
-        </label>
-        {errors.role && <p className="text-error">{errors.role?.message}</p>}
       </fieldset>
 
       <button
