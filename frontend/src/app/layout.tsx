@@ -62,7 +62,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" data-theme="winter" className="" dir="rtl">
-      <body className={`${geistCairo.className} antialiased`}>
+      <body
+        className={`${geistCairo.className} antialiased bg-gradient-to-bl from-base-300 to-base-content`}
+      >
         <Provider>
           <Header />
           <main className="min-h-screen">{children}</main>

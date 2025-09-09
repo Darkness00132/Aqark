@@ -4,11 +4,3 @@
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, winter, luxury;
 }
-
-body {
-  background-image: url("/bg.jpg");
-  object-fit: cover;
-  object-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
