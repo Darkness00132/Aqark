@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { FiUploadCloud } from "react-icons/fi";
 import { ChangeEvent, useRef } from "react";
+import useUploadAvatar from "@/hooks/useUploadAvatar";
 
 export default function AvatarUplaod({
   userAvatar,
@@ -8,15 +9,21 @@ export default function AvatarUplaod({
   userAvatar: string | undefined;
 }) {
   const avatar = useRef<HTMLInputElement>(null);
+  const { mutate, isPending } = useUploadAvatar();
 
   function handleAvatarUpload(e: ChangeEvent<HTMLInputElement>) {
     const avatar = e.target.files?.[0];
     if (!avatar) return;
+    const formData = new FormData();
+    formData.append("avatar", avatar);
+    mutate(formData);
   }
+
   return (
     <div
-      className="cursor-pointer relative group hover:opacity-75 transition-opacity"
+      className="flex flex-col justify-center items-center cursor-pointer relative group hover:opacity-75 transition-opacity"
       onClick={() => avatar.current?.click()}
+      aria-disabled={isPending}
     >
       <Image
         src={userAvatar || "/avatar.jpg"}
@@ -24,6 +31,7 @@ export default function AvatarUplaod({
         width={250}
         height={250}
         className="object-cover object-center rounded-full"
+        priority
       />
       <div className="absolute inset-0 flex justify-center items-center ">
         <FiUploadCloud
@@ -37,6 +45,7 @@ export default function AvatarUplaod({
         ref={avatar}
         accept="image/*"
         onChange={handleAvatarUpload}
+        disabled={isPending}
       />
     </div>
   );

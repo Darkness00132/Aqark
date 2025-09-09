@@ -9,7 +9,7 @@ export default function Header() {
   const isAuth = useAuth((state) => state.isAuth);
   const user = useAuth((state) => state.user);
   return (
-    <header className="navbar bg-base-200 shadow-sm">
+    <header className="navbar bg-base-content text-base-300">
       <div className="flex-1">
         <Link href="/" className="btn btn-ghost text-xl">
           <Image
@@ -26,7 +26,7 @@ export default function Header() {
         <input
           type="text"
           placeholder="ابحث عن عقار"
-          className="input input-bordered w-24 md:w-auto"
+          className="input input-bordered w-24 md:w-auto text-lg font-bold text-base-content/80"
         />
         <div className="dropdown dropdown-end">
           <div
@@ -47,29 +47,31 @@ export default function Header() {
           </div>
           <ul
             tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-200 rounded-box z-1 mt-3 w-52 p-2 shadow"
+            className="menu menu-sm dropdown-content bg-base-content text-base-300 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
-            <li>
-              {isAuth ? (
-                <button
-                  className={`text-base justify-center ${
-                    isPending && "text-gray-500"
-                  }`}
-                  onClick={() => mutate()}
-                  disabled={isPending}
-                >
-                  تسجيل خروج{" "}
-                </button>
-              ) : (
+            {isAuth ? (
+              <>
+                <li className="hover:opacity-50">
+                  <button
+                    className={`text-base justify-center ${
+                      isPending && "text-base-100"
+                    }`}
+                    onClick={() => mutate()}
+                    disabled={isPending}
+                  >
+                    تسجيل خروج{" "}
+                  </button>
+                </li>
+                <li className="hover:opacity-50">
+                  <Link href="/profile" className="text-base justify-center">
+                    ملف الشخصى
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <li className="hover:opacity-50">
                 <Link href="/login" className="text-base justify-center">
                   سجل دخول
-                </Link>
-              )}
-            </li>
-            {isAuth && (
-              <li>
-                <Link href="/profile" className="text-base justify-center">
-                  ملف الشخصى
                 </Link>
               </li>
             )}

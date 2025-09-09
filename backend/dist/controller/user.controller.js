@@ -116,16 +116,16 @@ export const updateProfile = asyncHandler(async (req, res) => {
     const { value, error } = updateProfileSchema.validate(req.body);
     if (error)
         return res.status(400).json({ message: error.details[0]?.message });
-    const { name, role, avatar, password, enteredPassword } = value;
+    const { name, role, password, newPassword } = value;
     if (name)
         req.user.name = name;
     if (role)
         req.user.role = role;
-    if (enteredPassword) {
+    if (newPassword) {
         const isMatch = await req.user.matchPassword(password);
         if (!isMatch)
             return res.status(400).json({ message: "كلمة مرور خاطئة" });
-        req.user.password = enteredPassword;
+        req.user.password = newPassword;
     }
     await req.user.save();
     return res.status(200).json({ message: "تم تحديث ملفك الشخصى بنجاح" });

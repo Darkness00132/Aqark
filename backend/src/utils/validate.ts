@@ -41,8 +41,7 @@ export interface UpdateProfileBody {
   name?: string;
   role?: string;
   password?: string;
-  enteredPassword?: string;
-  avatar?: string;
+  newPassword?: string;
 }
 
 export const signupSchema = Joi.object<SignupBody>({
@@ -95,5 +94,5 @@ export const updateProfileSchema = Joi.object<UpdateProfileBody>({
     then: passwordSchema.required(),
     otherwise: passwordSchema.optional(),
   }),
-  enteredPassword: passwordSchema.optional(),
+  newPassword: passwordSchema.optional(),
 });

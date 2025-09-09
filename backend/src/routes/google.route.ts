@@ -62,10 +62,6 @@ router.get(
   }
 );
 
-router.get("/auth/google/redirect", (req: Request, res: Response) => {
-  res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
-});
-
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
@@ -85,7 +81,7 @@ router.get(
         priority: "high",
       });
 
-      res.redirect("/auth/google/redirect");
+      res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
     } catch (err) {
       next(err);
     }

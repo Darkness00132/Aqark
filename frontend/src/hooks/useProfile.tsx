@@ -11,14 +11,10 @@ export default function useProfile() {
   return useQuery({
     queryKey: ["profile", isAuth],
     queryFn: async () => {
-      try {
-        const response = await axiosInstance.get("/users/profile");
-        setProfile(response.data.user);
-        setLoggedIn();
-        return response.data.user;
-      } catch (e) {
-        throw e;
-      }
+      const response = await axiosInstance.get("/users/profile");
+      setProfile(response.data.user);
+      setLoggedIn();
+      return response.data.user;
     },
     enabled: false,
     retry: false,

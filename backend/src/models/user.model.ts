@@ -19,6 +19,7 @@ interface IUser extends Document {
   isVerified: boolean;
   role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
   avatar?: string;
+  avatarId?: string;
   tokens: Token[];
   verificationToken?: string | null;
   verificationTokenExpire?: Date | null;
@@ -76,6 +77,7 @@ const userSchema = new Schema<IUser>(
       enum: ["user", "landlord", "admin", "superAdmin", "owner"],
     },
     avatar: { type: String },
+    avatarId: { type: String },
     tokens: [
       {
         token: { type: String, required: true },

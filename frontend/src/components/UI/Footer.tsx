@@ -3,18 +3,18 @@ import { FaFacebookF, FaYoutube, FaTiktok } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="footer footer-horizontal footer-center bg-base-200 text-base-content p-4">
+    <footer className="footer footer-horizontal footer-center bg-base-content text-base-300 p-4">
       <nav className="grid grid-flow-col self-center">
-        <Link href="/about" className="link link-hover btn btn-soft">
+        <Link href="/about" className="link link-hover">
           من نحن
         </Link>
-        <Link href="/contact" className="link link-hover btn btn-soft">
+        <Link href="/contact" className="link link-hover">
           تواصل معنا
         </Link>
-        <Link href="/privacyPolicy" className="link link-hover btn btn-soft">
+        <Link href="/privacyPolicy" className="link link-hover">
           سياسة الخصوصية
         </Link>
-        <Link href="/termsOfService" className="link link-hover btn btn-soft">
+        <Link href="/termsOfService" className="link link-hover">
           الشروط والأحكام
         </Link>
       </nav>
@@ -47,7 +47,7 @@ export default function Footer() {
         </div>
       </nav>
       <aside>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm">
           © {new Date().getFullYear()} جميع الحقوق محفوظة لموقع عقارك
         </p>
       </aside>

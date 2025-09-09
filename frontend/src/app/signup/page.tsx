@@ -1,5 +1,5 @@
-import ChooseRole from "@/components/ChooseRole";
-import SignupForm from "@/components/signupForm";
+import ChooseRole from "@/components/user/ChooseRole";
+import SignupForm from "@/components/user/signupForm";
 import { Metadata } from "next";
 import { FcGoogle } from "react-icons/fc";
 

@@ -50,9 +50,6 @@ router.get("/auth/google", (req, res, next) => {
         state: role,
     })(req, res, next);
 });
-router.get("/auth/google/redirect", (req, res) => {
-    res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
-});
 router.get("/auth/google/callback", passport.authenticate("google", {
     session: false,
     failureRedirect: process.env.FRONTEND_URL + "/login",
@@ -67,7 +64,7 @@ router.get("/auth/google/callback", passport.authenticate("google", {
             sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
             priority: "high",
         });
-        res.redirect("/auth/google/redirect");
+        res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
     }
     catch (err) {
         next(err);

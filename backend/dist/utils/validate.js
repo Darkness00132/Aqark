@@ -55,5 +55,5 @@ export const updateProfileSchema = Joi.object({
         then: passwordSchema.required(),
         otherwise: passwordSchema.optional(),
     }),
-    enteredPassword: passwordSchema.optional(),
+    newPassword: passwordSchema.optional(),
 });

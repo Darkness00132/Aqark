@@ -9,6 +9,7 @@ import helmet from "helmet";
 import xss from "xss";
 import googleRouter from "./routes/google.route.js";
 import userRouter from "./routes/user.route.js";
+import uploadRouter from "./routes/upload.route.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 const rateLimiter = new RateLimiterMemory({
@@ -74,6 +75,7 @@ connect(process.env.MONGODB_URI)
 // Routes
 app.use("/api/users", userRouter);
 app.use(googleRouter);
+app.use("/api/upload", uploadRouter);
 // Global Error Handler
 app.use((err, _req, res, _next) => {
     console.error("Error: ", err);

@@ -10,6 +10,7 @@ import helmet from "helmet";
 import xss from "xss";
 import googleRouter from "./routes/google.route.js";
 import userRouter from "./routes/user.route.js";
+import uploadRouter from "./routes/upload.route.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -87,6 +88,7 @@ connect(process.env.MONGODB_URI!)
 // Routes
 app.use("/api/users", userRouter);
 app.use(googleRouter);
+app.use("/api/upload", uploadRouter);
 
 // Global Error Handler
 app.use((err: any, _req: any, res: any, _next: any) => {

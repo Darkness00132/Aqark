@@ -47,6 +47,7 @@ const userSchema = new Schema({
         enum: ["user", "landlord", "admin", "superAdmin", "owner"],
     },
     avatar: { type: String },
+    avatarId: { type: String },
     tokens: [
         {
             token: { type: String, required: true },

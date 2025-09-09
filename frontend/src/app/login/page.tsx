@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { FcGoogle } from "react-icons/fc";
-import LoginForm from "@/components/loginForm";
-import ForgetPasswordModal from "@/components/forgetPasswordModel";
+import LoginForm from "@/components/user/loginForm";
+import ForgetPasswordModal from "@/components/user/forgetPasswordModel";
 import Link from "next/link";
 
 export const metadata: Metadata = {

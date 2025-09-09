@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ProfileForm from "@/components/profileForm";
+import ProfileForm from "@/components/user/profileForm";
 
 export const metadata: Metadata = {
   title: "الملف الشخصى",
