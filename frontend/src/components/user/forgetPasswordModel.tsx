@@ -26,7 +26,10 @@ export default function ForgetPasswordModal() {
     <>
       <p>
         لا تتذكر كلمة السر ؟{" "}
-        <button onClick={openModal} className="link link-primary">
+        <button
+          onClick={openModal}
+          className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline"
+        >
           استرجعها هنا
         </button>
       </p>
@@ -39,7 +42,7 @@ export default function ForgetPasswordModal() {
             <input
               type="email"
               placeholder="example@gmail.com"
-              className="input input-bordered w-full"
+              className="input input-bordered rounded-lg w-full"
               ref={input}
               required
             />

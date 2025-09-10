@@ -2,10 +2,11 @@
 import Link from "next/link";
 import useSignup from "@/hooks/useSignup";
 import useAuth from "@/store/useAuth";
+import { z } from "zod";
+import { FaExclamationCircle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/lib/zodSchemas";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -42,21 +43,15 @@ export default function SignupForm({ role }: { role: string }) {
         <input
           type="text"
           placeholder="اكتب اسمك الكامل"
-          className={`input input-bordered w-full rounded-2xl bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
+          className={`input input-bordered w-full rounded-lg mt-2 bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
             errors.name && "input-error border-error"
           }`}
           {...register("name")}
         />
         {errors.name && (
-          <label className="label">
+          <label className="label mt-2">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <FaExclamationCircle />
               {errors.name.message}
             </span>
           </label>
@@ -71,21 +66,15 @@ export default function SignupForm({ role }: { role: string }) {
         <input
           type="email"
           placeholder="example@gmail.com"
-          className={`input input-bordered w-full rounded-2xl bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
+          className={`input input-bordered w-full rounded-lg mt-2 bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
             errors.email && "input-error border-error"
           }`}
           {...register("email")}
         />
         {errors.email && (
-          <label className="label">
+          <label className="label mt-2">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <FaExclamationCircle />
               {errors.email.message}
             </span>
           </label>
@@ -100,21 +89,15 @@ export default function SignupForm({ role }: { role: string }) {
         <input
           type="password"
           placeholder="••••••••"
-          className={`input input-bordered w-full rounded-2xl bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
+          className={`input input-bordered w-full rounded-lg mt-2 bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
             errors.password && "input-error border-error"
           }`}
           {...register("password")}
         />
         {errors.password && (
-          <label className="label">
+          <label className="label mt-2">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <FaExclamationCircle />
               {errors.password.message}
             </span>
           </label>

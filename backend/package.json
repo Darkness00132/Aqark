@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "build": "tsc --build"
+    "build": "npx tsc"
   },
   "dependencies": {
     "argon2": "^0.44.0",

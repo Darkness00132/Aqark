@@ -21,7 +21,7 @@ export default function AvatarUplaod({
 
   return (
     <div
-      className="flex flex-col justify-center items-center cursor-pointer relative group hover:opacity-75 transition-opacity"
+      className="flex flex-col justify-center items-center cursor-pointer relative group hover:opacity-85 transition-opacity"
       onClick={() => avatar.current?.click()}
       aria-disabled={isPending}
     >
@@ -36,7 +36,7 @@ export default function AvatarUplaod({
       <div className="absolute inset-0 flex justify-center items-center ">
         <FiUploadCloud
           size={50}
-          className="opacity-0 group-hover:opacity-75 transition-opacity"
+          className="opacity-0 group-hover:opacity-85 text-base-100 transition-opacity"
         />
       </div>
       <input

@@ -78,28 +78,6 @@ export default function Header() {
               tabIndex={0}
               className="menu menu-sm dropdown-content bg-base-100 rounded-2xl z-[9999] mt-3 w-56 p-2 shadow-2xl border border-base-300"
             >
-              <li className="p-2">
-                <div className="flex items-center gap-3 p-2 rounded-xl bg-base-200/50">
-                  <div className="w-8 h-8 rounded-full overflow-hidden">
-                    <Image
-                      alt="Avatar"
-                      src={user?.avatar || "/avatar.jpg"}
-                      width={32}
-                      height={32}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-base-content">
-                      {user?.name}
-                    </div>
-                    <div className="text-sm text-base-content/70">
-                      {user?.email}
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <div className="divider my-2"></div>
               <li>
                 <Link
                   href="/profile"
