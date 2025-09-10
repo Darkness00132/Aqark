@@ -2,5 +2,26 @@
 @import "tw-animate-css";
 @custom-variant dark (&:where(.dark, .dark *));
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, winter, luxury;
+  themes: light --default, mytheme;
+}
+@plugin "daisyui/theme" {
+  name: "mytheme";
+  default: true;
+  color-scheme: "light";
+
+  --color-primary: #059669;
+  --color-primary-content: #ffffff;
+  --color-secondary: #2563eb;
+  --color-secondary-content: #ffffff;
+  --color-accent: #0d9488;
+  --color-accent-content: #ffffff;
+
+  --color-neutral: #1f2937;
+  --color-neutral-content: #f9fafb;
+  --color-base-100: #f8fafc;
+  --color-base-200: #e2e8f0;
+  --color-base-300: #cbd5e1;
+  --color-base-content: #1e293b;
+
+  /* لو في إضافات مثل gradients أو depths ممكن تضيف هنا */
 }

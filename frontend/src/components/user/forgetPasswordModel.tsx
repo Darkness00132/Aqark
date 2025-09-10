@@ -26,44 +26,38 @@ export default function ForgetPasswordModal() {
     <>
       <p>
         لا تتذكر كلمة السر ؟{" "}
-        <button
-          onClick={openModal}
-          className="text-blue-800 font-bold hover:underline ml-1"
-        >
+        <button onClick={openModal} className="link link-primary">
           استرجعها هنا
         </button>
       </p>
-      <div className="flex flex-col items-center justify-center">
-        <dialog ref={dialogRef} className="modal modal-bottom sm:modal-middle">
-          <div className="modal-box bg-gray-100">
-            <h3 className="font-bold text-lg">نسيت باسورد؟</h3>
-            <p className="py-4">ادخل بريدك الإلكتروني</p>
-            <div className="flex flex-col gap-2">
-              <input
-                type="email"
-                name="email"
-                placeholder="example@gmail.com"
-                className="input input-bordered w-full"
-                required
-                ref={input}
-              />
-              <button
-                type="submit"
-                className="btn btn-wide self-center btn-secondary mt-2"
-                onClick={handleSubmit}
-                disabled={isPending}
-              >
-                إرسال
-              </button>
-            </div>
-            <div className="modal-action">
-              <button onClick={closeModal} className="btn" disabled={isPending}>
-                إغلاق
-              </button>
-            </div>
+
+      <dialog ref={dialogRef} className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">نسيت كلمة المرور؟</h3>
+          <p className="py-4">ادخل بريدك الإلكتروني</p>
+          <div className="form-control">
+            <input
+              type="email"
+              placeholder="example@gmail.com"
+              className="input input-bordered w-full"
+              ref={input}
+              required
+            />
           </div>
-        </dialog>
-      </div>
+          <div className="modal-action">
+            <button
+              className="btn btn-primary"
+              onClick={handleSubmit}
+              disabled={isPending}
+            >
+              {isPending ? "جاري الإرسال..." : "إرسال"}
+            </button>
+            <button onClick={closeModal} className="btn" disabled={isPending}>
+              إغلاق
+            </button>
+          </div>
+        </div>
+      </dialog>
     </>
   );
 }

@@ -49,8 +49,10 @@ export default function ProfileForm() {
   }
 
   return (
-    <div className="card bg-base-300/90 shadow-xl flex flex-col justify-center my-5 mx-auto w-[80%] max-w-4xl p-6 sm:p-10">
-      <h1 className="text-3xl text-center font-bold mb-5">الملف الشخصى</h1>
+    <div className="card bg-base-200/90 shadow-xl flex flex-col justify-center my-5 mx-auto w-[80%] max-w-4xl p-6 sm:p-10 border border-base-300">
+      <h1 className="text-3xl text-center font-bold mb-5 text-base-content">
+        الملف الشخصى
+      </h1>
       <AvatarUplaod userAvatar={user?.avatar} />
       <form
         onSubmit={handleSubmit(onSubmit)}

@@ -61,13 +61,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" data-theme="winter" className="" dir="rtl">
+    <html lang="ar" data-theme="mytheme" className="" dir="rtl">
       <body
-        className={`${geistCairo.className} antialiased bg-gradient-to-bl from-base-300 to-base-content`}
+        className={`${geistCairo.className} antialiased bg-gradient-to-tr from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen`}
       >
         <Provider>
           <Header />
-          <main className="min-h-screen">{children}</main>
+          <main className="min-h-screen pb-20">{children}</main>
           <Footer />
         </Provider>
         <SpeedInsights />

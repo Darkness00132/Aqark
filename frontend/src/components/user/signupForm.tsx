@@ -31,69 +31,106 @@ export default function SignupForm({ role }: { role: string }) {
   function onSubmit(data: z.infer<typeof signupSchema>) {
     mutate({ ...data, role });
   }
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
-      <h2 className="text-2xl font-bold mb-2">انشئ حساب جديد!</h2>
-      <p className="text-gray-600 dark:text-gray-400 mb-2">
-        قم بإنشاء حسابك للوصول إلى جميع ميزات الموقع والاستمتاع بتجربة رائعة.
-      </p>
 
-      <fieldset className="fieldset w-full">
-        <legend className="fieldset-legend">ما هو اسمك ؟</legend>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Name Field */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-semibold">الاسم الكامل</span>
+        </label>
         <input
           type="text"
-          className={`input ${errors.name && "input-error"} w-full`}
-          placeholder="اكتب هنا"
+          placeholder="اكتب اسمك الكامل"
+          className={`input input-bordered w-full rounded-2xl bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
+            errors.name && "input-error border-error"
+          }`}
           {...register("name")}
         />
-        {errors.password && (
-          <p className="text-error">{errors.name?.message}</p>
+        {errors.name && (
+          <label className="label">
+            <span className="label-text-alt text-error flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {errors.name.message}
+            </span>
+          </label>
         )}
-      </fieldset>
+      </div>
 
-      <fieldset className="fieldset w-full">
-        <legend className="fieldset-legend">ايميل خاص بك</legend>
+      {/* Email Field */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-semibold">البريد الإلكتروني</span>
+        </label>
         <input
           type="email"
-          className={`input ${errors.email && "input-error"} w-full`}
           placeholder="example@gmail.com"
+          className={`input input-bordered w-full rounded-2xl bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
+            errors.email && "input-error border-error"
+          }`}
           {...register("email")}
         />
-        {errors.email && <p className="text-error">{errors.email.message}</p>}
-      </fieldset>
+        {errors.email && (
+          <label className="label">
+            <span className="label-text-alt text-error flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {errors.email.message}
+            </span>
+          </label>
+        )}
+      </div>
 
-      <fieldset className="fieldset w-full">
-        <legend className="fieldset-legend">انشاء كلمة سر قوية</legend>
+      {/* Password Field */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-semibold">كلمة المرور</span>
+        </label>
         <input
           type="password"
-          className={`input ${errors.password && "input-error"} w-full`}
           placeholder="••••••••"
+          className={`input input-bordered w-full rounded-2xl bg-base-100 border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 ${
+            errors.password && "input-error border-error"
+          }`}
           {...register("password")}
         />
         {errors.password && (
-          <p className="text-error">{errors.password.message}</p>
+          <label className="label">
+            <span className="label-text-alt text-error flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {errors.password.message}
+            </span>
+          </label>
         )}
-      </fieldset>
+      </div>
 
-      <button
-        className={`btn btn-primary btn-wide mt-4 ${
-          isPending && "btn-disabled"
-        } self-center`}
-        disabled={isPending}
-      >
-        انشاء حساب
-      </button>
-
-      <div className="flex flex-col gap-2 mt-2 text-sm">
-        <p>
-          لديك حساب بالفعل؟{" "}
-          <Link
-            href="/login"
-            className="text-blue-800 font-bold hover:underline ml-1"
-          >
-            سجل دخول هنا
-          </Link>
-        </p>
+      {/* Submit Button */}
+      <div className="form-control mt-6">
+        <button
+          className={`btn btn-primary btn-lg w-full rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 ${
+            isPending && "loading"
+          }`}
+          disabled={isPending}
+        >
+          {isPending ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
+        </button>
       </div>
     </form>
   );
