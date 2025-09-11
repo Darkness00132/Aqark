@@ -1,15 +1,14 @@
-import dotenv from "dotenv";
-dotenv.config();
-import express from "express";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import { connect } from "mongoose";
-import { RateLimiterMemory } from "rate-limiter-flexible";
-import helmet from "helmet";
-import xss from "xss";
-import googleRouter from "./routes/google.route.js";
-import userRouter from "./routes/user.route.js";
-import uploadRouter from "./routes/upload.route.js";
+import 'dotenv/config';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import sequelize from './db/sql.js';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
+import helmet from 'helmet';
+import xss from 'xss';
+import googleRouter from './routes/google.route.js';
+import userRouter from './routes/user.route.js';
+import uploadRouter from './routes/upload.route.js';
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 const rateLimiter = new RateLimiterMemory({
@@ -19,97 +18,112 @@ const rateLimiter = new RateLimiterMemory({
 app.use(async (req, res, next) => {
     try {
         // Ensure IP is a string fallback
-        const ip = typeof req.ip === "string"
+        const ip = typeof req.ip === 'string'
             ? req.ip
-            : req.headers["x-forwarded-for"]?.toString() || "unknown";
+            : req.headers['x-forwarded-for']?.toString() || 'unknown';
         await rateLimiter.consume(ip);
         next();
     }
     catch (err) {
         // Make sure you send a proper object with normal prototype
-        res.status(429).json({ message: "طلبات كثيرة جدا" });
+        res.status(429).json({ message: 'طلبات كثيرة جدا' });
     }
 });
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-// Sanitize input to prevent Mongo Injection
-const sanitizeNoMongo = (input) => {
-    if (typeof input === "string")
+app
+    .use(express.json())
+    .use(express.urlencoded({ extended: true }))
+    .set('trust proxy', 1);
+// Sanitize input to prevent xss attacks
+const sanitizeXSS = (input) => {
+    if (typeof input === 'string')
         return xss(input);
-    if (typeof input === "object" && input !== null) {
+    if (typeof input === 'object' && input !== null) {
         const sanitized = Array.isArray(input) ? [] : {};
         for (const key in input) {
-            if (key.startsWith("$") || key.includes("."))
-                continue;
-            sanitized[key] = sanitizeNoMongo(input[key]);
+            sanitized[key] = sanitizeXSS(input[key]);
         }
         return sanitized;
     }
     return input;
 };
 app.use((req, _res, next) => {
-    req.body = sanitizeNoMongo(req.body);
-    req.query = sanitizeNoMongo(req.query);
-    req.params = sanitizeNoMongo(req.params);
+    req.secureBody = sanitizeXSS(req.body);
+    req.secureQuery = sanitizeXSS(req.query);
+    req.secureParams = sanitizeXSS(req.params);
     next();
 });
-app.set("trust proxy", 1);
-app.use(cors({
+app
+    .use(cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-}));
-app.use(cookieParser(process.env.SECRET_COOKIE));
-app.use(helmet.noSniff());
-app.use(helmet.dnsPrefetchControl({ allow: false }));
-app.use(helmet.referrerPolicy({ policy: "no-referrer-when-downgrade" }));
-app.use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true, preload: true }));
-app.disable("x-powered-by");
-// MongoDB connection
-connect(process.env.MONGODB_URI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-});
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}))
+    .use(cookieParser())
+    .use(helmet())
+    .use(helmet.noSniff())
+    .use(helmet.dnsPrefetchControl({ allow: false }))
+    .use(helmet.referrerPolicy({ policy: 'no-referrer-when-downgrade' }))
+    .use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true, preload: true }))
+    .disable('x-powered-by');
+//database
+try {
+    await sequelize.authenticate();
+    await sequelize.sync({ alter: true });
+    console.log('Connected to Supabase');
+}
+catch (error) {
+    console.error('Unable to connect to the database:', error);
+}
 // Routes
-app.use("/api/users", userRouter);
-app.use(googleRouter);
-app.use("/api/upload", uploadRouter);
-// Global Error Handler
+app
+    .use('/api/users', userRouter)
+    .use(googleRouter)
+    .use('/api/upload', uploadRouter);
 app.use((err, _req, res, _next) => {
-    console.error("Error: ", err);
-    if (err.name === "ValidationError") {
-        const errors = Object.values(err.errors).map((e) => ({
-            field: e.path,
-            message: e.message,
-        }));
-        return res.status(400).json({ message: "Validation failed", errors });
-    }
-    if (err.code === 11000 || err.code === "E11000") {
-        const field = Object.keys(err.keyValue)[0];
-        let value;
-        if (field) {
-            value = err.keyValue?.[field];
+    console.error('Error:', err);
+    // If err is an Error object
+    if (err instanceof Error) {
+        // Handle JWT errors
+        if (err.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Invalid token' });
         }
-        return res.status(409).json({
-            message: `Duplicate value for field '${field}': '${value}'`,
-            field,
-            value,
-        });
-    }
-    if (err.name === "CastError") {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Token has expired' });
+        }
+        // Handle validation errors (if using Joi or similar)
+        if (err.name === 'ValidationError') {
+            const errors = Object.values(err.errors || {}).map((e) => ({
+                field: e.path,
+                message: e.message,
+            }));
+            return res.status(400).json({ message: 'Validation failed', errors });
+        }
+        // Default Error response
         return res
-            .status(400)
-            .json({ message: `Invalid value for '${err.path}': ${err.value}` });
+            .status(500)
+            .json({ message: err.message || 'Something went wrong' });
     }
-    if (err.name === "JsonWebTokenError")
-        return res.status(401).json({ message: "Invalid token" });
-    if (err.name === "TokenExpiredError")
-        return res.status(401).json({ message: "Token has expired" });
-    return res
-        .status(err.status || 500)
-        .json({ message: err.message || "Something went wrong" });
+    // If err is a plain object (like { code: 11000 } from DB)
+    if (err && typeof err === 'object') {
+        const e = err;
+        if (e.code === 11000 || e.code === 'E11000') {
+            const field = Object.keys(e.keyValue || {})[0];
+            const value = field ? e.keyValue?.[field] : undefined;
+            return res.status(409).json({
+                message: `Duplicate value for field '${field}': '${value}'`,
+                field,
+                value,
+            });
+        }
+        if (e.name === 'CastError') {
+            return res
+                .status(400)
+                .json({ message: `Invalid value for '${e.path}': ${e.value}` });
+        }
+    }
+    // Fallback for anything else (like null-prototype objects)
+    res.status(500).json({ message: 'Something went wrong', error: err });
 });
 // export default app;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+//# sourceMappingURL=server.js.map

@@ -1,9 +1,9 @@
-const resend = require("../utils/resend");
+import resend from '../utils/resend.js';
 async function WelcomeEmail(email) {
     const { data, error } = await resend.emails.send({
         from: process.env.EMAIL,
         to: [email],
-        subject: "مرحبًا بك في عقارك!",
+        subject: 'مرحبًا بك في عقارك!',
         html: `  <!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <head>
@@ -69,3 +69,4 @@ async function WelcomeEmail(email) {
     }
 }
 export default WelcomeEmail;
+//# sourceMappingURL=welcomeEmail.js.map

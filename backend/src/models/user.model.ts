@@ -1,128 +1,191 @@
-// src/models/user.model.ts
-import { Schema, model, Document } from "mongoose";
-import { hash, verify } from "argon2";
-import jwt from "jsonwebtoken";
-import validator from "validator";
-import { v4 as uuid } from "uuid";
+import { DataTypes, Model } from 'sequelize';
+import { hash, verify } from 'argon2';
+import { customAlphabet } from 'nanoid';
+import sequelize from '../db/sql.js';
+import jwt from 'jsonwebtoken';
+import validator from 'validator';
 
-export interface Token {
+export type Role = 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
+
+const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 12);
+
+interface Token {
   token: string;
   createdAt: Date;
 }
 
-interface IUser extends Document {
-  publicId: string;
+interface UserAttributes {
+  id?: string;
+  publicId?: Number;
   googleId?: string;
   name: string;
   email: string;
   password?: string;
-  isVerified: boolean;
-  role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
+  isVerified?: boolean;
+  isBlocked?: boolean;
+  role: 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
   avatar?: string;
   avatarId?: string;
-  tokens: Token[];
+  tokens?: Token[];
   verificationToken?: string | null;
   verificationTokenExpire?: Date | null;
   resetPasswordToken?: string | null;
   resetPasswordTokenExpire?: Date | null;
+}
 
+interface UserMethods {
   matchPassword: (enteredPassword: string) => Promise<boolean>;
   generateAuthToken: () => Promise<string>;
   toJSON: () => Record<string, any>;
 }
 
-const userSchema = new Schema<IUser>(
+class User
+  extends Model<UserAttributes>
+  implements UserAttributes, UserMethods
+{
+  declare id?: string;
+  declare publicId?: Number;
+  declare googleId?: string;
+  declare name: string;
+  declare email: string;
+  declare password?: string;
+  declare isVerified?: boolean;
+  declare isBlocked?: boolean;
+  declare role: 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
+  declare avatar?: string;
+  declare avatarId?: string;
+  declare tokens?: Token[];
+  declare verificationToken?: string | null;
+  declare verificationTokenExpire?: Date | null;
+  declare resetPasswordToken?: string | null;
+  declare resetPasswordTokenExpire?: Date | null;
+
+  public async matchPassword(enteredPassword: string) {
+    if (!this.password) return false;
+    return await verify(this.password, enteredPassword);
+  }
+
+  public async generateAuthToken() {
+    const token = jwt.sign({ id: this.id }, process.env.JWT_SECRET!, {
+      expiresIn: '7d',
+    });
+
+    this.tokens = [...this.tokens!, { token, createdAt: new Date() }];
+
+    await this.save();
+
+    return token;
+  }
+  public toJson() {
+    return {
+      name: this.name,
+      email: this.email,
+      avatar: this.avatar,
+      role: this.role,
+    };
+  }
+}
+
+User.init(
   {
-    publicId: {
-      type: String,
-      unique: true,
-      index: true,
-      default: uuid, // auto-generate
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV1,
+      primaryKey: true,
     },
-    googleId: { type: String, index: true },
-    name: { type: String, required: true, trim: true },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
+    publicId: {
+      type: DataTypes.STRING(12),
+      allowNull: false,
       unique: true,
-      index: true,
+      defaultValue: () => nanoid(),
+    },
+    googleId: {
+      type: DataTypes.STRING,
+      unique: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
       validate: {
-        validator: (value: string) => validator.isEmail(value),
-        message: "Invalid Email Format",
+        notEmpty: { msg: 'الاسم لا يمكن أن يكون فارغاً' },
+        len: {
+          args: [3, 50],
+          msg: 'الاسم يجب أن يكون بين 3 و 50 حرف',
+        },
+      },
+    },
+    email: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: 'البريد الإلكتروني مطلوب' },
+        isEmail: { msg: 'البريد الإلكتروني غير صالح' },
       },
     },
     password: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING,
       validate: {
-        validator: (value: string) =>
-          value
-            ? validator.isStrongPassword(value, {
-                minLength: 6,
-                minLowercase: 1,
-                minUppercase: 1,
-                minNumbers: 1,
-                minSymbols: 1,
-              })
-            : true,
-        message:
-          "Password must be at least 8 characters and include uppercase, lowercase, number, and symbol",
+        isStrongPassword(value: string) {
+          const strong = validator.isStrongPassword(value, {
+            minLength: 6,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1,
+          });
+          if (!strong) {
+            throw new Error(
+              'كلمة المرور ضعيفة: يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام ورموز',
+            );
+          }
+        },
       },
     },
-    isVerified: { type: Boolean, default: false, required: true },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isBlocked: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     role: {
-      type: String,
-      required: true,
-      enum: ["user", "landlord", "admin", "superAdmin", "owner"],
+      type: DataTypes.ENUM('user', 'landlord', 'admin', 'superAdmin', 'owner'),
+      allowNull: false,
+      defaultValue: 'user',
     },
-    avatar: { type: String },
-    avatarId: { type: String },
-    tokens: [
-      {
-        token: { type: String, required: true },
-        createdAt: { type: Date, default: Date.now, expires: 60 * 24 * 7 },
-      },
-    ],
-    verificationToken: { type: String, index: true },
-    verificationTokenExpire: { type: Date },
-    resetPasswordToken: { type: String, index: true },
-    resetPasswordTokenExpire: { type: Date },
+    avatar: {
+      type: DataTypes.STRING,
+    },
+    avatarId: {
+      type: DataTypes.STRING,
+    },
+    tokens: {
+      type: DataTypes.JSONB,
+      defaultValue: [],
+      allowNull: false,
+    },
+    verificationToken: {
+      type: DataTypes.STRING,
+    },
+    verificationTokenExpire: {
+      type: DataTypes.DATE,
+    },
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+    },
+    resetPasswordTokenExpire: {
+      type: DataTypes.DATE,
+    },
   },
-  { timestamps: true }
+  { sequelize, schema: 'public', tableName: 'users', timestamps: true },
 );
 
-userSchema.pre<IUser>("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  if (this.password) this.password = await hash(this.password);
-  next();
+User.beforeSave(async (user, option) => {
+  if (user.changed('password') && user.password) {
+    user.password = await hash(user.password);
+  }
 });
 
-userSchema.methods.matchPassword = async function (enteredPassword: string) {
-  if (!this.password) return false;
-  return await verify(this.password, enteredPassword);
-};
-
-userSchema.methods.generateAuthToken = async function () {
-  const token = jwt.sign({ id: this._id }, process.env.JWT_SECRET!, {
-    expiresIn: "7d",
-  });
-
-  this.tokens.push({ token, createdAt: new Date() });
-  await this.save();
-
-  return token;
-};
-
-userSchema.methods.toJSON = function () {
-  const user = this.toObject();
-  return {
-    name: user.name,
-    email: user.email,
-    avatar: user.avatar,
-    role: user.role,
-  };
-};
-
-const User = model<IUser>("User", userSchema);
 export default User;

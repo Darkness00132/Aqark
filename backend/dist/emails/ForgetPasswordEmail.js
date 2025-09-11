@@ -1,9 +1,9 @@
-const resend = require("../utils/resend");
+import resend from '../utils/resend.js';
 async function forgetPasswordEmail(resetPasswordToken, email) {
     const { data, error } = await resend.emails.send({
         from: process.env.EMAIL,
         to: [email],
-        subject: "إعادة تعيين كلمة المرور",
+        subject: 'إعادة تعيين كلمة المرور',
         html: `
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">
@@ -70,3 +70,4 @@ async function forgetPasswordEmail(resetPasswordToken, email) {
     }
 }
 export default forgetPasswordEmail;
+//# sourceMappingURL=ForgetPasswordEmail.js.map

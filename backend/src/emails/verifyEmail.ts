@@ -1,10 +1,10 @@
-const resend = require("../utils/resend");
+import resend from '../utils/resend.js';
 
 async function verifyEmail(verifyUrl: string, email: string) {
   const { data, error } = await resend.emails.send({
-    from: process.env.EMAIL,
+    from: process.env.EMAIL!,
     to: [email],
-    subject: "تأكيد البريد الإلكتروني الخاص بك",
+    subject: 'تأكيد البريد الإلكتروني الخاص بك',
     html: `
       <!DOCTYPE html>
 <html lang="ar" dir="rtl">

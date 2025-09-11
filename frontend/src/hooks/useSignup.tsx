@@ -22,7 +22,7 @@ export default function useSignup() {
     },
     onSuccess: (data) => {
       toast.success(data.message || "تم إنشاء الحساب");
-      router.push("/?login=success");
+      router.push("/login");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(

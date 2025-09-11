@@ -1,10 +1,10 @@
-const resend = require("../utils/resend");
+import resend from '../utils/resend.js';
 
 async function passwordChangedEmail(email: string) {
   const { data, error } = await resend.emails.send({
-    from: process.env.EMAIL,
+    from: process.env.EMAIL!,
     to: [email],
-    subject: "تم تغيير كلمة المرور بنجاح",
+    subject: 'تم تغيير كلمة المرور بنجاح',
     html: `
       <!DOCTYPE html>
       <html lang="ar" dir="rtl">

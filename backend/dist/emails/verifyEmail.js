@@ -1,9 +1,9 @@
-const resend = require("../utils/resend");
+import resend from '../utils/resend.js';
 async function verifyEmail(verifyUrl, email) {
     const { data, error } = await resend.emails.send({
         from: process.env.EMAIL,
         to: [email],
-        subject: "تأكيد البريد الإلكتروني الخاص بك",
+        subject: 'تأكيد البريد الإلكتروني الخاص بك',
         html: `
       <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -70,3 +70,4 @@ async function verifyEmail(verifyUrl, email) {
     }
 }
 export default verifyEmail;
+//# sourceMappingURL=verifyEmail.js.map

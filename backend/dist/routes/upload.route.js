@@ -1,5 +1,5 @@
-import Router, {} from "express";
-import auth, {} from "../middlewares/auth.js";
+import Router from "express";
+import auth from "../middlewares/auth.js";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import asyncHandler from "../utils/asyncHnadler.js";
@@ -39,3 +39,4 @@ router.put("/avatar", auth, upload.single("avatar"), asyncHandler(async (req, re
     stream.end(req.file.buffer);
 }));
 export default router;
+//# sourceMappingURL=upload.route.js.map

@@ -57,3 +57,4 @@ export const updateProfileSchema = Joi.object({
     }),
     newPassword: passwordSchema.optional(),
 });
+//# sourceMappingURL=validate.js.map

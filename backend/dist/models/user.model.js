@@ -1,92 +1,127 @@
-// src/models/user.model.ts
-import { Schema, model, Document } from "mongoose";
-import { hash, verify } from "argon2";
-import jwt from "jsonwebtoken";
-import validator from "validator";
-import { v4 as uuid } from "uuid";
-const userSchema = new Schema({
-    publicId: {
-        type: String,
-        unique: true,
-        index: true,
-        default: uuid, // auto-generate
+import { DataTypes, Model } from 'sequelize';
+import { hash, verify } from 'argon2';
+import { customAlphabet } from 'nanoid';
+import sequelize from '../db/sql.js';
+import jwt from 'jsonwebtoken';
+import validator from 'validator';
+const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 12);
+class User extends Model {
+    async matchPassword(enteredPassword) {
+        if (!this.password)
+            return false;
+        return await verify(this.password, enteredPassword);
+    }
+    async generateAuthToken() {
+        const token = jwt.sign({ id: this.id }, process.env.JWT_SECRET, {
+            expiresIn: '7d',
+        });
+        this.tokens = [...this.tokens, { token, createdAt: new Date() }];
+        await this.save();
+        return token;
+    }
+    toJson() {
+        return {
+            name: this.name,
+            email: this.email,
+            avatar: this.avatar,
+            role: this.role,
+        };
+    }
+}
+User.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV1,
+        primaryKey: true,
     },
-    googleId: { type: String, index: true },
-    name: { type: String, required: true, trim: true },
-    email: {
-        type: String,
-        required: true,
-        trim: true,
+    publicId: {
+        type: DataTypes.STRING(12),
+        allowNull: false,
         unique: true,
-        index: true,
+        defaultValue: () => nanoid(),
+    },
+    googleId: {
+        type: DataTypes.STRING,
+        unique: true,
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false,
         validate: {
-            validator: (value) => validator.isEmail(value),
-            message: "Invalid Email Format",
+            notEmpty: { msg: 'الاسم لا يمكن أن يكون فارغاً' },
+            len: {
+                args: [3, 50],
+                msg: 'الاسم يجب أن يكون بين 3 و 50 حرف',
+            },
+        },
+    },
+    email: {
+        type: DataTypes.STRING,
+        unique: true,
+        allowNull: false,
+        validate: {
+            notEmpty: { msg: 'البريد الإلكتروني مطلوب' },
+            isEmail: { msg: 'البريد الإلكتروني غير صالح' },
         },
     },
     password: {
-        type: String,
-        trim: true,
+        type: DataTypes.STRING,
         validate: {
-            validator: (value) => value
-                ? validator.isStrongPassword(value, {
+            isStrongPassword(value) {
+                const strong = validator.isStrongPassword(value, {
                     minLength: 6,
                     minLowercase: 1,
                     minUppercase: 1,
                     minNumbers: 1,
                     minSymbols: 1,
-                })
-                : true,
-            message: "Password must be at least 8 characters and include uppercase, lowercase, number, and symbol",
+                });
+                if (!strong) {
+                    throw new Error('كلمة المرور ضعيفة: يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام ورموز');
+                }
+            },
         },
     },
-    isVerified: { type: Boolean, default: false, required: true },
+    isVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    isBlocked: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
     role: {
-        type: String,
-        required: true,
-        enum: ["user", "landlord", "admin", "superAdmin", "owner"],
+        type: DataTypes.ENUM('user', 'landlord', 'admin', 'superAdmin', 'owner'),
+        allowNull: false,
+        defaultValue: 'user',
     },
-    avatar: { type: String },
-    avatarId: { type: String },
-    tokens: [
-        {
-            token: { type: String, required: true },
-            createdAt: { type: Date, default: Date.now, expires: 60 * 24 * 7 },
-        },
-    ],
-    verificationToken: { type: String, index: true },
-    verificationTokenExpire: { type: Date },
-    resetPasswordToken: { type: String, index: true },
-    resetPasswordTokenExpire: { type: Date },
-}, { timestamps: true });
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password"))
-        return next();
-    if (this.password)
-        this.password = await hash(this.password);
-    next();
+    avatar: {
+        type: DataTypes.STRING,
+    },
+    avatarId: {
+        type: DataTypes.STRING,
+    },
+    tokens: {
+        type: DataTypes.JSONB,
+        defaultValue: [],
+        allowNull: false,
+    },
+    verificationToken: {
+        type: DataTypes.STRING,
+    },
+    verificationTokenExpire: {
+        type: DataTypes.DATE,
+    },
+    resetPasswordToken: {
+        type: DataTypes.STRING,
+    },
+    resetPasswordTokenExpire: {
+        type: DataTypes.DATE,
+    },
+}, { sequelize, schema: 'public', tableName: 'users', timestamps: true });
+User.beforeSave(async (user, option) => {
+    if (user.changed('password') && user.password) {
+        user.password = await hash(user.password);
+    }
 });
-userSchema.methods.matchPassword = async function (enteredPassword) {
-    if (!this.password)
-        return false;
-    return await verify(this.password, enteredPassword);
-};
-userSchema.methods.generateAuthToken = async function () {
-    const token = jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-        expiresIn: "7d",
-    });
-    this.tokens.push({ token, createdAt: new Date() });
-    await this.save();
-    return token;
-};
-userSchema.methods.toJSON = function () {
-    const user = this.toObject();
-    return {
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        role: user.role,
-    };
-};
-const User = model("User", userSchema);
 export default User;
+//# sourceMappingURL=user.model.js.map
