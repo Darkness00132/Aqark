@@ -1,10 +1,10 @@
 import { DataTypes, Model } from 'sequelize';
 import { hash, verify } from 'argon2';
-import { customAlphabet } from 'nanoid';
+import { ulid } from 'ulid';
+import customeNanoId from '../utils/customeNanoId.js';
 import sequelize from '../db/sql.js';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
-const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 12);
 class User extends Model {
     async matchPassword(enteredPassword) {
         if (!this.password)
@@ -19,26 +19,27 @@ class User extends Model {
         await this.save();
         return token;
     }
-    toJson() {
+    toJSON() {
         return {
+            publicId: this.publicId,
             name: this.name,
-            email: this.email,
             avatar: this.avatar,
             role: this.role,
+            credits: this.credits,
         };
     }
 }
 User.init({
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV1,
+        type: DataTypes.STRING,
+        defaultValue: () => ulid(),
         primaryKey: true,
     },
     publicId: {
-        type: DataTypes.STRING(12),
-        allowNull: false,
+        type: DataTypes.STRING,
         unique: true,
-        defaultValue: () => nanoid(),
+        allowNull: false,
+        defaultValue: () => customeNanoId(12),
     },
     googleId: {
         type: DataTypes.STRING,
@@ -97,7 +98,7 @@ User.init({
     avatar: {
         type: DataTypes.STRING,
     },
-    avatarId: {
+    avatarKey: {
         type: DataTypes.STRING,
     },
     tokens: {
@@ -117,7 +118,21 @@ User.init({
     resetPasswordTokenExpire: {
         type: DataTypes.DATE,
     },
-}, { sequelize, schema: 'public', tableName: 'users', timestamps: true });
+    avgRating: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0,
+    },
+    totalReviews: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+    },
+}, {
+    sequelize,
+    schema: 'public',
+    tableName: 'users',
+    timestamps: true,
+    indexes: [{ fields: ['id'] }, { fields: ['email'] }],
+});
 User.beforeSave(async (user, option) => {
     if (user.changed('password') && user.password) {
         user.password = await hash(user.password);

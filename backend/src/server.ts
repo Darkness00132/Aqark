@@ -3,7 +3,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import sequelize from './db/sql.js';
-import { RateLimiterMemory } from 'rate-limiter-flexible';
+import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 import helmet from 'helmet';
 import xss from 'xss';
 import googleRouter from './routes/google.route.js';
@@ -14,23 +14,20 @@ const app = express();
 const PORT = process.env.PORT ?? 3000;
 
 const rateLimiter = new RateLimiterMemory({
-  points: 20, // 20 requests
-  duration: 60, // per 60 seconds
+  points: 60, // 60 requests
+  duration: 60, // per minute
 });
 
 app.use(async (req, res, next) => {
   try {
-    // Ensure IP is a string fallback
-    const ip =
-      typeof req.ip === 'string'
-        ? req.ip
-        : req.headers['x-forwarded-for']?.toString() || 'unknown';
-
-    await rateLimiter.consume(ip);
+    await rateLimiter.consume(req.ip || req.socket.remoteAddress || 'unknown');
     next();
   } catch (err) {
-    // Make sure you send a proper object with normal prototype
-    res.status(429).json({ message: 'طلبات كثيرة جدا' });
+    const rejRes = err as RateLimiterRes;
+    const retrySecs = Math.ceil(rejRes.msBeforeNext / 1000);
+    res.status(429).json({
+      message: `لقد وصلت الحد الأقصى للطلبات. حاول مرة أخرى بعد ${retrySecs} ثانية.`,
+    });
   }
 });
 

@@ -1,22 +1,21 @@
 import { DataTypes, Model } from 'sequelize';
 import { hash, verify } from 'argon2';
-import { customAlphabet } from 'nanoid';
+import { ulid } from 'ulid';
+import customeNanoId from '../utils/customeNanoId.js';
 import sequelize from '../db/sql.js';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
 
 export type Role = 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
 
-const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 12);
-
 interface Token {
   token: string;
   createdAt: Date;
 }
 
-interface UserAttributes {
+export interface UserAttributes {
   id?: string;
-  publicId?: Number;
+  publicId?: bigint;
   googleId?: string;
   name: string;
   email: string;
@@ -25,15 +24,18 @@ interface UserAttributes {
   isBlocked?: boolean;
   role: 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
   avatar?: string;
-  avatarId?: string;
+  avatarKey?: string;
   tokens?: Token[];
   verificationToken?: string | null;
   verificationTokenExpire?: Date | null;
   resetPasswordToken?: string | null;
   resetPasswordTokenExpire?: Date | null;
+  avgRating?: number;
+  totalReviews?: number;
+  credits?: number;
 }
 
-interface UserMethods {
+export interface UserMethods {
   matchPassword: (enteredPassword: string) => Promise<boolean>;
   generateAuthToken: () => Promise<string>;
   toJSON: () => Record<string, any>;
@@ -44,7 +46,7 @@ class User
   implements UserAttributes, UserMethods
 {
   declare id?: string;
-  declare publicId?: Number;
+  declare publicId?: bigint;
   declare googleId?: string;
   declare name: string;
   declare email: string;
@@ -53,12 +55,15 @@ class User
   declare isBlocked?: boolean;
   declare role: 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
   declare avatar?: string;
-  declare avatarId?: string;
+  declare avatarKey?: string;
   declare tokens?: Token[];
   declare verificationToken?: string | null;
   declare verificationTokenExpire?: Date | null;
   declare resetPasswordToken?: string | null;
   declare resetPasswordTokenExpire?: Date | null;
+  declare avgRating?: number;
+  declare totalReviews?: number;
+  declare credits?: number;
 
   public async matchPassword(enteredPassword: string) {
     if (!this.password) return false;
@@ -76,12 +81,13 @@ class User
 
     return token;
   }
-  public toJson() {
+  public toJSON() {
     return {
+      publicId: this.publicId,
       name: this.name,
-      email: this.email,
       avatar: this.avatar,
       role: this.role,
+      credits: this.credits,
     };
   }
 }
@@ -89,15 +95,15 @@ class User
 User.init(
   {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV1,
+      type: DataTypes.STRING,
+      defaultValue: () => ulid(),
       primaryKey: true,
     },
     publicId: {
-      type: DataTypes.STRING(12),
-      allowNull: false,
+      type: DataTypes.STRING,
       unique: true,
-      defaultValue: () => nanoid(),
+      allowNull: false,
+      defaultValue: () => customeNanoId(12),
     },
     googleId: {
       type: DataTypes.STRING,
@@ -158,7 +164,7 @@ User.init(
     avatar: {
       type: DataTypes.STRING,
     },
-    avatarId: {
+    avatarKey: {
       type: DataTypes.STRING,
     },
     tokens: {
@@ -178,8 +184,22 @@ User.init(
     resetPasswordTokenExpire: {
       type: DataTypes.DATE,
     },
+    avgRating: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
+    },
+    totalReviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   },
-  { sequelize, schema: 'public', tableName: 'users', timestamps: true },
+  {
+    sequelize,
+    schema: 'public',
+    tableName: 'users',
+    timestamps: true,
+    indexes: [{ fields: ['id'] }, { fields: ['email'] }],
+  },
 );
 
 User.beforeSave(async (user, option) => {

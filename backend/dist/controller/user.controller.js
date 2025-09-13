@@ -1,11 +1,11 @@
-import crypto from 'crypto';
 import User from '../models/user.model.js';
-import { signupSchema, loginSchema, forgetPasswordSchema, resetPasswordSchema, updateProfileSchema, } from '../utils/validate.js';
+import { signupSchema, loginSchema, forgetPasswordSchema, resetPasswordSchema, updateProfileSchema, } from '../validates/user.js';
 import asyncHandler from '../utils/asyncHnadler.js';
 import verifyEmail from '../emails/verifyEmail.js';
 import welcomeEmail from '../emails/welcomeEmail.js';
 import forgetPasswordEmail from '../emails/ForgetPasswordEmail.js';
 import passwordChangedEmail from '../emails/passwordChangedEmail.js';
+import customeNanoId from '../utils/customeNanoId.js';
 export const signup = asyncHandler(async (req, res) => {
     const { error, value } = signupSchema.validate(req.secureBody);
     if (error)
@@ -19,33 +19,32 @@ export const signup = asyncHandler(async (req, res) => {
         email,
         password,
         role,
-        isVerified: true,
-        verificationToken: crypto.randomBytes(32).toString('hex'),
+        verificationToken: customeNanoId(16),
         verificationTokenExpire: new Date(Date.now() + 10 * 60 * 1000),
     });
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const verifyUrl = `${protocol}://${host}/api/users/verifyEmail?verificationToken=${user.verificationToken}`;
-    await verifyEmail(verifyUrl, 'delivered@resend.dev');
+    await verifyEmail(user.verificationToken, user.email);
     res.status(201).json({ message: 'تم انشاء حساب بنجاح يرجى تحقق من ايميلك' });
 });
 export const verify = asyncHandler(async (req, res) => {
     const { verificationToken } = req.secureQuery;
     const user = await User.findOne({ where: { verificationToken } });
-    if (!user ||
-        (user.verificationTokenExpire &&
-            user.verificationTokenExpire.getTime() < Date.now())) {
+    if (!user || user.isVerified) {
+        return res.redirect(process.env.FRONTEND_URL + '/?login=already');
+    }
+    if (user.verificationTokenExpire &&
+        user.verificationTokenExpire.getTime() < Date.now()) {
         return res.status(404).json({ message: 'انتهت صلاحية الرابط' });
     }
     user.isVerified = true;
     user.verificationToken = null;
     user.verificationTokenExpire = null;
+    user.credits = 20;
     await user.save();
-    await welcomeEmail('delivered@resend.dev');
+    await welcomeEmail(user.email);
     const token = await user.generateAuthToken();
     res.cookie('jwt-auth', token, {
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 * 7, //saved for 7days
+        maxAge: 1000 * 60 * 60 * 24 * 7,
         secure: process.env.PRODUCTION === 'true',
         sameSite: process.env.PRODUCTION === 'true' ? 'none' : 'lax',
         priority: 'high',
@@ -89,10 +88,10 @@ export const forgetPassword = asyncHandler(async (req, res) => {
     const user = await User.findOne({ where: { email } });
     if (!user)
         return res.status(404).json({ message: 'لا يوجد حساب فى هذا الايميل' });
-    user.resetPasswordToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = customeNanoId(16);
     user.resetPasswordTokenExpire = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
-    await forgetPasswordEmail(user.resetPasswordToken, 'delivered@resend.dev');
+    await forgetPasswordEmail(user.resetPasswordToken, user.email);
     res.status(200).json({
         message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني',
     });
@@ -112,7 +111,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
     user.resetPasswordTokenExpire = null;
     user.password = password;
     await user.save();
-    await passwordChangedEmail('delivered@resend.dev');
+    await passwordChangedEmail(user.email);
     res.status(200).json({ message: 'تم تغيير كلمة مرور بنجاح' });
 });
 export const updateProfile = asyncHandler(async (req, res) => {
