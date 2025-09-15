@@ -8,25 +8,23 @@ export const createAdSchema = z
       .min(10, "عنوان الإعلان يجب أن يكون على الأقل 10 حروف")
       .max(100, "عنوان الإعلان يجب أن لا يتجاوز 100 حرف"),
 
-    city: z.enum(CITIES, {
-      error: "المدينة غير صحيحة",
-    }),
+    city: z.enum(CITIES, { error: "المدينة غير صحيحة" }),
 
-    area: z.string(),
+    area: z.string({ error: "المنطقة غير صحيحة" }),
 
     rooms: z
-      .number()
+      .number({ error: "عدد الغرف يجب أن يكون رقمًا" })
       .int({ message: "عدد الغرف يجب أن يكون رقمًا صحيحًا" })
       .min(1, "عدد الغرف يجب أن يكون على الأقل 1")
       .max(20, "عدد الغرف يجب أن لا يتجاوز 20"),
 
     space: z
-      .number()
+      .number({ error: "مساحة العقار يجب أن تكون رقمًا" })
       .int({ message: "مساحة العقار يجب أن تكون رقمًا صحيحًا" })
       .min(50, "مساحة العقار يجب أن تكون على الأقل 50")
       .max(1000, "مساحة العقار يجب أن لا تتجاوز 1000"),
 
-    propertyType: z.enum(PROPERTY_TYPES),
+    propertyType: z.enum(PROPERTY_TYPES, { error: "نوع العقار غير صحيح" }),
 
     type: z.enum(["تمليك", "ايجار"], {
       error: "نوع الإعلان يجب أن يكون إما 'تمليك' أو 'إيجار'",
@@ -43,7 +41,7 @@ export const createAdSchema = z
       .max(500, "وصف العقار يجب أن لا يتجاوز 500 حروف"),
 
     price: z
-      .number()
+      .number({ error: "السعر يجب أن يكون رقمًا" })
       .int({ message: "السعر يجب أن يكون رقمًا صحيحًا" })
       .min(0, "السعر يجب أن لا يكون سالبًا"),
 

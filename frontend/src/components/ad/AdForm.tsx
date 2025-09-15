@@ -1,12 +1,20 @@
 "use client";
+
 import Select, { SingleValue } from "react-select";
-import { createAdSchema } from "@/lib/adValidates";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
+import { useDropzone } from "react-dropzone";
+import imageCompression from "browser-image-compression";
+import Image from "next/image";
+import { FiUpload, FiX } from "react-icons/fi";
+import { useCallback, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createAdSchema } from "@/lib/adValidates";
 import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "@/lib/data";
 
 export default function AdForm() {
+  const [images, setImages] = useState<File[]>([]);
+
   const {
     control,
     register,
@@ -26,28 +34,63 @@ export default function AdForm() {
       }))
     : [];
 
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    try {
+      const compressedFiles = await Promise.all(
+        acceptedFiles.map(async (file) => {
+          const options = {
+            maxSizeMB: 5,
+            maxWidthOrHeight: 800,
+            useWebWorker: true,
+            fileType: "image/webp",
+          };
+          return await imageCompression(file, options);
+        })
+      );
+      setImages((prev) => [...prev, ...compressedFiles]);
+    } catch (error) {
+      console.error("Error compressing images:", error);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "image/*": [] },
+    multiple: true,
+  });
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const onSubmit = (data: z.infer<typeof createAdSchema>) => {
-    console.log(data);
+    console.log(data, images);
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6"
     >
       {/* Title */}
-      <div className="col-span-2">
+      <div className="col-span-1 md:col-span-3 form-control">
         <input
           {...register("title")}
           type="text"
           placeholder="عنوان الإعلان"
           className="input input-bordered w-full"
         />
-        {errors.title && <p className="text-red-500">{errors.title.message}</p>}
+        {errors.title && (
+          <label className="label">
+            <span className="label-text-alt text-red-500">
+              {errors.title.message}
+            </span>
+          </label>
+        )}
       </div>
 
       {/* City */}
-      <div className="mb-4">
+      <div className="form-control">
         <Controller
           name="city"
           control={control}
@@ -67,11 +110,13 @@ export default function AdForm() {
             />
           )}
         />
-        {errors.city && <p className="text-red-500">{errors.city.message}</p>}
+        {errors.city && (
+          <span className="text-red-500 mt-1">{errors.city.message}</span>
+        )}
       </div>
 
       {/* Area */}
-      <div className="mb-4">
+      <div className="form-control">
         <Controller
           name="area"
           control={control}
@@ -92,35 +137,42 @@ export default function AdForm() {
             />
           )}
         />
-        {errors.area && <p className="text-red-500">{errors.area.message}</p>}
+        {errors.area && (
+          <span className="text-red-500 mt-1">{errors.area.message}</span>
+        )}
       </div>
 
-      {/* Rooms & Space */}
-      <div>
+      {/* Rooms */}
+      <div className="form-control">
         <input
           {...register("rooms", { valueAsNumber: true })}
           type="number"
           placeholder="عدد الغرف"
           className="input input-bordered w-full"
         />
-        {errors.rooms && <p className="text-red-500">{errors.rooms.message}</p>}
+        {errors.rooms && (
+          <span className="text-red-500 mt-1">{errors.rooms.message}</span>
+        )}
       </div>
 
-      <div>
+      {/* Space */}
+      <div className="form-control">
         <input
           {...register("space", { valueAsNumber: true })}
           type="number"
           placeholder="المساحة (م²)"
           className="input input-bordered w-full"
         />
-        {errors.space && <p className="text-red-500">{errors.space.message}</p>}
+        {errors.space && (
+          <span className="text-red-500 mt-1">{errors.space.message}</span>
+        )}
       </div>
 
-      {/* Property Type & Ad Type */}
-      <div>
+      {/* Property Type */}
+      <div className="form-control">
         <select
           {...register("propertyType")}
-          className="input input-bordered w-full"
+          className="select select-bordered w-full"
         >
           <option value="">اختر نوع العقار</option>
           {PROPERTY_TYPES.map((type) => (
@@ -130,56 +182,39 @@ export default function AdForm() {
           ))}
         </select>
         {errors.propertyType && (
-          <p className="text-red-500">{errors.propertyType.message}</p>
+          <span className="text-red-500 mt-1">
+            {errors.propertyType.message}
+          </span>
         )}
       </div>
 
-      <div>
-        <select {...register("type")} className="input input-bordered w-full">
+      {/* Ad Type */}
+      <div className="form-control">
+        <select {...register("type")} className="select select-bordered w-full">
           <option value="">اختر نوع الإعلان</option>
           <option value="تمليك">تمليك</option>
           <option value="ايجار">إيجار</option>
         </select>
-        {errors.type && <p className="text-red-500">{errors.type.message}</p>}
-      </div>
-
-      {/* Address */}
-      <div className="col-span-2">
-        <input
-          {...register("address")}
-          type="text"
-          placeholder="العنوان التفصيلي"
-          className="input input-bordered w-full"
-        />
-        {errors.address && (
-          <p className="text-red-500">{errors.address.message}</p>
+        {errors.type && (
+          <span className="text-red-500 mt-1">{errors.type.message}</span>
         )}
       </div>
 
-      {/* Description */}
-      <div className="col-span-2">
-        <textarea
-          {...register("description")}
-          placeholder="وصف العقار"
-          className="textarea textarea-bordered w-full h-32"
-        />
-        {errors.description && (
-          <p className="text-red-500">{errors.description.message}</p>
-        )}
-      </div>
-
-      {/* Price & Whatsapp */}
-      <div>
+      {/* Price */}
+      <div className="form-control">
         <input
           {...register("price", { valueAsNumber: true })}
           type="number"
           placeholder="السعر"
           className="input input-bordered w-full"
         />
-        {errors.price && <p className="text-red-500">{errors.price.message}</p>}
+        {errors.price && (
+          <span className="text-red-500 mt-1">{errors.price.message}</span>
+        )}
       </div>
 
-      <div>
+      {/* Whatsapp */}
+      <div className="form-control">
         <input
           {...register("whatsappNumber")}
           type="text"
@@ -187,24 +222,88 @@ export default function AdForm() {
           className="input input-bordered w-full"
         />
         {errors.whatsappNumber && (
-          <p className="text-red-500">{errors.whatsappNumber.message}</p>
+          <span className="text-red-500 mt-1">
+            {errors.whatsappNumber.message}
+          </span>
         )}
       </div>
 
-      {/* Images */}
-      <div className="col-span-2">
-        <label className="block mb-2 font-medium">صور العقار</label>
+      {/* Address */}
+      <div className="col-span-1 md:col-span-3 form-control">
         <input
-          type="file"
-          multiple
-          accept="image/*"
-          className="file-input file-input-bordered w-full"
+          {...register("address")}
+          type="text"
+          placeholder="العنوان التفصيلي"
+          className="input input-bordered w-full"
         />
+        {errors.address && (
+          <span className="text-red-500 mt-1">{errors.address.message}</span>
+        )}
+      </div>
+
+      {/* Description */}
+      <div className="col-span-1 md:col-span-3 form-control">
+        <textarea
+          {...register("description")}
+          placeholder="وصف العقار"
+          className="textarea textarea-bordered w-full h-32"
+        />
+        {errors.description && (
+          <span className="text-red-500 mt-1">
+            {errors.description.message}
+          </span>
+        )}
+      </div>
+
+      {/* Images Upload */}
+      <div className="col-span-1 md:col-span-3">
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer ${
+            isDragActive
+              ? "border-secondary bg-base-200"
+              : "border-base-300 bg-base-100"
+          }`}
+        >
+          <input {...getInputProps()} />
+          <FiUpload className="w-10 h-10 text-gray-400 mb-2" />
+          <p className="text-gray-600">
+            {isDragActive
+              ? "ضع الصور هنا..."
+              : "اسحب الصور هنا أو اضغط لاختيارها"}
+          </p>
+          <p className="text-sm text-gray-400 mt-1">يمكنك اختيار عدة صور</p>
+        </div>
+
+        {/* Preview */}
+        {images.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+            {images.map((file, idx) => (
+              <div key={idx} className="card bg-base-100 shadow relative">
+                <div className="aspect-[4/3] relative w-full overflow-hidden rounded-lg">
+                  <Image
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    fill
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeImage(idx)}
+                  className="absolute top-2 right-2 btn btn-sm btn-circle btn-error text-white"
+                >
+                  <FiX />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Submit */}
-      <div className="col-span-2 text-center">
-        <button type="submit" className="btn btn-primary w-full sm:w-1/2">
+      <div className="col-span-1 md:col-span-3 mt-4 text-center">
+        <button className="btn btn-primary w-full md:w-1/2">
           إنشاء الإعلان
         </button>
       </div>
