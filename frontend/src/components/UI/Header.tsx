@@ -12,7 +12,7 @@ export default function Header() {
   const user = useAuth((state) => state.user);
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="mb-3">
       <nav className="navbar bg-base-100/90 shadow-lg">
         <div className="navbar-start">
           <Link href="/" className="btn btn-ghost text-xl hover:opacity-80">

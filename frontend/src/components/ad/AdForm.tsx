@@ -1,12 +1,14 @@
 "use client";
+import Select, { SingleValue } from "react-select";
 import { createAdSchema } from "@/lib/adValidates";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "@/lib/data";
 
 export default function AdForm() {
   const {
+    control,
     register,
     handleSubmit,
     watch,
@@ -16,6 +18,13 @@ export default function AdForm() {
   });
 
   const selectedCity = watch("city");
+  const cityOptions = CITIES.map((city) => ({ value: city, label: city }));
+  const areaOptions = selectedCity
+    ? CITIES_WITH_AREAS[selectedCity].map((area) => ({
+        value: area,
+        label: area,
+      }))
+    : [];
 
   const onSubmit = (data: z.infer<typeof createAdSchema>) => {
     console.log(data);
@@ -38,37 +47,51 @@ export default function AdForm() {
       </div>
 
       {/* City */}
-      <div>
-        <select {...register("city")} className="input input-bordered w-full">
-          <option value="" disabled selected>
-            اختر المدينة
-          </option>
-          {CITIES.map((city) => (
-            <option key={city} value={city}>
-              {city}
-            </option>
-          ))}
-        </select>
+      <div className="mb-4">
+        <Controller
+          name="city"
+          control={control}
+          render={({ field }) => (
+            <Select
+              options={cityOptions}
+              placeholder="اختر المدينة"
+              value={
+                cityOptions.find((option) => option.value === field.value) ||
+                null
+              }
+              onChange={(
+                option: SingleValue<{ value: string; label: string }>
+              ) => field.onChange(option?.value)}
+              onBlur={field.onBlur}
+              instanceId="city-select"
+            />
+          )}
+        />
         {errors.city && <p className="text-red-500">{errors.city.message}</p>}
       </div>
 
       {/* Area */}
-      <div>
-        <select
-          {...register("area")}
-          className="input input-bordered w-full"
-          disabled={!!selectedCity} // disabled if city not selected
-        >
-          <option value="" disabled selected>
-            اختر المنطقة
-          </option>
-          {selectedCity &&
-            CITIES_WITH_AREAS[selectedCity]?.map((area) => (
-              <option key={area} value={area}>
-                {area}
-              </option>
-            ))}
-        </select>
+      <div className="mb-4">
+        <Controller
+          name="area"
+          control={control}
+          render={({ field }) => (
+            <Select
+              options={areaOptions}
+              placeholder="اختر المنطقة"
+              value={
+                areaOptions.find((option) => option.value === field.value) ||
+                null
+              }
+              onChange={(
+                option: SingleValue<{ value: string; label: string }>
+              ) => field.onChange(option?.value)}
+              onBlur={field.onBlur}
+              instanceId="area-select"
+              isDisabled={!selectedCity}
+            />
+          )}
+        />
         {errors.area && <p className="text-red-500">{errors.area.message}</p>}
       </div>
 
