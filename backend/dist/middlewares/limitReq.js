@@ -1,12 +1,12 @@
-import { RateLimiterMemory } from 'rate-limiter-flexible';
-import asyncHandler from '../utils/asyncHnadler';
+import { RateLimiterMemory } from "rate-limiter-flexible";
+import asyncHandler from "../utils/asyncHnadler.js";
 const rateLimiter = new RateLimiterMemory({
     points: 5, // 5 requests
     duration: 5 * 60, // 5 minutes
 });
 const limitReq = asyncHandler(async (req, res, next) => {
     try {
-        await rateLimiter.consume(req.ip || req.socket.remoteAddress || 'unknown');
+        await rateLimiter.consume(req.ip || req.socket.remoteAddress || "unknown");
         next();
     }
     catch (err) {

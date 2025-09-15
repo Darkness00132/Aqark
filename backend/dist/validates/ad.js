@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { CITIES, PROPERTY_TYPES, CITIES_WITH_AREAS } from '../db/data';
+import { CITIES, PROPERTY_TYPES, CITIES_WITH_AREAS } from "../db/data.js";
 export const getAdsSchema = Joi.object({
     city: Joi.string()
         .valid(...CITIES)
@@ -60,11 +60,11 @@ export const getAdsSchema = Joi.object({
         'number.min': 'السعر يجب أن لا يكون سالبًا',
         'any.invalid': 'السعر الأقصى يجب أن يكون أكبر من السعر الأدنى',
     }),
-    page: Joi.number().messages({
+    page: Joi.number().min(1).messages({
         'number.base': 'السعر يجب أن يكون رقمًا',
         'number.min': 'السعر يجب أن لا يكون سالبًا',
     }),
-    limit: Joi.number().messages({
+    limit: Joi.number().min(1).messages({
         'number.base': 'السعر يجب أن يكون رقمًا',
         'number.min': 'السعر يجب أن لا يكون سالبًا',
     }),
@@ -74,6 +74,10 @@ export const getAdsSchema = Joi.object({
         'string.min': 'عنوان الإعلان يجب أن يكون على الأقل 10 حروف',
         'string.max': 'عنوان الإعلان يجب أن لا يتجاوز 500 حرف',
         'any.required': 'عنوان الإعلان مطلوب',
+    }),
+    order: Joi.string().valid('ASC', 'DESC', 'lowPrice', 'highPrice').messages({
+        'string.base': 'طريقة الفرز يجب أن تكون نصًا',
+        'any.only': 'طريقة الفرز غير صحيحة',
     }),
 });
 export const createAdSchema = Joi.object({

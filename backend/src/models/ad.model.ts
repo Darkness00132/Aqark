@@ -1,13 +1,12 @@
-import { DataTypes, Model } from 'sequelize';
-import { ulid } from 'ulid';
-import { CITIES, AREAS, PROPERTY_TYPES } from '../db/data.js';
-import sequelize from '../db/sql.js';
-import User from './user.model.js';
-import customeNanoId from '../utils/customeNanoId.js';
+import { DataTypes, Model } from "sequelize";
+import { CITIES, AREAS, PROPERTY_TYPES } from "../db/data.js";
+import { nanoid } from "nanoid";
+import sequelize from "../db/sql.js";
+import slugify from "slugify";
 
 interface AdAttributes {
   id?: string;
-  publicId?: bigint;
+  publicId?: string;
   userId: string;
   title: string;
   city: string;
@@ -24,6 +23,8 @@ interface AdAttributes {
   viewsCount?: number;
   whatsappClicksCount?: number;
   costInCredits?: number;
+  isDeleted?: boolean;
+  slug?: string;
 }
 
 interface AdMethods {
@@ -32,7 +33,7 @@ interface AdMethods {
 
 class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare id?: string;
-  declare publicId?: bigint;
+  declare publicId?: string;
   declare userId: string;
   declare title: string;
   declare city: string;
@@ -49,6 +50,8 @@ class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare viewsCount?: number;
   declare whatsappClicksCount?: number;
   declare costInCredits?: number;
+  declare isDeleted?: boolean;
+  declare slug?: string;
 
   public toJSON() {
     const { userId, id, ...values } = this.get({ plain: true });
@@ -60,14 +63,12 @@ Ad.init(
   {
     id: {
       type: DataTypes.STRING,
-      defaultValue: () => ulid(),
+      defaultValue: () => nanoid(16),
       primaryKey: true,
     },
     publicId: {
       type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
-      defaultValue: () => customeNanoId(12),
+      defaultValue: () => nanoid(12),
     },
     userId: {
       type: DataTypes.STRING,
@@ -82,8 +83,11 @@ Ad.init(
       allowNull: false,
     },
     area: {
-      type: DataTypes.ENUM(...AREAS),
+      type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        isIn: [AREAS],
+      },
     },
     rooms: {
       type: DataTypes.INTEGER,
@@ -102,7 +106,7 @@ Ad.init(
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM('تمليك', 'إيجار'),
+      type: DataTypes.ENUM("تمليك", "إيجار"),
       allowNull: false,
     },
     description: {
@@ -134,17 +138,24 @@ Ad.init(
       defaultValue: 0,
     },
     costInCredits: { type: DataTypes.INTEGER, defaultValue: 1 },
+    isDeleted: { type: DataTypes.BOOLEAN, defaultValue: false },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
   {
     sequelize,
-    schema: 'public',
-    tableName: 'ads',
+    schema: "public",
+    tableName: "ads",
     timestamps: true,
-    indexes: [{ fields: ['city', 'area'] }, { fields: ['type'] }],
-  },
+    indexes: [{ fields: ["city", "area"] }, { fields: ["type"] }],
+  }
 );
 
-Ad.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-User.hasMany(Ad, { foreignKey: 'userId', as: 'ads' });
+Ad.beforeSave((ad: any) => {
+  const base = `${ad.propertyType}-${ad.city}-${ad.area}`;
+  ad.slug = `${slugify(base, { lower: true, strict: true })}-${ad.publicId}`;
+});
 
 export default Ad;

@@ -1,12 +1,18 @@
-import { Request, Response } from 'express';
-import { createAdSchema, getAdsSchema, updateAdSchema } from '../validates/ad';
-import { AuthRequest } from '../middlewares/auth';
-import { s3Client, Bucket } from './upload.controller';
-import asyncHandler from '../utils/asyncHnadler';
-import User from '../models/user.model';
-import Ad from '../models/ad.model';
-import { DeleteObjectsCommand } from '@aws-sdk/client-s3';
-import adsFilters from '../utils/adsFilter';
+import { Request, Response } from "express";
+import {
+  createAdSchema,
+  getAdsSchema,
+  updateAdSchema,
+} from "../validates/ad.js";
+import { AuthRequest } from "../middlewares/auth.js";
+import { s3Client, Bucket } from "./upload.controller.js";
+import asyncHandler from "../utils/asyncHnadler.js";
+import User from "../models/user.model.js";
+import Ad from "../models/ad.model.js";
+import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import adsFilters from "../utils/adsFilter.js";
+import { Order } from "sequelize";
+import Transaction from "../models/transaction.model.js";
 
 export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
   const { value, error } = getAdsSchema.validate(req.secureQuery);
@@ -14,25 +20,57 @@ export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
     return res.status(400).json({ message: error.details });
   }
   const where = adsFilters(value);
-  const { page = 1, limit = 10 } = value;
+  const { page = 1, limit = 10, order } = value;
+  let orderChoice: Order;
+  switch (order) {
+    case "ASC":
+      orderChoice = [["createdAt", "ASC"]];
+      break;
+    case "lowPrice":
+      orderChoice = [["price", "ASC"]];
+      break;
+    case "highPrice":
+      orderChoice = [["price", "DESC"]];
+      break;
+    default:
+      orderChoice = [["createdAt", "DESC"]];
+  }
   const offset = (page - 1) * limit;
-  const ads = await Ad.findAll({
+  const { count, rows } = await Ad.findAndCountAll({
     where,
-    include: [{ model: User, as: 'user' }],
+    include: [{ model: User, as: "user" }],
     limit,
     offset,
+    order: orderChoice,
   });
 
-  res.status(200).json({ ads });
+  res.status(200).json({
+    totalItems: count,
+    totalPages: Math.ceil(count / limit),
+    currentPage: page,
+    ads: rows,
+  });
 });
 
-export const getAdById = asyncHandler(async (req: Request, res: Response) => {
+export const getMyAds = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const ads = await Ad.findAll({
+      where: { userId: req.user },
+      order: [["createdAt", "DESC"]],
+    });
+    res.status(200).json({ ads });
+  }
+);
+
+export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
+  const slug = req.secureParams.slug;
+  const publicId = slug.split("-").pop();
   const ad = await Ad.findOne({
-    where: { publicId: req.params.publicId },
-    include: [{ model: User, as: 'user' }],
+    where: { publicId },
+    include: [{ model: User, as: "user" }],
   });
   if (!ad) {
-    return res.status(404).json({ message: 'لم يتم العثور على الإعلان' });
+    return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
   }
   res.status(200).json({ ad });
 });
@@ -43,19 +81,37 @@ export const createAd = asyncHandler(
     if (error) {
       return res.status(400).json({ message: error.details });
     }
-    const ad = await Ad.create({ ...value, userId: req.user.id });
+    let costInCredits = 1;
+    if (value.type === "تمليك") costInCredits = 2;
+    const ad = await Ad.create({
+      ...value,
+      userId: req.user.id,
+      costInCredits,
+    });
+
+    req.user.credits -= costInCredits;
+    await req.user.save();
+
+    await Transaction.create({
+      userId: req.user.id,
+      adId: ad.id,
+      description: "Spent credits for creating ad",
+      type: "spend",
+      credits: 2,
+    });
+
     res.status(201).json({ ad });
-  },
+  }
 );
 
 export const updateAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { adId } = req.secureBody;
+    const { adId } = req.secureParams;
     const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
     if (!ad) {
       return res
         .status(404)
-        .json({ message: 'الإعلان غير موجود أو لا تملك صلاحية التعديل عليه' });
+        .json({ message: "الإعلان غير موجود أو لا تملك صلاحية التعديل عليه" });
     }
     const { error, value } = updateAdSchema.validate(req.secureBody);
     if (error) {
@@ -63,31 +119,34 @@ export const updateAd = asyncHandler(
     }
     await ad.update(value);
 
-    return res.status(200).json({ message: 'تم تحديث الإعلان بنجاح' });
-  },
+    return res.status(200).json({ message: "تم تحديث الإعلان بنجاح" });
+  }
 );
 
 export const deleteAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { adId } = req.secureBody;
+    const { adId } = req.secureParams;
     const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
     if (!ad) {
       return res
         .status(404)
-        .json({ message: 'الإعلان غير موجود أو لا تملك صلاحية الحذف عليه' });
+        .json({ message: "الإعلان غير موجود أو لا تملك صلاحية الحذف عليه" });
     }
-    //delete images from s3
+    //delete images from S3
     const keys = ad.images?.map((img) => img.key) || [];
     if (keys.length > 0) {
       await s3Client.send(
         new DeleteObjectsCommand({
           Bucket,
           Delete: { Objects: keys.map((Key) => ({ Key })) },
-        }),
+        })
       );
     }
 
-    await ad.destroy();
-    return res.status(200).json({ message: 'تم حذف الإعلان بنجاح' });
-  },
+    ad.images = [];
+    ad.isDeleted = true;
+    await ad.save();
+
+    return res.status(200).json({ message: "تم حذف الإعلان بنجاح" });
+  }
 );

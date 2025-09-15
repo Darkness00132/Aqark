@@ -6,6 +6,9 @@ interface User {
   email: string;
   avatar: string;
   role: string;
+  credits: number;
+  avgRating: number;
+  totalReviews: number;
 }
 
 interface AuthState {

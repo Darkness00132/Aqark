@@ -3,7 +3,7 @@ import { FaSearch, FaHome, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 export default function ChooseRole() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 mt-5">
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>

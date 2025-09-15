@@ -46,7 +46,7 @@ export default async function Signup({
 
                 {/* Google Signup */}
                 <a
-                  href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google?role=${role}`}
+                  href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google?mode=signup&&role=${role}`}
                   className="btn btn-outline lg:btn-lg w-full rounded-lg border-base-300 hover:bg-base-200 hover:border-primary/50 transition-all duration-300 group"
                 >
                   <FcGoogle

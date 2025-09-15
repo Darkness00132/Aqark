@@ -1,13 +1,6 @@
 import AuthInitializer from "@/components/UI/AuthInitializer";
-import Link from "next/link";
-import {
-  FaSearch,
-  FaHome,
-  FaShieldAlt,
-  FaUsers,
-  FaClock,
-  FaCheckCircle,
-} from "react-icons/fa";
+import Hero from "@/components/UI/Hero";
+import { FaSearch, FaHome, FaCheckCircle } from "react-icons/fa";
 
 export default async function Home({
   searchParams,
@@ -20,84 +13,7 @@ export default async function Home({
       <AuthInitializer login={params.login} />
 
       {/* Hero Section */}
-      <div className="hero min-h-screen relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="hero-content text-center relative z-10 px-4">
-          <div className="max-w-6xl w-full">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black text-base-content mb-4 sm:mb-6 leading-tight">
-              مرحباً بك في
-              <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                عقارك
-              </span>
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-base-content/80 max-w-4xl mx-auto leading-relaxed mb-8 sm:mb-12 px-2">
-              منصة العقارات الأولى في مصر - اعثر على العقار المثالي أو اعرض
-              عقارك بسهولة وأمان
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-16 max-w-2xl mx-auto">
-              <Link
-                href="/signup?role=user"
-                className="btn btn-primary btn-sm sm:btn-md lg:btn-lg px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-bold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-              >
-                <FaSearch className="mr-1 sm:mr-2" />
-                ابحث عن عقار
-              </Link>
-
-              <Link
-                href="/signup?role=landlord"
-                className="btn btn-secondary btn-sm sm:btn-md lg:btn-lg px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-bold shadow-2xl hover:shadow-secondary/25 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-              >
-                <FaHome className="mr-1 sm:mr-2" />
-                اعرض عقارك
-              </Link>
-            </div>
-
-            {/* Stats Section */}
-            <div className="stats stats-vertical sm:stats-horizontal shadow-2xl bg-base-100/80 backdrop-blur-sm border border-base-300 w-full max-w-4xl mx-auto">
-              <div className="stat">
-                <div className="stat-figure text-primary">
-                  <FaHome className="text-2xl sm:text-3xl lg:text-4xl" />
-                </div>
-                <div className="stat-title text-xs sm:text-sm">
-                  العقارات المتاحة
-                </div>
-                <div className="stat-value text-primary text-lg sm:text-xl lg:text-2xl">
-                  1000+
-                </div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-figure text-secondary">
-                  <FaUsers className="text-2xl sm:text-3xl lg:text-4xl" />
-                </div>
-                <div className="stat-title text-xs sm:text-sm">
-                  أصحاب العقارات
-                </div>
-                <div className="stat-value text-secondary text-lg sm:text-xl lg:text-2xl">
-                  500+
-                </div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-figure text-accent">
-                  <FaShieldAlt className="text-2xl sm:text-3xl lg:text-4xl" />
-                </div>
-                <div className="stat-title text-xs sm:text-sm">معدل الرضا</div>
-                <div className="stat-value text-accent text-lg sm:text-xl lg:text-2xl">
-                  95%
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Hero />
 
       {/* Features Section */}
       <div className="py-12 sm:py-16 lg:py-20">
@@ -150,7 +66,8 @@ export default async function Home({
                   آمن وموثوق
                 </h3>
                 <p className="text-sm sm:text-base text-base-content/70 leading-relaxed">
-                  جميع العقارات معتمدة ومتحقق منها لضمان أفضل تجربة
+                  جميع بيانات محمية بكامل و دفع مؤمن و ابلاغ عن اى شخض يخالف
+                  القواعد
                 </p>
               </div>
             </div>

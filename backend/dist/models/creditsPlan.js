@@ -1,13 +1,13 @@
-import sequelize from '../db/sql';
-import { DataTypes, Model } from 'sequelize';
-import customeNanoId from '../utils/customeNanoId';
+import sequelize from "../db/sql.js";
+import { DataTypes, Model } from "sequelize";
+import { nanoid } from "nanoid";
 class CreditsPlan extends Model {
 }
 CreditsPlan.init({
     id: {
         type: DataTypes.STRING,
         primaryKey: true,
-        defaultValue: () => customeNanoId(25),
+        defaultValue: () => nanoid(16),
     },
     credits: {
         type: DataTypes.INTEGER,
@@ -25,6 +25,6 @@ CreditsPlan.init({
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-}, { sequelize, schema: 'public', modelName: 'creditsPlans', timestamps: false });
+}, { sequelize, schema: "public", modelName: "creditsPlans", timestamps: false });
 export default CreditsPlan;
 //# sourceMappingURL=creditsPlan.js.map

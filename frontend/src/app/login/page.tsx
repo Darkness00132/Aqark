@@ -33,7 +33,7 @@ export default async function Login() {
 
             {/* Google Login */}
             <a
-              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
+              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google?mode=login`}
               className="btn btn-outline lg:btn-lg w-full rounded-lg border-base-300 hover:bg-base-200 hover:border-primary/50 transition-all duration-300 group"
             >
               <FcGoogle

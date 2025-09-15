@@ -1,33 +1,39 @@
-import sequelize from '../db/sql';
-import { DataTypes, Model } from 'sequelize';
-import User from './user.model';
-import customeNanoId from '../utils/customeNanoId';
+import sequelize from "../db/sql.js";
+import { DataTypes, Model } from "sequelize";
+import { nanoid } from "nanoid";
 class Transaction extends Model {
 }
 Transaction.init({
     id: {
         type: DataTypes.STRING,
         primaryKey: true,
-        defaultValue: () => customeNanoId(25),
+        defaultValue: () => nanoid(16),
     },
     userId: {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    adId: {
+        type: DataTypes.STRING,
+    },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    planName: {
+        type: DataTypes.STRING,
+    },
     type: {
-        type: DataTypes.ENUM('purchase', 'spend', 'refund'),
+        type: DataTypes.ENUM("purchase", "spend", "refund"),
         allowNull: false,
     },
     amount: {
-        type: DataTypes.NUMBER,
-        allowNull: false,
+        type: DataTypes.INTEGER,
     },
     credits: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
-}, { sequelize, schema: 'public', modelName: 'transaction', timestamps: true });
-User.hasMany(Transaction, { as: 'transactions', foreignKey: 'userId' });
-Transaction.belongsTo(User, { as: 'user', foreignKey: 'userId' });
+}, { sequelize, schema: "public", modelName: "transaction", timestamps: true });
 export default Transaction;
 //# sourceMappingURL=transaction.model.js.map

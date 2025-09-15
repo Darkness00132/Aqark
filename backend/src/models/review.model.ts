@@ -1,7 +1,6 @@
-import sequelize from '../db/sql';
-import { DataTypes, Model } from 'sequelize';
-import User from './user.model';
-import customeNanoId from '../utils/customeNanoId';
+import sequelize from "../db/sql.js";
+import { DataTypes, Model } from "sequelize";
+import { nanoid } from "nanoid";
 
 export interface ReviewAttributes {
   id?: string;
@@ -9,14 +8,16 @@ export interface ReviewAttributes {
   reviewedUserId: string;
   rating: number;
   comment: string;
+  loves?: number;
 }
 
 class Review extends Model<ReviewAttributes> implements ReviewAttributes {
-  public id!: string;
-  public reviewerId!: string;
-  public reviewedUserId!: string;
-  public rating!: number;
-  public comment!: string;
+  declare id: string;
+  declare reviewerId: string;
+  declare reviewedUserId: string;
+  declare rating: number;
+  declare comment: string;
+  declare loves?: number;
 
   public toJSON() {
     return {
@@ -30,7 +31,7 @@ Review.init(
   {
     id: {
       type: DataTypes.STRING,
-      defaultValue: () => customeNanoId(12),
+      defaultValue: () => nanoid(16),
       primaryKey: true,
     },
     reviewerId: {
@@ -53,20 +54,19 @@ Review.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    loves: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
   },
   {
     sequelize,
-    schema: 'public',
-    tableName: 'reviews',
+    schema: "public",
+    tableName: "reviews",
     timestamps: true,
-    indexes: [{ unique: true, fields: ['reviewerId', 'reviewedUserId'] }],
-  },
+    indexes: [{ unique: true, fields: ["reviewerId", "reviewedUserId"] }],
+  }
 );
-
-Review.belongsTo(User, { as: 'reviewer', foreignKey: 'reviewerId' });
-Review.belongsTo(User, { as: 'reviewedUser', foreignKey: 'reviewedUserId' });
-
-User.hasMany(Review, { as: 'givenReviews', foreignKey: 'reviewerId' });
-User.hasMany(Review, { as: 'receivedReviews', foreignKey: 'reviewedUserId' });
 
 export default Review;

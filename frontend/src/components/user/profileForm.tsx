@@ -8,11 +8,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { updateProfileSchema } from "@/lib/zodSchemas";
 import useUpdateProfile from "@/hooks/useUpdateProfile";
 
+// react-icons
+import { FaEdit, FaTimes, FaSave } from "react-icons/fa";
+
 type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
 
 export default function ProfileForm() {
   const { mutate, isPending } = useUpdateProfile();
   const user = useAuth((state) => state.user);
+
   const {
     register,
     handleSubmit,
@@ -33,139 +37,123 @@ export default function ProfileForm() {
     }
   }, [user, reset]);
 
-  const [editInputs, setEditInputs] = useState({
-    name: false,
-    role: false,
-    password: false,
-  });
+  const [editProfile, setEditProfile] = useState(false);
 
   function onSubmit(data: UpdateProfileForm) {
-    mutate(data);
-    setEditInputs({
-      name: false,
-      role: false,
-      password: false,
-    });
+    const payload: Partial<UpdateProfileForm> = {};
+
+    if (data.name !== user?.name) {
+      payload.name = data.name;
+    }
+    if (data.role !== user?.role) {
+      payload.role = data.role;
+    }
+    if (data.password && data.newPassword) {
+      payload.password = data.password;
+      payload.newPassword = data.newPassword;
+    }
+
+    if (Object.keys(payload).length > 0) {
+      mutate(payload);
+    }
+
+    setEditProfile(false);
   }
 
   return (
     <>
-      <AvatarUplaod userAvatar={user?.avatar} />
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col justify-center items-center w-full gap-2 mt-5"
+        className="flex flex-col justify-center items-center w-full gap-4 mt-5"
       >
+        <AvatarUplaod userAvatar={user?.avatar} />
         {/* Name */}
-        <fieldset className="fieldset w-full flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <fieldset className="fieldset w-full">
           <legend className="fieldset-legend text-lg">الاسم</legend>
           <input
             type="text"
-            className="input text-lg flex-1"
+            className="input input-bordered text-lg w-full"
             placeholder="اكتب هنا"
-            disabled={!editInputs.name}
+            disabled={!editProfile}
             {...register("name")}
           />
-          <button
-            className={`btn btn-primary sm:btn-sm`}
-            onClick={() =>
-              setEditInputs((prev) => ({
-                ...prev,
-                name: !prev.name,
-              }))
-            }
-            type="button"
-          >
-            تعديل
-          </button>
         </fieldset>
         {errors?.name && (
           <p className="text-error self-start">{errors.name.message}</p>
         )}
 
         {/* Role */}
-        <fieldset className="fieldset w-full flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <fieldset className="fieldset w-full">
           <legend className="fieldset-legend text-lg">الدور</legend>
           <select
-            className="select w-full"
-            disabled={!editInputs.role}
+            className="select select-bordered w-full"
+            disabled={!editProfile}
             {...register("role")}
           >
             <option value="user">تبحث عن عقار</option>
             <option value="landlord">تعرض العقارات</option>
           </select>
-          <button
-            className={`btn btn-primary sm:btn-sm`}
-            onClick={() =>
-              setEditInputs((prev) => ({
-                ...prev,
-                role: !prev.role,
-              }))
-            }
-            type="button"
-          >
-            تعديل
-          </button>
         </fieldset>
         {errors?.role && (
           <p className="text-error self-start">{errors.role.message}</p>
         )}
-        {/* Password */}
-        <fieldset className="fieldset w-full flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <legend className="fieldset-legend text-lg">
-            {editInputs.password ? "كلمة المرور الحالية" : "نغيير كلمة المرور"}
-          </legend>
+
+        {/* Divider */}
+        <div className="divider"></div>
+        <h2 className="text-start self-start">تغيير الباسور</h2>
+        {/* Password Section (Optional) */}
+        <fieldset className="fieldset w-full flex flex-col gap-3">
           <input
             type="password"
-            className="input flex-1"
-            placeholder="••••••••"
-            disabled={!editInputs.password}
+            className="input input-bordered w-full"
+            placeholder="كلمة المرور الحالية"
+            disabled={!editProfile}
             {...register("password")}
           />
-          <button
-            className={`btn btn-primary sm:btn-sm`}
-            onClick={() =>
-              setEditInputs((prev) => ({
-                ...prev,
-                password: !prev.password,
-              }))
-            }
-            type="button"
-          >
-            تغيير
-          </button>
+          {errors?.password && (
+            <p className="text-error">{errors.password.message}</p>
+          )}
+
+          <input
+            type="password"
+            className="input input-bordered w-full"
+            placeholder="كلمة المرور الجديدة"
+            disabled={!editProfile}
+            {...register("newPassword")}
+          />
+          {errors?.newPassword && (
+            <p className="text-error">{errors.newPassword.message}</p>
+          )}
         </fieldset>
-        {errors?.password && (
-          <p className="text-error self-start">{errors.password.message}</p>
-        )}
-        {editInputs.password && (
-          <fieldset className="fieldset w-full self-start flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <legend className="fieldset-legend text-lg">
-              كلمة المرور الجديدة
-            </legend>
-            <input
-              type="password"
-              className="input flex-1"
-              placeholder="••••••••"
-              {...register("newPassword")}
-            />
-          </fieldset>
-        )}
-        {errors?.newPassword && (
-          <p className="text-error self-start">{errors.newPassword.message}</p>
-        )}
-        <button
-          className={`mt-10 btn btn-primary ${
-            ((!editInputs.name && !editInputs.role && !editInputs.password) ||
-              isPending) &&
-            "btn-disabled"
-          }`}
-          disabled={
-            (!editInputs.name && !editInputs.role && !editInputs.password) ||
-            isPending
-          }
-        >
-          حفظ التغييرات
-        </button>
+
+        {/* Action Buttons */}
+        <div className="mt-10 flex gap-3">
+          {!editProfile ? (
+            <button
+              type="button"
+              className="btn btn-secondary flex items-center gap-2"
+              onClick={() => setEditProfile(true)}
+            >
+              <FaEdit /> تعديل البيانات
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-error flex items-center gap-2"
+              onClick={() => setEditProfile(false)}
+            >
+              <FaTimes /> تجاهل التغييرات
+            </button>
+          )}
+          <button
+            className={`btn btn-primary flex items-center gap-2 ${
+              isPending && "btn-disabled"
+            }`}
+            disabled={isPending || !editProfile}
+          >
+            <FaSave /> حفظ التغييرات
+          </button>
+        </div>
       </form>
     </>
   );

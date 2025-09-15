@@ -1,10 +1,12 @@
-import { Router } from 'express';
-import auth from '../middlewares/auth';
-import { getAllAds, getAdById, createAd, updateAd, deleteAd, } from '../controller/ads.controller';
+import { Router } from "express";
+import auth from "../middlewares/auth.js";
+import { getAllAds, getMyAds, getAdBySlug, createAd, updateAd, deleteAd, } from "../controller/ads.controller.js";
 const router = Router();
-router.get('/ads', getAllAds);
-router.get('/ads/:publicId', getAdById);
-router.post('/ads', auth, createAd);
-router.put('/ads', auth, updateAd);
-router.delete('/ads', auth, deleteAd);
+router.get("/all", getAllAds);
+router.get("/me", auth, getMyAds);
+router.get("/:slug", getAdBySlug);
+router.post("/create", auth, createAd);
+router.put("/:id", auth, updateAd);
+router.delete("/:id", auth, deleteAd);
+export default router;
 //# sourceMappingURL=ads.route.js.map

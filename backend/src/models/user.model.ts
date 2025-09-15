@@ -1,12 +1,11 @@
-import { DataTypes, Model } from 'sequelize';
-import { hash, verify } from 'argon2';
-import { ulid } from 'ulid';
-import customeNanoId from '../utils/customeNanoId.js';
-import sequelize from '../db/sql.js';
-import jwt from 'jsonwebtoken';
-import validator from 'validator';
+import { DataTypes, Model } from "sequelize";
+import { hash, verify } from "argon2";
+import { nanoid } from "nanoid";
+import sequelize from "../db/sql.js";
+import jwt from "jsonwebtoken";
+import validator from "validator";
 
-export type Role = 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
+export type Role = "user" | "landlord" | "admin" | "superAdmin" | "owner";
 
 interface Token {
   token: string;
@@ -22,7 +21,7 @@ export interface UserAttributes {
   password?: string;
   isVerified?: boolean;
   isBlocked?: boolean;
-  role: 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
+  role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
   avatar?: string;
   avatarKey?: string;
   tokens?: Token[];
@@ -53,7 +52,7 @@ class User
   declare password?: string;
   declare isVerified?: boolean;
   declare isBlocked?: boolean;
-  declare role: 'user' | 'landlord' | 'admin' | 'superAdmin' | 'owner';
+  declare role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
   declare avatar?: string;
   declare avatarKey?: string;
   declare tokens?: Token[];
@@ -72,7 +71,7 @@ class User
 
   public async generateAuthToken() {
     const token = jwt.sign({ id: this.id }, process.env.JWT_SECRET!, {
-      expiresIn: '7d',
+      expiresIn: "7d",
     });
 
     this.tokens = [...this.tokens!, { token, createdAt: new Date() }];
@@ -87,6 +86,8 @@ class User
       name: this.name,
       avatar: this.avatar,
       role: this.role,
+      avgRating: this.avgRating,
+      totalReviews: this.totalReviews,
       credits: this.credits,
     };
   }
@@ -96,14 +97,14 @@ User.init(
   {
     id: {
       type: DataTypes.STRING,
-      defaultValue: () => ulid(),
+      defaultValue: () => nanoid(16),
       primaryKey: true,
     },
     publicId: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
-      defaultValue: () => customeNanoId(12),
+      defaultValue: () => nanoid(12),
     },
     googleId: {
       type: DataTypes.STRING,
@@ -113,10 +114,10 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: { msg: 'الاسم لا يمكن أن يكون فارغاً' },
+        notEmpty: { msg: "الاسم لا يمكن أن يكون فارغاً" },
         len: {
           args: [3, 50],
-          msg: 'الاسم يجب أن يكون بين 3 و 50 حرف',
+          msg: "الاسم يجب أن يكون بين 3 و 50 حرف",
         },
       },
     },
@@ -125,8 +126,8 @@ User.init(
       unique: true,
       allowNull: false,
       validate: {
-        notEmpty: { msg: 'البريد الإلكتروني مطلوب' },
-        isEmail: { msg: 'البريد الإلكتروني غير صالح' },
+        notEmpty: { msg: "البريد الإلكتروني مطلوب" },
+        isEmail: { msg: "البريد الإلكتروني غير صالح" },
       },
     },
     password: {
@@ -142,7 +143,7 @@ User.init(
           });
           if (!strong) {
             throw new Error(
-              'كلمة المرور ضعيفة: يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام ورموز',
+              "كلمة المرور ضعيفة: يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام ورموز"
             );
           }
         },
@@ -157,9 +158,9 @@ User.init(
       defaultValue: false,
     },
     role: {
-      type: DataTypes.ENUM('user', 'landlord', 'admin', 'superAdmin', 'owner'),
+      type: DataTypes.ENUM("user", "landlord", "admin", "superAdmin", "owner"),
       allowNull: false,
-      defaultValue: 'user',
+      defaultValue: "user",
     },
     avatar: {
       type: DataTypes.STRING,
@@ -192,18 +193,22 @@ User.init(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    credits: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   },
   {
     sequelize,
-    schema: 'public',
-    tableName: 'users',
+    schema: "public",
+    tableName: "users",
     timestamps: true,
-    indexes: [{ fields: ['id'] }, { fields: ['email'] }],
-  },
+    indexes: [{ fields: ["id"] }, { fields: ["email"] }],
+  }
 );
 
 User.beforeSave(async (user, option) => {
-  if (user.changed('password') && user.password) {
+  if (user.changed("password") && user.password) {
     user.password = await hash(user.password);
   }
 });

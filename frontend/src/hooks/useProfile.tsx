@@ -11,7 +11,7 @@ export default function useProfile() {
   return useQuery({
     queryKey: ["profile", isAuth],
     queryFn: async () => {
-      const response = await axiosInstance.get("/users/profile");
+      const response = await axiosInstance.get("/users/profile/me");
       setProfile(response.data.user);
       setLoggedIn();
       return response.data.user;
