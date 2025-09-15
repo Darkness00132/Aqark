@@ -1,6 +1,4 @@
-"use client";
-
-import AdForm from "@/components/ad/adForm";
+import AdForm from "@/components/ad/AdForm";
 
 export default function CreateAd() {
   return (
