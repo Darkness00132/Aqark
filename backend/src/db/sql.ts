@@ -1,7 +1,8 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize } from "sequelize";
+await import("pg");
 
 const sequelize = new Sequelize(process.env.SQL_URL!, {
-  dialect: 'postgres',
+  dialect: "postgres",
   dialectOptions: {
     ssl: { require: true, rejectUnauthorized: false },
   },
