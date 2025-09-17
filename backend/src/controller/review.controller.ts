@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 import { AuthRequest } from "../middlewares/auth.js";
 import asyncHandler from "../utils/asyncHnadler.js";
-import Review from "../models/review.model.js";
-import User from "../models/user.model.js";
+import { User, Review } from "../models/associations.js";
 
 export const getReviews = asyncHandler(async (req: Request, res: Response) => {
   const { publicId } = req.secureParams;

@@ -11,8 +11,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "res.cloudinary.com",
-        port: "",
+        hostname: "picsum.photos",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "aqark-s3.s3.us-east-1.amazonaws.com",
         pathname: "/**",
       },
     ],

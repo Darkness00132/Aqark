@@ -11,9 +11,12 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createAdSchema } from "@/lib/adValidates";
 import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "@/lib/data";
+import useCreateAd from "@/hooks/ad/useCreateAd";
 
 export default function AdForm() {
   const [images, setImages] = useState<File[]>([]);
+
+  type CreateAdSchema = typeof createAdSchema;
 
   const {
     control,
@@ -21,8 +24,11 @@ export default function AdForm() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<z.infer<typeof createAdSchema>>({
+  } = useForm<z.infer<CreateAdSchema>>({
     resolver: zodResolver(createAdSchema),
+    defaultValues: {
+      rooms: undefined,
+    },
   });
 
   const selectedCity = watch("city");
@@ -63,8 +69,10 @@ export default function AdForm() {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const onSubmit = (data: z.infer<typeof createAdSchema>) => {
-    console.log(data, images);
+  const { mutate, isPending } = useCreateAd();
+
+  const onSubmit = (data: z.infer<CreateAdSchema>) => {
+    mutate({ images, data });
   };
 
   return (
@@ -97,7 +105,7 @@ export default function AdForm() {
           render={({ field }) => (
             <Select
               options={cityOptions}
-              placeholder="اختر المدينة"
+              placeholder="اختر المحافظة"
               value={
                 cityOptions.find((option) => option.value === field.value) ||
                 null
@@ -145,7 +153,10 @@ export default function AdForm() {
       {/* Rooms */}
       <div className="form-control">
         <input
-          {...register("rooms", { valueAsNumber: true })}
+          {...register("rooms", {
+            setValueAs: (value) =>
+              value === "" || isNaN(value) ? undefined : parseInt(value),
+          })}
           type="number"
           placeholder="عدد الغرف"
           className="input input-bordered w-full"
@@ -160,7 +171,7 @@ export default function AdForm() {
         <input
           {...register("space", { valueAsNumber: true })}
           type="number"
-          placeholder="المساحة (م²)"
+          placeholder="المساحة بمتر او بقيراط"
           className="input input-bordered w-full"
         />
         {errors.space && (
@@ -303,7 +314,12 @@ export default function AdForm() {
 
       {/* Submit */}
       <div className="col-span-1 md:col-span-3 mt-4 text-center">
-        <button className="btn btn-primary w-full md:w-1/2">
+        <button
+          className={`btn btn-primary w-full md:w-1/2 ${
+            isPending && "btn-disabled"
+          }`}
+          disabled={isPending}
+        >
           إنشاء الإعلان
         </button>
       </div>

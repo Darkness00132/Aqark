@@ -81,7 +81,7 @@ app
     .use(googleRouter)
     .use("/api/upload", uploadRouter)
     .use("/api/reviews", reviewsRouter)
-    .use("/ads", adsRouter);
+    .use("/api/ads", adsRouter);
 app.use((err, _req, res, _next) => {
     console.error("Error:", err);
     // If err is an Error object

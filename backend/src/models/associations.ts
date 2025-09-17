@@ -3,6 +3,7 @@ import Transaction from "./transaction.model.js";
 import Review from "./review.model.js";
 import AdLogs from "./adLogs.model.js";
 import Ad from "./ad.model.js";
+import CreditsPlan from "./creditsPlan.js";
 
 //ad model
 Ad.belongsTo(User, { foreignKey: "userId", as: "user" });
@@ -24,3 +25,5 @@ Transaction.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 AdLogs.belongsTo(User, { as: "user", foreignKey: "userId" });
 AdLogs.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 Ad.hasMany(AdLogs, { foreignKey: "adId", onDelete: "CASCADE" });
+
+export { User, Ad, AdLogs, Transaction, CreditsPlan, Review };

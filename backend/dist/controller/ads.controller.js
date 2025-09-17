@@ -1,11 +1,9 @@
 import { createAdSchema, getAdsSchema, updateAdSchema, } from "../validates/ad.js";
 import { s3Client, Bucket } from "./upload.controller.js";
 import asyncHandler from "../utils/asyncHnadler.js";
-import User from "../models/user.model.js";
-import Ad from "../models/ad.model.js";
+import { User, Ad, Transaction } from "../models/associations.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import adsFilters from "../utils/adsFilter.js";
-import Transaction from "../models/transaction.model.js";
 export const getAllAds = asyncHandler(async (req, res) => {
     const { value, error } = getAdsSchema.validate(req.secureQuery);
     if (error) {
@@ -44,13 +42,16 @@ export const getAllAds = asyncHandler(async (req, res) => {
 });
 export const getMyAds = asyncHandler(async (req, res) => {
     const ads = await Ad.findAll({
-        where: { userId: req.user },
+        where: { userId: req.user.id },
         order: [["createdAt", "DESC"]],
     });
     res.status(200).json({ ads });
 });
 export const getAdBySlug = asyncHandler(async (req, res) => {
     const slug = req.secureParams.slug;
+    if (!slug) {
+        return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
+    }
     const publicId = slug.split("-").pop();
     const ad = await Ad.findOne({
         where: { publicId },

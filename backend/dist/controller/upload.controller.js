@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, DeleteObjectsCommand, } from "@aws-sdk/client-s3";
-import Ad from "../models/ad.model.js";
+import { Ad } from "../models/associations.js";
 import asyncHandler from "../utils/asyncHnadler.js";
 import sharp from "sharp";
 import pMap from "p-map";
@@ -32,7 +32,6 @@ export const uploadAvatar = asyncHandler(async (req, res) => {
         Key: key,
         Body: buffer,
         ContentType: "image/webp",
-        ACL: "public-read",
     }));
     if (req.user.avatarKey) {
         try {
@@ -53,13 +52,6 @@ export const uploadAvatar = asyncHandler(async (req, res) => {
 export const uploadAdImages = asyncHandler(async (req, res) => {
     if (!req.files || (req.files && req.files.length === 0)) {
         return res.status(400).json({ message: "يرجى ارسال الصور" });
-    }
-    const { adId } = req.secureBody;
-    const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
-    if (!ad) {
-        return res
-            .status(404)
-            .json({ message: "الإعلان غير موجود أو لا تملك صلاحية التعديل عليه" });
     }
     const files = req.files;
     const bufferimages = await pMap(files, async (file) => {
@@ -83,17 +75,13 @@ export const uploadAdImages = asyncHandler(async (req, res) => {
             Key: key,
             Body: buffer,
             ContentType: "image/webp",
-            ACL: "public-read",
         }));
         return {
             url: `https://${Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
             key,
         };
     }, { concurrency: 10 });
-    // Update DB: add new images
-    ad.images = [...(ad.images || []), ...uploadedImages];
-    await ad.save();
-    return res.status(200).json({ message: "تم رفع الصور" });
+    return res.status(200).json({ images: uploadedImages });
 });
 export const deleteAdImages = asyncHandler(async (req, res) => {
     const { keys, adId } = req.secureBody;

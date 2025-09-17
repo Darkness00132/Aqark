@@ -5,10 +5,10 @@ export const createAdSchema = z
   .object({
     title: z
       .string()
-      .min(10, "عنوان الإعلان يجب أن يكون على الأقل 10 حروف")
-      .max(100, "عنوان الإعلان يجب أن لا يتجاوز 100 حرف"),
+      .min(5, "عنوان الإعلان يجب أن يكون على الأقل 5 حروف")
+      .max(50, "عنوان الإعلان يجب أن لا يتجاوز 50 حرف"),
 
-    city: z.enum(CITIES, { error: "المدينة غير صحيحة" }),
+    city: z.enum(CITIES, { error: "المحافظة غير صحيحة" }),
 
     area: z.string({ error: "المنطقة غير صحيحة" }),
 
@@ -16,8 +16,8 @@ export const createAdSchema = z
       .number({ error: "عدد الغرف يجب أن يكون رقمًا" })
       .int({ message: "عدد الغرف يجب أن يكون رقمًا صحيحًا" })
       .min(1, "عدد الغرف يجب أن يكون على الأقل 1")
-      .max(20, "عدد الغرف يجب أن لا يتجاوز 20"),
-
+      .max(20, "عدد الغرف يجب أن لا يتجاوز 20")
+      .optional(),
     space: z
       .number({ error: "مساحة العقار يجب أن تكون رقمًا" })
       .int({ message: "مساحة العقار يجب أن تكون رقمًا صحيحًا" })
@@ -37,7 +37,7 @@ export const createAdSchema = z
 
     description: z
       .string()
-      .min(20, "وصف العقار يجب أن يكون على الأقل 20 حروف")
+      .min(10, "وصف العقار يجب أن يكون على الأقل 10 حروف")
       .max(500, "وصف العقار يجب أن لا يتجاوز 500 حروف"),
 
     price: z
@@ -57,5 +57,86 @@ export const createAdSchema = z
         code: "custom",
         message: "المنطقة غير صحيحة بالنسبة للمدينة المحددة",
       });
+    }
+  });
+
+export const AdfiltersSchema = z
+  .object({
+    title: z
+      .string()
+      .min(5, "عنوان الإعلان يجب أن يكون على الأقل 5 حروف")
+      .max(50, "عنوان الإعلان يجب أن لا يتجاوز 50 حرف")
+      .optional(),
+
+    city: z
+      .string()
+      .optional()
+      .refine((val) => !val || CITIES.includes(val), {
+        message: "المحافظة غير صحيحة",
+      }),
+
+    area: z.string({ error: "المنطقة غير صحيحة" }).optional(),
+
+    rooms: z
+      .number({ error: "عدد الغرف يجب أن يكون رقمًا" })
+      .int({ message: "عدد الغرف يجب أن يكون رقمًا صحيحًا" })
+      .min(1, "عدد الغرف يجب أن يكون على الأقل 1")
+      .max(20, "عدد الغرف يجب أن لا يتجاوز 20")
+      .optional(),
+    space: z
+      .number({ error: "مساحة العقار يجب أن تكون رقمًا" })
+      .int({ message: "مساحة العقار يجب أن تكون رقمًا صحيحًا" })
+      .min(50, "مساحة العقار يجب أن تكون على الأقل 50")
+      .max(1000, "مساحة العقار يجب أن لا تتجاوز 1000")
+      .optional(),
+
+    propertyType: z
+      .string()
+      .optional()
+      .refine((val) => !val || PROPERTY_TYPES.includes(val), {
+        message: "نوع العقار غير صحيح",
+      }),
+
+    type: z
+      .enum(["تمليك", "ايجار"], {
+        error: "نوع الإعلان يجب أن يكون إما 'تمليك' أو 'إيجار'",
+      })
+      .or(z.literal(""))
+      .optional(),
+
+    address: z
+      .string()
+      .min(10, "العنوان يجب أن يكون على الأقل 10 حروف")
+      .max(200, "العنوان يجب أن لا يتجاوز 200 حرف")
+      .optional(),
+
+    description: z
+      .string()
+      .min(10, "وصف العقار يجب أن يكون على الأقل 10 حروف")
+      .max(500, "وصف العقار يجب أن لا يتجاوز 500 حروف")
+      .optional(),
+
+    minPrice: z
+      .number({ error: "السعر يجب أن يكون رقمًا" })
+      .int({ message: "السعر يجب أن يكون رقمًا صحيحًا" })
+      .min(0, "السعر يجب أن لا يكون سالبًا")
+      .optional(),
+    maxPrice: z
+      .number({ error: "السعر يجب أن يكون رقمًا" })
+      .int({ message: "السعر يجب أن يكون رقمًا صحيحًا" })
+      .min(0, "السعر يجب أن لا يكون سالبًا")
+      .optional(),
+    orderBy: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.city) {
+      const areas = CITIES_WITH_AREAS[data.city];
+      if (!data.area || !areas || !areas.includes(data.area)) {
+        ctx.addIssue({
+          path: ["area"],
+          code: "custom",
+          message: "المنطقة غير صحيحة بالنسبة للمدينة المحددة",
+        });
+      }
     }
   });

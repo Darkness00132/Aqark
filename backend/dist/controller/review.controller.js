@@ -1,6 +1,5 @@
 import asyncHandler from "../utils/asyncHnadler.js";
-import Review from "../models/review.model.js";
-import User from "../models/user.model.js";
+import { User, Review } from "../models/associations.js";
 export const getReviews = asyncHandler(async (req, res) => {
     const { publicId } = req.secureParams;
     const user = await User.findOne({ where: { publicId } });

@@ -1,6 +1,7 @@
 import type { Response, Request } from "express";
 import type { AuthRequest } from "../middlewares/auth.js";
-import User, { type Role } from "../models/user.model.js";
+import { User, Review } from "../models/associations.js";
+import { type Role } from "../models/user.model.js";
 import {
   signupSchema,
   loginSchema,
@@ -15,7 +16,6 @@ import verifyEmail from "../emails/verifyEmail.js";
 import welcomeEmail from "../emails/welcomeEmail.js";
 import forgetPasswordEmail from "../emails/ForgetPasswordEmail.js";
 import passwordChangedEmail from "../emails/passwordChangedEmail.js";
-import Review from "../models/review.model.js";
 
 interface SignupValue {
   name: string;

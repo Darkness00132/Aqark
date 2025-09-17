@@ -40,7 +40,6 @@ Ad.init({
     },
     rooms: {
         type: DataTypes.INTEGER,
-        allowNull: false,
     },
     space: {
         type: DataTypes.INTEGER,

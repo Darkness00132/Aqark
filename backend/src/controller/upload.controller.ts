@@ -7,7 +7,7 @@ import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
-import Ad from "../models/ad.model.js";
+import { Ad } from "../models/associations.js";
 import asyncHandler from "../utils/asyncHnadler.js";
 import sharp from "sharp";
 import pMap from "p-map";
@@ -45,7 +45,6 @@ export const uploadAvatar = asyncHandler(
         Key: key,
         Body: buffer,
         ContentType: "image/webp",
-        ACL: "public-read",
       })
     );
 
@@ -74,14 +73,6 @@ export const uploadAdImages = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     if (!req.files || (req.files && req.files.length === 0)) {
       return res.status(400).json({ message: "يرجى ارسال الصور" });
-    }
-
-    const { adId } = req.secureBody;
-    const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
-    if (!ad) {
-      return res
-        .status(404)
-        .json({ message: "الإعلان غير موجود أو لا تملك صلاحية التعديل عليه" });
     }
 
     const files = req.files as Express.Multer.File[];
@@ -116,7 +107,6 @@ export const uploadAdImages = asyncHandler(
             Key: key,
             Body: buffer,
             ContentType: "image/webp",
-            ACL: "public-read",
           })
         );
         return {
@@ -127,11 +117,7 @@ export const uploadAdImages = asyncHandler(
       { concurrency: 10 }
     );
 
-    // Update DB: add new images
-    ad.images = [...(ad.images || []), ...uploadedImages];
-    await ad.save();
-
-    return res.status(200).json({ message: "تم رفع الصور" });
+    return res.status(200).json({ images: uploadedImages });
   }
 );
 

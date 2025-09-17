@@ -91,7 +91,7 @@ app
   .use(googleRouter)
   .use("/api/upload", uploadRouter)
   .use("/api/reviews", reviewsRouter)
-  .use("/ads", adsRouter);
+  .use("/api/ads", adsRouter);
 
 app.use((err: unknown, _req: any, res: any, _next: any) => {
   console.error("Error:", err);

@@ -11,7 +11,7 @@ interface AdAttributes {
   title: string;
   city: string;
   area: string;
-  rooms: number;
+  rooms?: number;
   space: number;
   propertyType: string;
   address: string;
@@ -38,7 +38,7 @@ class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare title: string;
   declare city: string;
   declare area: string;
-  declare rooms: number;
+  declare rooms?: number;
   declare space: number;
   declare propertyType: string;
   declare address: string;
@@ -91,7 +91,6 @@ Ad.init(
     },
     rooms: {
       type: DataTypes.INTEGER,
-      allowNull: false,
     },
     space: {
       type: DataTypes.INTEGER,

@@ -1,4 +1,4 @@
-import User from "../models/user.model.js";
+import { User, Review } from "../models/associations.js";
 import { signupSchema, loginSchema, forgetPasswordSchema, resetPasswordSchema, updateProfileSchema, } from "../validates/user.js";
 import { col, fn } from "sequelize";
 import { nanoid } from "nanoid";
@@ -7,7 +7,6 @@ import verifyEmail from "../emails/verifyEmail.js";
 import welcomeEmail from "../emails/welcomeEmail.js";
 import forgetPasswordEmail from "../emails/ForgetPasswordEmail.js";
 import passwordChangedEmail from "../emails/passwordChangedEmail.js";
-import Review from "../models/review.model.js";
 export const signup = asyncHandler(async (req, res) => {
     const { error, value } = signupSchema.validate(req.secureBody);
     if (error)
