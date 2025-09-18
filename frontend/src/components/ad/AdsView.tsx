@@ -1,13 +1,16 @@
 "use client";
 import AdCard from "./AdCard";
 import useGetAds from "@/hooks/ad/useGetAds";
-import Loading from "@/app/loading";
 
 export default function Adviews({ mine = false }: { mine?: boolean }) {
-  const { data, isFetching, isLoading } = useGetAds(mine);
+  const { data, isFetching } = useGetAds(mine);
 
-  if (isLoading || isFetching) {
-    return <Loading />;
+  if (isFetching) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <span className="loading loading-dots w-20"></span>
+      </div>
+    );
   }
 
   if (!data || data.length === 0) {
