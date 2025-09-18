@@ -15,7 +15,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         richColors
         position="top-left"
         className="text-2xl"
-        duration={2500}
+        duration={3000}
       />
       <QueryClientProvider client={queryClient}>
         {children}

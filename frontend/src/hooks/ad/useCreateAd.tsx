@@ -1,7 +1,8 @@
+"use client";
 import axiosInstance from "@/axiosInstance/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export default function useCreateAd() {
