@@ -1,4 +1,4 @@
-import Joi, { string } from "joi";
+import Joi from "joi";
 import { CITIES, PROPERTY_TYPES, CITIES_WITH_AREAS } from "../db/data.js";
 
 export interface getAds {

@@ -65,7 +65,7 @@ export const getAdBySlug = asyncHandler(async (req, res) => {
 export const createAd = asyncHandler(async (req, res) => {
     const { error, value } = createAdSchema.validate(req.secureBody);
     if (error) {
-        return res.status(400).json({ message: error.details });
+        return res.status(400).json({ message: error.details[0] });
     }
     let costInCredits = 1;
     if (value.type === "تمليك")

@@ -20,6 +20,7 @@ export default function useCreateAd() {
         toast.error("يجب رفع صورة واحدة على الاقل");
         return undefined;
       }
+      console.log(data);
       const formData = new FormData();
       images.forEach((img) => formData.append("images", img));
       const response = await axiosInstance.post("/upload/adImages", formData, {
@@ -29,15 +30,13 @@ export default function useCreateAd() {
       const response2 = await axiosInstance.post("/ads/create", adPayload);
       return response2.data;
     },
-    onSuccess: (data) => {
-      toast.success(data?.message || "تم نشر الاعلان");
+    onSuccess: () => {
+      toast.success("تم نشر الاعلان");
       router.push(`/ads/my-ads`);
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      console.log(error?.response?.data?.message);
-      toast.error(
-        error?.response?.data?.message || "حدث مشكلة ما يرجى محاولة مجددا"
-      );
+      console.log(error?.response?.data);
+      toast.error("حدث مشكلة ما يرجى محاولة مجددا");
     },
   });
 }

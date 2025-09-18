@@ -80,7 +80,7 @@ export const createAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { error, value } = createAdSchema.validate(req.secureBody);
     if (error) {
-      return res.status(400).json({ message: error.details });
+      return res.status(400).json({ message: error.details[0] });
     }
     let costInCredits = 1;
     if (value.type === "تمليك") costInCredits = 2;

@@ -172,7 +172,7 @@ export default function AdForm() {
         <select {...register("type")} className="select select-bordered w-full">
           <option value="">اختر نوع الإعلان</option>
           <option value="تمليك">تمليك</option>
-          <option value="ايجار">إيجار</option>
+          <option value="إيجار">إيجار</option>
         </select>
         {errors.type && (
           <span className="text-red-500 mt-1">{errors.type.message}</span>

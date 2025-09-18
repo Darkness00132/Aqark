@@ -26,7 +26,7 @@ export const createAdSchema = z
 
     propertyType: z.enum(PROPERTY_TYPES, { error: "نوع العقار غير صحيح" }),
 
-    type: z.enum(["تمليك", "ايجار"], {
+    type: z.enum(["تمليك", "إيجار"], {
       error: "نوع الإعلان يجب أن يكون إما 'تمليك' أو 'إيجار'",
     }),
 
