@@ -4,20 +4,12 @@ import { nanoid } from "nanoid";
 import sequelize from "../db/sql.js";
 import slugify from "slugify";
 class Ad extends Model {
-    toJSON() {
-        const { userId, id, ...values } = this.get({ plain: true });
-        return values;
-    }
 }
 Ad.init({
     id: {
         type: DataTypes.STRING,
         defaultValue: () => nanoid(16),
         primaryKey: true,
-    },
-    publicId: {
-        type: DataTypes.STRING,
-        defaultValue: () => nanoid(12),
     },
     userId: {
         type: DataTypes.STRING,
@@ -98,9 +90,11 @@ Ad.init({
     timestamps: true,
     indexes: [{ fields: ["city", "area"] }, { fields: ["type"] }],
 });
-Ad.beforeSave((ad) => {
-    const base = `${ad.propertyType}-${ad.city}-${ad.area}`;
-    ad.slug = `${slugify(base, { lower: true, strict: true })}-${ad.publicId}`;
+Ad.beforeValidate((ad) => {
+    if (!ad.slug) {
+        const base = `${ad.propertyType}-${ad.city}-${ad.area}`;
+        ad.slug = `${slugify(base, { lower: true, strict: true, remove: undefined, locale: "ar" })}-${nanoid(12)}`;
+    }
 });
 export default Ad;
 //# sourceMappingURL=ad.model.js.map

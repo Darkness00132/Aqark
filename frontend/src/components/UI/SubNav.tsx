@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function SubNav() {
   return (
-    <nav className="bg-base-200/90 border-t border-b border-base-300">
+    <nav className="bg-base-200/60 border-t border-b border-base-300">
       <ul className="flex justify-center text-sm sm:text-lg space-x-6 py-1">
         <li>
           <Link href="/" className="hover:text-primary font-medium">
@@ -10,13 +10,13 @@ export default function SubNav() {
           </Link>
         </li>
         <li>
-          <Link href="/about" className="hover:text-primary font-medium">
-            من نحن
+          <Link href="/ads" className="hover:text-primary font-medium">
+            اعلانات العقارات
           </Link>
         </li>
         <li>
-          <Link href="/services" className="hover:text-primary font-medium">
-            الخدمات
+          <Link href="/" className="hover:text-primary font-medium">
+            مفضل
           </Link>
         </li>
         <li>

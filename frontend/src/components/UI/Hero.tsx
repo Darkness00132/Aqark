@@ -23,7 +23,7 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-16 max-w-2xl mx-auto">
             {role === "landord" ? (
               <Link
-                href="/ad"
+                href="/ads"
                 className="btn btn-primary btn-sm sm:btn-md lg:btn-lg px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-bold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
               >
                 <FaSearch className="mr-1 sm:mr-2" />
@@ -31,7 +31,7 @@ export default function Hero() {
               </Link>
             ) : (
               <Link
-                href="/ad/create"
+                href="/ads/create"
                 className="btn btn-secondary btn-sm sm:btn-md lg:btn-lg px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-bold shadow-2xl hover:shadow-secondary/25 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
               >
                 <FaHome className="mr-1 sm:mr-2" />

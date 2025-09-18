@@ -11,7 +11,7 @@ import {
 } from "react-icons/fa";
 import { AdfiltersSchema } from "@/lib/adValidates";
 import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "@/lib/data";
-import { z } from "zod";
+import type { z } from "zod";
 
 // Types
 type AdFiltersForm = z.infer<typeof AdfiltersSchema>;
@@ -70,7 +70,7 @@ export default function AdFilters() {
         </label>
       </div>
 
-      <div className="drawer-side">
+      <div className="drawer-side z-9999">
         <label htmlFor="filter-drawer" className="drawer-overlay"></label>
         <div className="w-80 h-full bg-base-100 p-5 flex flex-col gap-4 overflow-y-auto">
           <h2 className="text-xl font-bold text-primary mb-3 border-b pb-2">
@@ -182,7 +182,7 @@ export default function AdFilters() {
                     setValueAs: (value) =>
                       value === "" || isNaN(value)
                         ? undefined
-                        : parseInt(value),
+                        : Number.parseInt(value),
                   })}
                   className={`${inputClass} pl-8`}
                 />
@@ -202,7 +202,7 @@ export default function AdFilters() {
                     setValueAs: (value) =>
                       value === "" || isNaN(value)
                         ? undefined
-                        : parseInt(value),
+                        : Number.parseInt(value),
                   })}
                   className={`${inputClass} pl-8`}
                 />
@@ -225,7 +225,7 @@ export default function AdFilters() {
                     setValueAs: (value) =>
                       value === "" || isNaN(value)
                         ? undefined
-                        : parseInt(value),
+                        : Number.parseInt(value),
                   })}
                   className={`${inputClass} pl-8`}
                 />
@@ -245,7 +245,7 @@ export default function AdFilters() {
                     setValueAs: (value) =>
                       value === "" || isNaN(value)
                         ? undefined
-                        : parseInt(value),
+                        : Number.parseInt(value),
                   })}
                   className={`${inputClass} pl-8`}
                 />

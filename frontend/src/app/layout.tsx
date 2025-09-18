@@ -63,7 +63,7 @@ export default function RootLayout({
   return (
     <html lang="ar" data-theme="mytheme" className="" dir="rtl">
       <body
-        className={`${geistCairo.className} antialiased bg-gradient-to-bl from-primary/10 to-secondary/15 overflow-x-hidden min-h-screen`}
+        className={`${geistCairo.className} antialiased bg-gradient-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen`}
       >
         <Provider>
           <Header />

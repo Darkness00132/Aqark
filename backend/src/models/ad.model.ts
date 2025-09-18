@@ -6,7 +6,6 @@ import slugify from "slugify";
 
 interface AdAttributes {
   id?: string;
-  publicId?: string;
   userId: string;
   title: string;
   city: string;
@@ -33,7 +32,6 @@ interface AdMethods {
 
 class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare id?: string;
-  declare publicId?: string;
   declare userId: string;
   declare title: string;
   declare city: string;
@@ -52,11 +50,6 @@ class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare costInCredits?: number;
   declare isDeleted?: boolean;
   declare slug?: string;
-
-  public toJSON() {
-    const { userId, id, ...values } = this.get({ plain: true });
-    return values;
-  }
 }
 
 Ad.init(
@@ -65,10 +58,6 @@ Ad.init(
       type: DataTypes.STRING,
       defaultValue: () => nanoid(16),
       primaryKey: true,
-    },
-    publicId: {
-      type: DataTypes.STRING,
-      defaultValue: () => nanoid(12),
     },
     userId: {
       type: DataTypes.STRING,
@@ -152,9 +141,11 @@ Ad.init(
   }
 );
 
-Ad.beforeSave((ad: any) => {
-  const base = `${ad.propertyType}-${ad.city}-${ad.area}`;
-  ad.slug = `${slugify(base, { lower: true, strict: true })}-${ad.publicId}`;
+Ad.beforeValidate((ad: Ad) => {
+  if (!ad.slug) {
+    const base = `${ad.propertyType}-${ad.city}-${ad.area}`;
+    ad.slug = `${slugify(base, { lower: true, strict: true, remove: undefined, locale: "ar" })}-${nanoid(12)}`;
+  }
 });
 
 export default Ad;

@@ -16,6 +16,7 @@ import verifyEmail from "../emails/verifyEmail.js";
 import welcomeEmail from "../emails/welcomeEmail.js";
 import forgetPasswordEmail from "../emails/ForgetPasswordEmail.js";
 import passwordChangedEmail from "../emails/passwordChangedEmail.js";
+import sanitizeXSS from "../utils/sanitizeXSS.js";
 
 interface SignupValue {
   name: string;
@@ -60,7 +61,6 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(201).json({ message: "تم انشاء حساب بنجاح يرجى تحقق من ايميلك" });
 });
-
 export const verify = asyncHandler(async (req: Request, res: Response) => {
   const { verificationToken } = req.secureQuery;
   const user = await User.findOne({ where: { verificationToken } });
@@ -136,7 +136,7 @@ export const getMyProfile = asyncHandler(
 );
 
 export const getProfile = asyncHandler(async (req: Request, res: Response) => {
-  const { publicId } = req.secureParams;
+  const { publicId } = sanitizeXSS(req.params);
   let user = await User.findOne({ where: { publicId } });
   if (!user) {
     return res.status(400).json({ message: "المستخدم غير موجود" });

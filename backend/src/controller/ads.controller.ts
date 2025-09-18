@@ -11,6 +11,7 @@ import { User, Ad, AdLogs, Transaction } from "../models/associations.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import adsFilters from "../utils/adsFilter.js";
 import { Order } from "sequelize";
+import sanitizeXSS from "../utils/sanitizeXSS.js";
 
 export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
   const { value, error } = getAdsSchema.validate(req.secureQuery);
@@ -61,13 +62,12 @@ export const getMyAds = asyncHandler(
 );
 
 export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
-  const slug = req.secureParams.slug;
+  const slug = sanitizeXSS(req.params.slug);
   if (!slug) {
     return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
   }
-  const publicId = slug.split("-").pop();
   const ad = await Ad.findOne({
-    where: { publicId },
+    where: { slug },
     include: [{ model: User, as: "user" }],
   });
   if (!ad) {
@@ -107,7 +107,7 @@ export const createAd = asyncHandler(
 
 export const updateAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { adId } = req.secureParams;
+    const { adId } = sanitizeXSS(req.params);
     const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
     if (!ad) {
       return res
@@ -126,7 +126,7 @@ export const updateAd = asyncHandler(
 
 export const deleteAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { adId } = req.secureParams;
+    const { adId } = sanitizeXSS(req.params);
     const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
     if (!ad) {
       return res

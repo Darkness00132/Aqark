@@ -6,7 +6,8 @@ export const getAdsSchema = Joi.object({
         .messages({
         "string.base": "المدينة يجب أن تكون نصًا",
         "any.only": "المدينة غير صحيحة",
-    }),
+    })
+        .optional(),
     area: Joi.string()
         .custom((value, helper) => {
         const { city } = helper.state.ancestors[0];
@@ -19,32 +20,52 @@ export const getAdsSchema = Joi.object({
         "string.base": "المنطقة يجب أن تكون نصًا",
         "any.invalid": "المنطقة غير صحيحة بالنسبة للمدينة المحددة",
         "any.only": "المنطقة غير صحيحة",
-    }),
-    rooms: Joi.number().integer().min(1).max(20).optional().messages({
+    })
+        .optional(),
+    rooms: Joi.number()
+        .integer()
+        .min(1)
+        .max(20)
+        .optional()
+        .messages({
         "number.base": "عدد الغرف يجب أن يكون رقمًا",
         "number.min": "عدد الغرف يجب أن يكون على الأقل 1",
         "number.max": "عدد الغرف يجب أن لا يتجاوز 20",
-    }),
-    space: Joi.number().integer().min(50).max(1000).messages({
+    })
+        .optional(),
+    space: Joi.number()
+        .integer()
+        .min(50)
+        .max(1000)
+        .messages({
         "number.base": "مساحة العقار يجب أن تكون رقمًا",
         "number.min": "مساحة العقار يجب أن تكون على الأقل 50",
         "number.max": "مساحة العقار يجب أن لا تتجاوز 1000",
-    }),
+    })
+        .optional(),
     propertyType: Joi.string()
         .valid(...PROPERTY_TYPES)
         .required()
         .messages({
         "string.base": "نوع العقار يجب أن يكون نصًا",
         "any.only": "نوع العقار غير صحيح",
-    }),
-    type: Joi.string().valid("تمليك", "إيجار").messages({
+    })
+        .optional(),
+    type: Joi.string()
+        .valid("تمليك", "إيجار")
+        .messages({
         "string.base": "نوع الإعلان يجب أن يكون نصًا",
         "any.only": "نوع الإعلان يجب أن يكون إما 'تمليك' أو 'إيجار'",
-    }),
-    minPrice: Joi.number().integer().min(0).messages({
+    })
+        .optional(),
+    minPrice: Joi.number()
+        .integer()
+        .min(0)
+        .messages({
         "number.base": "السعر يجب أن يكون رقمًا",
         "number.min": "السعر يجب أن لا يكون سالبًا",
-    }),
+    })
+        .optional(),
     maxPrice: Joi.number()
         .integer()
         .min(0)
@@ -59,26 +80,40 @@ export const getAdsSchema = Joi.object({
         "number.base": "السعر يجب أن يكون رقمًا",
         "number.min": "السعر يجب أن لا يكون سالبًا",
         "any.invalid": "السعر الأقصى يجب أن يكون أكبر من السعر الأدنى",
-    }),
-    page: Joi.number().min(1).messages({
+    })
+        .optional(),
+    page: Joi.number()
+        .min(1)
+        .messages({
         "number.base": "السعر يجب أن يكون رقمًا",
         "number.min": "السعر يجب أن لا يكون سالبًا",
-    }),
-    limit: Joi.number().min(1).messages({
+    })
+        .optional(),
+    limit: Joi.number()
+        .min(1)
+        .messages({
         "number.base": "السعر يجب أن يكون رقمًا",
         "number.min": "السعر يجب أن لا يكون سالبًا",
-    }),
-    search: Joi.string().min(10).max(500).messages({
+    })
+        .optional(),
+    search: Joi.string()
+        .min(10)
+        .max(500)
+        .messages({
         "string.base": "عنوان الإعلان يجب أن يكون نصًا",
         "string.empty": "عنوان الإعلان لا يمكن أن يكون فارغًا",
         "string.min": "عنوان الإعلان يجب أن يكون على الأقل 10 حروف",
         "string.max": "عنوان الإعلان يجب أن لا يتجاوز 500 حرف",
         "any.required": "عنوان الإعلان مطلوب",
-    }),
-    order: Joi.string().valid("ASC", "DESC", "lowPrice", "highPrice").messages({
+    })
+        .optional(),
+    order: Joi.string()
+        .valid("ASC", "DESC", "lowPrice", "highPrice")
+        .messages({
         "string.base": "طريقة الفرز يجب أن تكون نصًا",
         "any.only": "طريقة الفرز غير صحيحة",
-    }),
+    })
+        .optional(),
 });
 export const createAdSchema = Joi.object({
     title: Joi.string().min(5).max(50).required().messages({
@@ -163,11 +198,19 @@ export const createAdSchema = Joi.object({
         "string.pattern.base": "رقم الواتساب غير صحيح",
         "any.required": "رقم الواتساب مطلوب",
     }),
-    images: Joi.array().items(Joi.string()).min(1).max(10).required().messages({
+    images: Joi.array()
+        .items(Joi.object({
+        url: Joi.string().uri().required(),
+        key: Joi.string().required(),
+    }))
+        .min(1)
+        .max(5)
+        .required()
+        .messages({
         "any.required": "حقل الصور مطلوب",
         "array.base": "الصور يجب أن تكون في شكل مصفوفة",
         "array.min": "يجب رفع صورة واحدة على الأقل",
-        "array.max": "لا يمكن رفع أكثر من 10 صور",
+        "array.max": "لا يمكن رفع أكثر من 5 صور",
     }),
 });
 export const updateAdSchema = Joi.object({

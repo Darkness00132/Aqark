@@ -13,7 +13,7 @@ export default function Header() {
 
   return (
     <header className="mb-3">
-      <nav className="navbar bg-base-100/90 shadow-lg">
+      <nav className="navbar bg-base-100/70 shadow-lg">
         <div className="navbar-start">
           <Link href="/" className="btn btn-ghost text-xl hover:opacity-80">
             <Image

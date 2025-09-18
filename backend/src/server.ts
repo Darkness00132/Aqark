@@ -11,6 +11,7 @@ import userRouter from "./routes/user.route.js";
 import uploadRouter from "./routes/upload.route.js";
 import reviewsRouter from "./routes/review.route.js";
 import adsRouter from "./routes/ads.route.js";
+import sanitizeXSS from "./utils/sanitizeXSS.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -38,23 +39,9 @@ app
   .use(express.urlencoded({ extended: true }))
   .set("trust proxy", 1);
 
-// Sanitize input to prevent xss attacks
-const sanitizeXSS = (input: any): any => {
-  if (typeof input === "string") return xss(input);
-  if (typeof input === "object" && input !== null) {
-    const sanitized: any = Array.isArray(input) ? [] : {};
-    for (const key in input) {
-      sanitized[key] = sanitizeXSS(input[key]);
-    }
-    return sanitized;
-  }
-  return input;
-};
-
 app.use((req, _res, next) => {
   req.secureBody = sanitizeXSS(req.body);
   req.secureQuery = sanitizeXSS(req.query);
-  req.secureParams = sanitizeXSS(req.params);
   next();
 });
 

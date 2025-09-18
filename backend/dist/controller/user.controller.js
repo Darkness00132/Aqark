@@ -7,6 +7,7 @@ import verifyEmail from "../emails/verifyEmail.js";
 import welcomeEmail from "../emails/welcomeEmail.js";
 import forgetPasswordEmail from "../emails/ForgetPasswordEmail.js";
 import passwordChangedEmail from "../emails/passwordChangedEmail.js";
+import sanitizeXSS from "../utils/sanitizeXSS.js";
 export const signup = asyncHandler(async (req, res) => {
     const { error, value } = signupSchema.validate(req.secureBody);
     if (error)
@@ -82,7 +83,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
     return res.status(200).json({ user: req.user });
 });
 export const getProfile = asyncHandler(async (req, res) => {
-    const { publicId } = req.secureParams;
+    const { publicId } = sanitizeXSS(req.params);
     let user = await User.findOne({ where: { publicId } });
     if (!user) {
         return res.status(400).json({ message: "المستخدم غير موجود" });

@@ -2,9 +2,10 @@ import { Request, Response } from "express";
 import { AuthRequest } from "../middlewares/auth.js";
 import asyncHandler from "../utils/asyncHnadler.js";
 import { User, Review } from "../models/associations.js";
+import sanitizeXSS from "../utils/sanitizeXSS.js";
 
 export const getReviews = asyncHandler(async (req: Request, res: Response) => {
-  const { publicId } = req.secureParams;
+  const { publicId } = sanitizeXSS(req.params);
   const user = await User.findOne({ where: { publicId } });
   if (!user) {
     return res.status(404).json({ message: "لم يتم العثور على المستخدم" });
@@ -28,7 +29,7 @@ export const getMyReviews = asyncHandler(
 );
 
 export const setLove = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { reviewId } = req.secureParams;
+  const { reviewId } = sanitizeXSS(req.params);
   const review = await Review.findByPk(reviewId);
   if (!review) {
     return res.status(404).json({ message: "لم يتم العثور على المراجعة" });
@@ -48,7 +49,7 @@ export const setLove = asyncHandler(async (req: AuthRequest, res: Response) => {
 
 export const createReview = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { publicId } = req.params;
+    const { publicId } = sanitizeXSS(req.params);
     const { rating, comment } = req.body;
 
     const user = await User.findOne({ where: { publicId } });
@@ -69,7 +70,7 @@ export const createReview = asyncHandler(
 
 export const updateReview = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { reviewId } = req.params;
+    const { reviewId } = sanitizeXSS(req.params);
     const { rating, comment } = req.body;
     const review = await Review.findByPk(reviewId);
     if (!review) {
@@ -86,7 +87,7 @@ export const updateReview = asyncHandler(
 
 export const deleteReview = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { reviewId } = req.params;
+    const { reviewId } = sanitizeXSS(req.params);
     const review = await Review.destroy({ where: { id: reviewId } });
     if (!review) {
       return res.status(404).json({ message: "لم يتم العثور على المراجعة" });

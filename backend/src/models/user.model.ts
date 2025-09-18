@@ -14,7 +14,7 @@ interface Token {
 
 export interface UserAttributes {
   id?: string;
-  publicId?: bigint;
+  publicId?: string;
   googleId?: string;
   name: string;
   email: string;
@@ -45,7 +45,7 @@ class User
   implements UserAttributes, UserMethods
 {
   declare id?: string;
-  declare publicId?: bigint;
+  declare publicId?: string;
   declare googleId?: string;
   declare name: string;
   declare email: string;

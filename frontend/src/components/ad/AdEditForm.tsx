@@ -2,15 +2,18 @@
 
 import Select, { SingleValue } from "react-select";
 import { z } from "zod";
-import { useState } from "react";
+import { useDropzone } from "react-dropzone";
+import imageCompression from "browser-image-compression";
+import Image from "next/image";
+import { FiUpload, FiX } from "react-icons/fi";
+import { useCallback, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createAdSchema } from "@/lib/adValidates";
 import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "@/lib/data";
 import useCreateAd from "@/hooks/ad/useCreateAd";
-import ImageUpload from "./ImagesUpload";
 
-export default function AdForm() {
+export default function AdEditForm() {
   const [images, setImages] = useState<File[]>([]);
 
   type CreateAdSchema = typeof createAdSchema;
@@ -36,6 +39,35 @@ export default function AdForm() {
         label: area,
       }))
     : [];
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    try {
+      const compressedFiles = await Promise.all(
+        acceptedFiles.map(async (file) => {
+          const options = {
+            maxSizeMB: 5,
+            maxWidthOrHeight: 800,
+            useWebWorker: true,
+            fileType: "image/webp",
+          };
+          return await imageCompression(file, options);
+        })
+      );
+      setImages((prev) => [...prev, ...compressedFiles]);
+    } catch (error) {
+      console.error("Error compressing images:", error);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "image/*": [] },
+    multiple: true,
+  });
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const { mutate, isPending } = useCreateAd();
 
@@ -235,7 +267,51 @@ export default function AdForm() {
       </div>
 
       {/* Images Upload */}
-      <ImageUpload setImages={setImages} images={images} />
+      <div className="col-span-1 md:col-span-3">
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer ${
+            isDragActive
+              ? "border-secondary bg-base-200"
+              : "border-base-300 bg-base-100"
+          }`}
+        >
+          <input {...getInputProps()} />
+          <FiUpload className="w-10 h-10 text-gray-400 mb-2" />
+          <p className="text-gray-600">
+            {isDragActive
+              ? "ضع الصور هنا..."
+              : "اسحب الصور هنا أو اضغط لاختيارها"}
+          </p>
+          <p className="text-sm text-gray-400 mt-1">يمكنك اختيار عدة صور</p>
+        </div>
+
+        {/* Preview */}
+        {images.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+            {images.map((file, idx) => (
+              <div key={idx} className="card bg-base-100 shadow relative">
+                <div className="aspect-[4/3] relative w-full overflow-hidden rounded-lg">
+                  <Image
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    fill
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeImage(idx)}
+                  className="absolute top-2 right-2 btn btn-sm btn-circle btn-error text-white"
+                >
+                  <FiX />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Submit */}
       <div className="col-span-1 md:col-span-3 mt-4 text-center">
         <button

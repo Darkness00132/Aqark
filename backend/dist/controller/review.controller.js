@@ -1,7 +1,8 @@
 import asyncHandler from "../utils/asyncHnadler.js";
 import { User, Review } from "../models/associations.js";
+import sanitizeXSS from "../utils/sanitizeXSS.js";
 export const getReviews = asyncHandler(async (req, res) => {
-    const { publicId } = req.secureParams;
+    const { publicId } = sanitizeXSS(req.params);
     const user = await User.findOne({ where: { publicId } });
     if (!user) {
         return res.status(404).json({ message: "لم يتم العثور على المستخدم" });
@@ -21,7 +22,7 @@ export const getMyReviews = asyncHandler(async (req, res) => {
     res.status(200).json({ reviews });
 });
 export const setLove = asyncHandler(async (req, res) => {
-    const { reviewId } = req.secureParams;
+    const { reviewId } = sanitizeXSS(req.params);
     const review = await Review.findByPk(reviewId);
     if (!review) {
         return res.status(404).json({ message: "لم يتم العثور على المراجعة" });
@@ -35,7 +36,7 @@ export const setLove = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "تم عملية بنجاح" });
 });
 export const createReview = asyncHandler(async (req, res) => {
-    const { publicId } = req.params;
+    const { publicId } = sanitizeXSS(req.params);
     const { rating, comment } = req.body;
     const user = await User.findOne({ where: { publicId } });
     if (!user) {
@@ -50,7 +51,7 @@ export const createReview = asyncHandler(async (req, res) => {
     res.status(201).json({ review });
 });
 export const updateReview = asyncHandler(async (req, res) => {
-    const { reviewId } = req.params;
+    const { reviewId } = sanitizeXSS(req.params);
     const { rating, comment } = req.body;
     const review = await Review.findByPk(reviewId);
     if (!review) {
@@ -64,7 +65,7 @@ export const updateReview = asyncHandler(async (req, res) => {
     res.status(200).json({ review });
 });
 export const deleteReview = asyncHandler(async (req, res) => {
-    const { reviewId } = req.params;
+    const { reviewId } = sanitizeXSS(req.params);
     const review = await Review.destroy({ where: { id: reviewId } });
     if (!review) {
         return res.status(404).json({ message: "لم يتم العثور على المراجعة" });

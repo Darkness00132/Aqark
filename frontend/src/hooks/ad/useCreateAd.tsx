@@ -1,9 +1,11 @@
 import axiosInstance from "@/axiosInstance/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useRouter } from "next/router";
 import { toast } from "sonner";
 
 export default function useCreateAd() {
+  const router = useRouter();
   return useMutation({
     mutationKey: ["create ad"],
     mutationFn: async ({
@@ -28,6 +30,7 @@ export default function useCreateAd() {
     },
     onSuccess: (data) => {
       toast.success(data?.message || "تم نشر الاعلان");
+      router.push(`/ads/my-ads`);
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log(error?.response?.data?.message);

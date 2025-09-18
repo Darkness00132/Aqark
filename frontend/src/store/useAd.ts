@@ -1,4 +1,5 @@
 export interface Ad {
+  id: string;
   title: string;
   city: string;
   area: string;
@@ -9,6 +10,7 @@ export interface Ad {
   address: string;
   description: string;
   price: number;
+  slug: string;
   whatsappNumber: string;
-  images: string[];
+  images: Array<{ url: string; key?: string }>;
 }

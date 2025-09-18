@@ -5,12 +5,12 @@ import cors from "cors";
 import sequelize from "./db/sql.js";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import helmet from "helmet";
-import xss from "xss";
 import googleRouter from "./routes/google.route.js";
 import userRouter from "./routes/user.route.js";
 import uploadRouter from "./routes/upload.route.js";
 import reviewsRouter from "./routes/review.route.js";
 import adsRouter from "./routes/ads.route.js";
+import sanitizeXSS from "./utils/sanitizeXSS.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 const rateLimiter = new RateLimiterMemory({
@@ -34,23 +34,9 @@ app
     .use(express.json())
     .use(express.urlencoded({ extended: true }))
     .set("trust proxy", 1);
-// Sanitize input to prevent xss attacks
-const sanitizeXSS = (input) => {
-    if (typeof input === "string")
-        return xss(input);
-    if (typeof input === "object" && input !== null) {
-        const sanitized = Array.isArray(input) ? [] : {};
-        for (const key in input) {
-            sanitized[key] = sanitizeXSS(input[key]);
-        }
-        return sanitized;
-    }
-    return input;
-};
 app.use((req, _res, next) => {
     req.secureBody = sanitizeXSS(req.body);
     req.secureQuery = sanitizeXSS(req.query);
-    req.secureParams = sanitizeXSS(req.params);
     next();
 });
 app
