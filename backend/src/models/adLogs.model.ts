@@ -7,6 +7,7 @@ interface adLogsAttributes {
   userId: string;
   adId: string;
   action: "delete" | "update" | "create";
+  description?: string;
 }
 
 class AdLogs extends Model<adLogsAttributes> implements adLogsAttributes {
@@ -14,6 +15,7 @@ class AdLogs extends Model<adLogsAttributes> implements adLogsAttributes {
   declare userId: string;
   declare adId: string;
   declare action: "delete" | "update" | "create";
+  declare description?: string;
 }
 
 AdLogs.init(
@@ -35,6 +37,7 @@ AdLogs.init(
       type: DataTypes.ENUM("delete", "update", "create"),
       allowNull: false,
     },
+    description: { type: DataTypes.TEXT },
   },
   { sequelize, schema: "public", tableName: "adLogs", timestamps: true }
 );

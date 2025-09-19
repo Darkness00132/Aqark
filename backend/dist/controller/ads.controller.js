@@ -1,7 +1,7 @@
 import { createAdSchema, getAdsSchema, updateAdSchema, } from "../validates/ad.js";
 import { s3Client, Bucket } from "./upload.controller.js";
 import asyncHandler from "../utils/asyncHnadler.js";
-import { User, Ad, Transaction } from "../models/associations.js";
+import { User, Ad, AdLogs, Transaction } from "../models/associations.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import adsFilters from "../utils/adsFilter.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
@@ -77,6 +77,12 @@ export const createAd = asyncHandler(async (req, res) => {
     });
     req.user.credits -= costInCredits;
     await req.user.save();
+    await AdLogs.create({
+        userId: req.user.id,
+        adId: ad.id,
+        action: "create",
+        description: `Created ad with title: ${ad.title}`,
+    });
     await Transaction.create({
         userId: req.user.id,
         adId: ad.id,

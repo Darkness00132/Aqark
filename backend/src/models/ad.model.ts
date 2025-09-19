@@ -16,7 +16,7 @@ interface AdAttributes {
   address: string;
   type: string;
   description: string;
-  images?: any[];
+  images: any[];
   price: number;
   whatsappNumber: string;
   viewsCount?: number;
@@ -42,7 +42,7 @@ class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare address: string;
   declare type: string;
   declare description: string;
-  declare images?: any[];
+  declare images: any[];
   declare price: number;
   declare whatsappNumber: string;
   declare viewsCount?: number;

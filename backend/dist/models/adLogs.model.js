@@ -21,6 +21,7 @@ AdLogs.init({
         type: DataTypes.ENUM("delete", "update", "create"),
         allowNull: false,
     },
+    description: { type: DataTypes.TEXT },
 }, { sequelize, schema: "public", tableName: "adLogs", timestamps: true });
 export default AdLogs;
 //# sourceMappingURL=adLogs.model.js.map

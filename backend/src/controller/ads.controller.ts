@@ -93,6 +93,13 @@ export const createAd = asyncHandler(
     req.user.credits -= costInCredits;
     await req.user.save();
 
+    await AdLogs.create({
+      userId: req.user.id,
+      adId: ad.id!,
+      action: "create",
+      description: `Created ad with title: ${ad.title}`,
+    });
+
     await Transaction.create({
       userId: req.user.id,
       adId: ad.id,

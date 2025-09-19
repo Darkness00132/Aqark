@@ -18,7 +18,7 @@ export default function useCreateAd() {
     }) => {
       if (images.length === 0) {
         toast.error("يجب رفع صورة واحدة على الاقل");
-        return undefined;
+        throw new Error("يجب رفع صورة واحدة على الاقل");
       }
       console.log(data);
       const formData = new FormData();
