@@ -36,7 +36,7 @@ export default function useCreateAd() {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log(error?.response?.data);
-      toast.error("حدث مشكلة ما يرجى محاولة مجددا");
+      toast.error(error?.message || "حدث مشكلة ما يرجى محاولة مجددا");
     },
   });
 }
