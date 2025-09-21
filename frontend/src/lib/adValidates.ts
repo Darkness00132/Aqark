@@ -98,7 +98,7 @@ export const AdfiltersSchema = z
       }),
 
     type: z
-      .enum(["تمليك", "ايجار"], {
+      .enum(["تمليك", "إيجار"], {
         error: "نوع الإعلان يجب أن يكون إما 'تمليك' أو 'إيجار'",
       })
       .or(z.literal(""))
@@ -129,9 +129,9 @@ export const AdfiltersSchema = z
     orderBy: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.city) {
+    if (data.city && data.area) {
       const areas = CITIES_WITH_AREAS[data.city];
-      if (!data.area || !areas || !areas.includes(data.area)) {
+      if (!areas || !areas.includes(data.area)) {
         ctx.addIssue({
           path: ["area"],
           code: "custom",

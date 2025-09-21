@@ -6,7 +6,7 @@ import useUpdateProfile from "@/hooks/useUpdateProfile";
 import { useEffect, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateProfileSchema } from "@/lib/zodSchemas";
+import { updateProfileSchema } from "@/lib/userValidates";
 import { FaEdit, FaTimes, FaSave } from "react-icons/fa";
 
 type UpdateProfileForm = z.infer<typeof updateProfileSchema>;

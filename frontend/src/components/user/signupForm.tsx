@@ -1,12 +1,11 @@
 "use client";
-import Link from "next/link";
 import useSignup from "@/hooks/useSignup";
 import useAuth from "@/store/useAuth";
 import { z } from "zod";
 import { FaExclamationCircle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema } from "@/lib/zodSchemas";
+import { signupSchema } from "@/lib/userValidates";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 

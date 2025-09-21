@@ -9,20 +9,25 @@ import {
   FaRulerCombined,
   FaDollarSign,
 } from "react-icons/fa";
+import { FiX } from "react-icons/fi";
 import { AdfiltersSchema } from "@/lib/adValidates";
 import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "@/lib/data";
 import type { z } from "zod";
+import useAd from "@/store/useAd";
 
 // Types
 type AdFiltersForm = z.infer<typeof AdfiltersSchema>;
 type Option = { value: string; label: string };
 
 export default function AdFilters() {
+  const setFilters = useAd((state) => state.setFilters);
+  const filters = useAd((state) => state.filters);
   const {
     register,
     handleSubmit,
     control,
     watch,
+    reset,
     formState: { errors },
   } = useForm<AdFiltersForm>({
     resolver: zodResolver(
@@ -36,13 +41,14 @@ export default function AdFilters() {
       city: "",
       area: "",
       propertyType: "",
-      type: undefined,
+      type: "",
       rooms: undefined,
       space: undefined,
       minPrice: undefined,
       maxPrice: undefined,
       orderBy: "",
     },
+    values: filters,
   });
 
   const selectedCity = watch("city");
@@ -55,25 +61,36 @@ export default function AdFilters() {
       }))
     : [];
 
-  const types = ["تمليك", "ايجار"];
+  const types = ["تمليك", "إيجار"];
   const orderOptions = ["تاريخ الإضافة", "السعر"];
   const inputClass = "input input-bordered w-full";
 
-  const onSubmit = (data: AdFiltersForm) => console.log("Filters:", data);
+  const onSubmit = (data: AdFiltersForm) => {
+    setFilters(data);
+  };
 
   return (
     <div className="drawer drawer-end">
       <input id="filter-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
-        <label htmlFor="filter-drawer" className="btn btn-primary btn-circle">
+        <label htmlFor="filter-drawer" className="btn btn-primary">
           <FaFilter />
+          <span>تصفية الإعلانات</span>
         </label>
       </div>
 
-      <div className="drawer-side z-9999">
+      <div className="drawer-side z-[9999]">
         <label htmlFor="filter-drawer" className="drawer-overlay"></label>
-        <div className="w-80 h-full bg-base-100 p-5 flex flex-col gap-4 overflow-y-auto">
-          <h2 className="text-xl font-bold text-primary mb-3 border-b pb-2">
+        <div className="w-80 h-full bg-base-100 p-5 flex flex-col gap-4 overflow-y-auto relative">
+          {/* Close Button */}
+          <label
+            htmlFor="filter-drawer"
+            className="absolute top-4 left-3 btn btn-sm btn-circle btn-ghost"
+          >
+            <FiX className="w-5 h-5" />
+          </label>
+
+          <h2 className="text-xl font-bold text-primary mb-3 border-b pb-2 text-center">
             تصفية الإعلانات
           </h2>
 
@@ -97,6 +114,7 @@ export default function AdFilters() {
                     onBlur={field.onBlur}
                     isClearable
                     instanceId="city-select"
+                    aria-label="اختر المحافظة"
                   />
                   {errors.city && (
                     <span className="text-red-500 text-sm">
@@ -124,6 +142,7 @@ export default function AdFilters() {
                     isClearable
                     isDisabled={!selectedCity}
                     instanceId="area-select"
+                    aria-label="اختر المنطقة"
                   />
                   {errors.area && (
                     <span className="text-red-500 text-sm">
@@ -276,13 +295,24 @@ export default function AdFilters() {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-2 mt-3">
-              <button type="submit" className="btn btn-primary flex-1">
+            <div className="flex flex-col sm:flex-row gap-2 mt-3">
+              <button
+                type="submit"
+                className="btn btn-primary w-full sm:w-[50%]"
+              >
                 تطبيق
               </button>
-              <label htmlFor="filter-drawer" className="btn btn-outline flex-1">
-                إغلاق
-              </label>
+
+              <button
+                type="button"
+                onClick={() => {
+                  reset();
+                  setFilters({});
+                }}
+                className="btn btn-secondary w-full sm:w-[50%]"
+              >
+                إعادة تعيين
+              </button>
             </div>
           </form>
         </div>

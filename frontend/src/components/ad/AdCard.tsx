@@ -6,6 +6,8 @@ import {
   FaRulerCombined,
   FaMapMarkerAlt,
   FaHeart,
+  FaUser,
+  FaStar,
 } from "react-icons/fa";
 
 export default function AdCard({
@@ -17,10 +19,11 @@ export default function AdCard({
 }) {
   return (
     <div className="group relative w-full max-w-md bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 mx-auto overflow-hidden border border-gray-100 hover:border-blue-200 hover:-translate-y-2">
+      {/* Image */}
       <figure className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10" />
         <Image
-          src={ad.images[0].url || "/placeholder.svg"}
+          src={ad.images[0]?.url || "/placeholder.svg"}
           alt={ad.title}
           className="w-full h-[260px] object-cover group-hover:scale-110 transition-transform duration-700"
           width={800}
@@ -28,11 +31,16 @@ export default function AdCard({
           sizes="(max-width: 768px) 100vw, 50vw"
         />
 
+        {/* Type badge */}
         <span className="absolute top-4 right-4 bg-primary text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg z-20">
           {ad.type}
         </span>
 
-        <button className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors z-20 group/heart">
+        {/* Favorite button */}
+        <button
+          className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors z-20 group/heart"
+          aria-label="أضف إلى المفضلة"
+        >
           <FaHeart
             className="text-gray-400 group-hover/heart:text-red-500 transition-colors"
             size={16}
@@ -40,11 +48,41 @@ export default function AdCard({
         </button>
       </figure>
 
+      {/* Content */}
       <div className="p-6 space-y-4">
+        {/* Title */}
         <h2 className="text-xl font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-primary transition-colors">
           {ad.title}
         </h2>
 
+        {/* User & Rating */}
+        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+            {ad.user.avatar ? (
+              <Image
+                src={ad.user.avatar}
+                alt={ad.user.name}
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <FaUser className="text-gray-400" size={16} />
+            )}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-900">{ad.user.name}</p>
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <FaStar className="text-yellow-400" size={12} />
+              <span className="font-medium text-gray-700">
+                {ad.user.avgRating?.toFixed(1) || "0.0"}
+              </span>
+              <span>({ad.user.totalReviews || 0} تقييم)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Location */}
         <div className="flex items-center text-gray-600 text-sm">
           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center ml-2">
             <FaMapMarkerAlt className="text-red-600" size={12} />
@@ -54,6 +92,7 @@ export default function AdCard({
           </span>
         </div>
 
+        {/* Features */}
         <div className="flex gap-4">
           {ad.rooms && (
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-xl">
@@ -77,10 +116,12 @@ export default function AdCard({
           )}
         </div>
 
+        {/* Address */}
         <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
           {ad.address}
         </p>
 
+        {/* Price & CTA */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex flex-col">
             <span className="text-xs text-gray-500 font-medium">السعر</span>

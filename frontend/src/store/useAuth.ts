@@ -14,12 +14,10 @@ interface User {
 interface AuthState {
   user: User | null;
   isAuth: boolean;
-  role: string;
   setLoggedIn(): void;
   setSignup(): void;
   setProfile(user: User): void;
   setLogout(): void;
-  setRole(role: string): void;
 }
 
 const useAuth = create(
@@ -27,7 +25,6 @@ const useAuth = create(
     (set) => ({
       user: null,
       isAuth: false,
-      role: "user",
       setLoggedIn: () => {
         set({ isAuth: true });
       },
@@ -39,9 +36,6 @@ const useAuth = create(
       },
       setLogout: () => {
         set({ isAuth: false, user: null });
-      },
-      setRole: (role: string) => {
-        set({ role });
       },
     }),
     {

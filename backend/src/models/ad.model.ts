@@ -2,11 +2,20 @@ import { DataTypes, Model } from "sequelize";
 import { CITIES, AREAS, PROPERTY_TYPES } from "../db/data.js";
 import { nanoid } from "nanoid";
 import sequelize from "../db/sql.js";
-import slugify from "slugify";
+import getSlug from "speakingurl";
+
+type User = {
+  publicId?: string;
+  name: string;
+  avatar?: string;
+  avgRating?: number;
+  totalReviews?: number;
+};
 
 interface AdAttributes {
   id?: string;
-  userId: string;
+  userId?: string;
+  user?: User;
   title: string;
   city: string;
   area: string;
@@ -32,7 +41,8 @@ interface AdMethods {
 
 class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare id?: string;
-  declare userId: string;
+  declare userId?: string;
+  declare user?: User;
   declare title: string;
   declare city: string;
   declare area: string;
@@ -50,6 +60,20 @@ class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare costInCredits?: number;
   declare isDeleted?: boolean;
   declare slug?: string;
+
+  public toJSON() {
+    const values = { ...this.get() };
+    delete values.userId;
+    delete values.costInCredits;
+    delete values.isDeleted;
+
+    if (this.user) {
+      const { publicId, name, avatar, avgRating, totalReviews } = this.user;
+      values.user = { publicId, name, avatar, avgRating, totalReviews };
+    }
+
+    return values;
+  }
 }
 
 Ad.init(
@@ -74,52 +98,25 @@ Ad.init(
     area: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        isIn: [AREAS],
-      },
+      validate: { isIn: [AREAS] },
     },
-    rooms: {
-      type: DataTypes.INTEGER,
-    },
-    space: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
+    rooms: { type: DataTypes.INTEGER },
+    space: { type: DataTypes.INTEGER, allowNull: false },
     propertyType: {
       type: DataTypes.ENUM(...PROPERTY_TYPES),
       allowNull: false,
     },
-    address: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    type: {
-      type: DataTypes.ENUM("تمليك", "إيجار"),
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
+    address: { type: DataTypes.STRING, allowNull: false },
+    type: { type: DataTypes.ENUM("تمليك", "إيجار"), allowNull: false },
+    description: { type: DataTypes.TEXT, allowNull: false },
     images: {
       type: DataTypes.ARRAY(DataTypes.JSON),
       allowNull: false,
       defaultValue: [],
     },
-    price: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: { min: 0 },
-    },
-    whatsappNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    viewsCount: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
-    },
+    price: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 0 } },
+    whatsappNumber: { type: DataTypes.STRING, allowNull: false },
+    viewsCount: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     whatsappClicksCount: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -127,10 +124,7 @@ Ad.init(
     },
     costInCredits: { type: DataTypes.INTEGER, defaultValue: 1 },
     isDeleted: { type: DataTypes.BOOLEAN, defaultValue: false },
-    slug: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    slug: { type: DataTypes.STRING, allowNull: false },
   },
   {
     sequelize,
@@ -144,7 +138,11 @@ Ad.init(
 Ad.beforeValidate((ad: Ad) => {
   if (!ad.slug) {
     const base = `${ad.propertyType}-${ad.city}-${ad.area}`;
-    ad.slug = `${slugify(base, { lower: true, strict: true, remove: undefined, locale: "ar" })}-${nanoid(12)}`;
+    ad.slug = `${getSlug(base, {
+      lang: "ar",
+      separator: "-",
+      maintainCase: false,
+    })}-${nanoid(12)}`;
   }
 });
 

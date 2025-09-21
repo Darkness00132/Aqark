@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/lib/zodSchemas";
+import { loginSchema } from "@/lib/userValidates";
 import { FaExclamationCircle } from "react-icons/fa";
 import useAuth from "@/store/useAuth";
 import useLogin from "@/hooks/useLogin";

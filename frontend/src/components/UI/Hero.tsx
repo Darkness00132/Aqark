@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FaHome, FaSearch, FaShieldAlt, FaUsers } from "react-icons/fa";
 
 export default function Hero() {
-  const role = useAuth((state) => state.user?.role);
+  const user = useAuth((state) => state.user);
   return (
     <div className="hero min-h-screen relative overflow-hidden">
       <div className="hero-content text-center relative z-10 px-4">
@@ -21,7 +21,7 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-16 max-w-2xl mx-auto">
-            {role === "landord" ? (
+            {user?.role !== "landlord" ? (
               <Link
                 href="/ads"
                 className="btn btn-primary btn-sm sm:btn-md lg:btn-lg px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-bold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 w-full sm:w-auto"

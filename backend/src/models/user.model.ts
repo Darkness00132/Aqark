@@ -80,7 +80,15 @@ class User
 
     return token;
   }
-  public toJSON() {
+  public toJSON(): {
+    publicId?: string;
+    name: string;
+    avatar?: string;
+    role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
+    avgRating?: number;
+    totalReviews?: number;
+    credits?: number;
+  } {
     return {
       publicId: this.publicId,
       name: this.name,

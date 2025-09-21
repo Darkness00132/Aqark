@@ -1,7 +1,7 @@
 "use client";
 import useResetPassword from "@/hooks/useResetPassword";
 import { z } from "zod";
-import { resetPasswordSchema } from "@/lib/zodSchemas";
+import { resetPasswordSchema } from "@/lib/userValidates";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 

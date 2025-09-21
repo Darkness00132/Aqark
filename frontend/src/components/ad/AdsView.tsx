@@ -19,7 +19,7 @@ export default function Adviews({ mine = false }: { mine?: boolean }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {data?.map((ad, i) => (
+      {data?.map((ad) => (
         <AdCard key={ad.slug} ad={ad} mine={mine} />
       ))}
     </div>
