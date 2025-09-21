@@ -55,7 +55,7 @@ Ad.init({
     },
     price: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 0 } },
     whatsappNumber: { type: DataTypes.STRING, allowNull: false },
-    viewsCount: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+    views: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     whatsappClicksCount: {
         type: DataTypes.INTEGER,
         allowNull: false,

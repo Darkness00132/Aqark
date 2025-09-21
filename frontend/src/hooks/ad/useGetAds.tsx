@@ -1,3 +1,4 @@
+"use client";
 import axiosInstance from "@/axiosInstance/axiosInstance";
 import useAd, { type Ad } from "@/store/useAd";
 import { useQuery } from "@tanstack/react-query";

@@ -1,5 +1,6 @@
 import User from "./user.model.js";
 import Transaction from "./transaction.model.js";
+import Wishlist from "./wishlist.model.js";
 import Review from "./review.model.js";
 import AdLogs from "./adLogs.model.js";
 import Ad from "./ad.model.js";
@@ -20,5 +21,10 @@ Transaction.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 AdLogs.belongsTo(User, { as: "user", foreignKey: "userId" });
 AdLogs.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 Ad.hasMany(AdLogs, { foreignKey: "adId", onDelete: "CASCADE" });
-export { User, Ad, AdLogs, Transaction, CreditsPlan, Review };
+//wishlist model
+Wishlist.belongsTo(User, { foreignKey: "userId", as: "user" });
+Wishlist.belongsTo(Ad, { foreignKey: "adId", as: "ad" });
+User.hasMany(Wishlist, { foreignKey: "userId", as: "wishlists" });
+Ad.hasMany(Wishlist, { foreignKey: "adId", as: "wishlists" });
+export { User, Ad, AdLogs, Transaction, CreditsPlan, Wishlist, Review };
 //# sourceMappingURL=associations.js.map

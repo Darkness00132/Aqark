@@ -12,17 +12,34 @@ import {
   FaStar,
 } from "react-icons/fa";
 import Link from "next/link";
+import AdImagesSwiper from "@/components/ad/AdImagesSwiper";
 
-const adCache = new Map<string, Ad>();
+type CachedAd = {
+  data: Ad;
+  expire: number;
+};
+
+const adCache = new Map<string, CachedAd>();
+const CACHE_DURATION = 5 * 60 * 1000;
+
 async function getAd(slug: string): Promise<Ad | null> {
+  const now = Date.now();
+
   if (adCache.has(slug)) {
-    return adCache.get(slug)!;
+    const cached = adCache.get(slug)!;
+    if (cached.expire > now) {
+      return cached.data;
+    }
+    adCache.delete(slug);
   }
+
   try {
     const { data } = await axiosInstance.get(`/ads/${slug}`);
-    adCache.set(slug, data.ad);
-    return data.ad;
-  } catch {
+    const ad: Ad = data.ad;
+    adCache.set(slug, { data: ad, expire: now + CACHE_DURATION });
+    return ad;
+  } catch (e) {
+    console.log(e);
     return null;
   }
 }
@@ -41,6 +58,7 @@ export async function generateMetadata({
       description: "لم يتم العثور على العقار المطلوب.",
     };
   }
+
   return {
     title: ad.title,
     description: ad.address,
@@ -72,6 +90,7 @@ export default async function AdSlug({
 }) {
   const { slug } = await params;
   const ad = await getAd(slug);
+
   if (!ad) {
     notFound();
   }
@@ -80,13 +99,7 @@ export default async function AdSlug({
     <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-8">
       {/* صور العقار */}
       <div className="rounded-2xl overflow-hidden shadow-md">
-        <Image
-          src={ad.images[0]?.url || "/placeholder.svg"}
-          alt={ad.title}
-          width={1200}
-          height={600}
-          className="object-cover w-full h-[350px] md:h-[450px]"
-        />
+        <AdImagesSwiper images={ad.images} alt={ad.title} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

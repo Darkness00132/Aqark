@@ -5,6 +5,7 @@ import { User, Ad, AdLogs, Transaction } from "../models/associations.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import adsFilters from "../utils/adsFilter.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
+import adCostInCredits from "../utils/adCostInCredits.js";
 export const getAllAds = asyncHandler(async (req, res) => {
     const { value, error } = getAdsSchema.validate(req.secureQuery);
     if (error) {
@@ -60,16 +61,31 @@ export const getAdBySlug = asyncHandler(async (req, res) => {
     if (!ad) {
         return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
     }
+    ad.views += 1;
+    await ad.save();
     res.status(200).json({ ad });
+});
+export const incrementWhatsappClicks = asyncHandler(async (req, res) => {
+    const { adId } = req.params;
+    const ad = await Ad.findByPk(adId);
+    if (!ad) {
+        return res.status(404).json({ message: "Ad not found" });
+    }
+    ad.whatsappClicksCount = (ad.whatsappClicksCount ?? 0) + 1;
+    await ad.save();
+    res
+        .status(200)
+        .json({ message: "Click counted", count: ad.whatsappClicksCount });
 });
 export const createAd = asyncHandler(async (req, res) => {
     const { error, value } = createAdSchema.validate(req.secureBody);
     if (error) {
         return res.status(400).json({ message: error.details[0] });
     }
-    let costInCredits = 1;
-    if (value.type === "تمليك")
-        costInCredits = 2;
+    const costInCredits = adCostInCredits({
+        type: value.type,
+        price: value.price,
+    });
     const ad = await Ad.create({
         ...value,
         userId: req.user.id,
@@ -105,6 +121,12 @@ export const updateAd = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: error.details });
     }
     await ad.update(value);
+    await AdLogs.create({
+        userId: req.user.id,
+        adId: ad.id,
+        action: "update",
+        description: `Updated ad with title: ${ad.title}`,
+    });
     return res.status(200).json({ message: "تم تحديث الإعلان بنجاح" });
 });
 export const deleteAd = asyncHandler(async (req, res) => {
@@ -126,6 +148,12 @@ export const deleteAd = asyncHandler(async (req, res) => {
     ad.images = [];
     ad.isDeleted = true;
     await ad.save();
+    await AdLogs.create({
+        userId: req.user.id,
+        adId: ad.id,
+        action: "delete",
+        description: `Deleted ad with title: ${ad.title}`,
+    });
     return res.status(200).json({ message: "تم حذف الإعلان بنجاح" });
 });
 //# sourceMappingURL=ads.controller.js.map
