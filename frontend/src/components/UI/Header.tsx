@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import useAuth from "@/store/useAuth";
-import useLogout from "@/hooks/useLogout";
+import useLogout from "@/hooks/user/useLogout";
 import { FaSearch, FaUser, FaSignOutAlt, FaCoins } from "react-icons/fa";
 import SubNav from "./SubNav";
 
@@ -47,13 +47,13 @@ export default function Header() {
           {!isAuth ? (
             <div className="flex gap-1 sm:gap-2">
               <Link
-                href="/login"
+                href="/user/login"
                 className="btn btn-ghost btn-xs sm:btn-md hover:bg-primary/10 hover:text-primary transition-all duration-300 text-xs sm:text-sm"
               >
                 تسجيل الدخول
               </Link>
               <Link
-                href="/signup"
+                href="/user/signup"
                 className="btn btn-primary btn-xs sm:btn-md hover:btn-primary/90 transition-all duration-300 text-xs sm:text-sm"
               >
                 إنشاء حساب
@@ -88,7 +88,7 @@ export default function Header() {
                 </li>
                 <li>
                   <Link
-                    href="/profile"
+                    href="/user/profile"
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300"
                   >
                     <FaUser className="text-lg" />

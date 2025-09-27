@@ -3,7 +3,6 @@ import { Cairo } from "next/font/google";
 import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const geistCairo = Cairo({ subsets: ["arabic"] });
@@ -70,7 +69,6 @@ export default function RootLayout({
           <main className="min-h-screen pb-20">{children}</main>
           <Footer />
         </Provider>
-        <SpeedInsights />
       </body>
     </html>
   );

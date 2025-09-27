@@ -1,5 +1,5 @@
 "use client";
-import useForgetPassword from "@/hooks/useForgetPassword";
+import useForgetPassword from "@/hooks/user/useForgetPassword";
 import { useRef } from "react";
 
 export default function ForgetPasswordModal() {

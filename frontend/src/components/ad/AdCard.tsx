@@ -25,9 +25,9 @@ export default function AdCard({
         <Image
           src={ad.images[0]?.url || "/placeholder.svg"}
           alt={ad.title}
-          className="w-full h-[260px] object-cover group-hover:scale-110 transition-transform duration-700"
           width={800}
           height={600}
+          className="w-full h-[260px] object-cover group-hover:scale-110 transition-transform duration-700"
           sizes="(max-width: 768px) 100vw, 50vw"
         />
 

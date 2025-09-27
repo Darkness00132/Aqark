@@ -35,7 +35,8 @@ export default function AdImagesSwiper({ images, alt }: Props) {
             alt={alt}
             width={1200}
             height={600}
-            className="object-cover w-full h-full"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 800px, 1200px"
+            className="object-cover object-center w-full h-[350px] md:h-[450px]"
           />
         </SwiperSlide>
       ))}

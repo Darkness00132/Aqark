@@ -18,13 +18,13 @@ export interface Ad {
   rooms: number;
   space: number;
   propertyType: string;
-  type: string;
+  type: "تمليك" | "إيجار" | undefined;
   address: string;
   description: string;
   price: number;
   slug: string;
   whatsappNumber: string;
-  images: Array<{ url: string; key?: string }>;
+  images: Array<{ url: string; key: string }>;
 }
 
 export interface AdFilters {

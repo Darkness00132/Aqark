@@ -45,12 +45,24 @@ export const getAllAds = asyncHandler(async (req, res) => {
 export const getMyAds = asyncHandler(async (req, res) => {
     const ads = await Ad.findAll({
         where: { userId: req.user.id },
+        include: [{ model: User, as: "user" }],
         order: [["createdAt", "DESC"]],
     });
     res.status(200).json({ ads });
 });
+export const getMyAd = asyncHandler(async (req, res) => {
+    const { id } = sanitizeXSS(req.params);
+    if (!id) {
+        return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
+    }
+    const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
+    if (!ad) {
+        return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
+    }
+    res.status(200).json({ ad });
+});
 export const getAdBySlug = asyncHandler(async (req, res) => {
-    const slug = sanitizeXSS(req.params.slug);
+    const { slug } = sanitizeXSS(req.params);
     if (!slug) {
         return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
     }
@@ -61,21 +73,22 @@ export const getAdBySlug = asyncHandler(async (req, res) => {
     if (!ad) {
         return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
     }
-    ad.views += 1;
-    await ad.save();
+    ad.increment("views", { by: 1 });
     res.status(200).json({ ad });
 });
 export const incrementWhatsappClicks = asyncHandler(async (req, res) => {
-    const { adId } = req.params;
-    const ad = await Ad.findByPk(adId);
-    if (!ad) {
-        return res.status(404).json({ message: "Ad not found" });
+    const { slug } = sanitizeXSS(req.params);
+    if (!slug) {
+        return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
     }
-    ad.whatsappClicksCount = (ad.whatsappClicksCount ?? 0) + 1;
-    await ad.save();
-    res
-        .status(200)
-        .json({ message: "Click counted", count: ad.whatsappClicksCount });
+    const [rows, affectedRows] = await Ad.increment("whatsappClicksCount", {
+        by: 1,
+        where: { slug },
+    });
+    if (affectedRows === 0) {
+        return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
+    }
+    res.status(200).json();
 });
 export const createAd = asyncHandler(async (req, res) => {
     const { error, value } = createAdSchema.validate(req.secureBody);
@@ -109,8 +122,8 @@ export const createAd = asyncHandler(async (req, res) => {
     res.status(201).json({ ad });
 });
 export const updateAd = asyncHandler(async (req, res) => {
-    const { adId } = sanitizeXSS(req.params);
-    const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
+    const { id } = sanitizeXSS(req.params);
+    const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
     if (!ad) {
         return res
             .status(404)
@@ -118,7 +131,7 @@ export const updateAd = asyncHandler(async (req, res) => {
     }
     const { error, value } = updateAdSchema.validate(req.secureBody);
     if (error) {
-        return res.status(400).json({ message: error.details });
+        return res.status(400).json({ message: error.details[0].message });
     }
     await ad.update(value);
     await AdLogs.create({
@@ -130,8 +143,8 @@ export const updateAd = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: "تم تحديث الإعلان بنجاح" });
 });
 export const deleteAd = asyncHandler(async (req, res) => {
-    const { adId } = sanitizeXSS(req.params);
-    const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
+    const { id } = sanitizeXSS(req.params);
+    const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
     if (!ad) {
         return res
             .status(404)

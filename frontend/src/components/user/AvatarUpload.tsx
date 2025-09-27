@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { FiUploadCloud } from "react-icons/fi";
 import { ChangeEvent, useRef } from "react";
-import useUploadAvatar from "@/hooks/useUploadAvatar";
+import useUploadAvatar from "@/hooks/user/useUploadAvatar";
 
 export default function AvatarUplaod({
   userAvatar,

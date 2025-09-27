@@ -2,7 +2,7 @@
 import z from "zod";
 import useAuth from "@/store/useAuth";
 import AvatarUplaod from "./AvatarUpload";
-import useUpdateProfile from "@/hooks/useUpdateProfile";
+import useUpdateProfile from "@/hooks/user/useUpdateProfile";
 import { useEffect, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

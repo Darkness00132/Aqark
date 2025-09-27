@@ -65,12 +65,12 @@ router.get("/auth/google", (req, res, next) => {
 router.get("/auth/google/callback", (req, res, next) => {
     passport.authenticate("google", {
         session: false,
-        failureRedirect: process.env.FRONTEND_URL + "/signup",
+        failureRedirect: process.env.FRONTEND_URL + "/user/signup",
     })(req, res, next);
 }, async (req, res, next) => {
     try {
         if (!req.user) {
-            return res.redirect(`${process.env.FRONTEND_URL}/signup`);
+            return res.redirect(`${process.env.FRONTEND_URL}/user/signup`);
         }
         const token = await req.user.generateAuthToken();
         welcomeEmail(req.user.email);

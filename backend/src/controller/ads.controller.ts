@@ -56,14 +56,27 @@ export const getMyAds = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const ads = await Ad.findAll({
       where: { userId: req.user.id },
+      include: [{ model: User, as: "user" }],
       order: [["createdAt", "DESC"]],
     });
     res.status(200).json({ ads });
   }
 );
 
+export const getMyAd = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id } = sanitizeXSS(req.params);
+  if (!id) {
+    return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
+  }
+  const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
+  if (!ad) {
+    return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
+  }
+  res.status(200).json({ ad });
+});
+
 export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
-  const slug = sanitizeXSS(req.params.slug);
+  const { slug } = sanitizeXSS(req.params);
   if (!slug) {
     return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
   }
@@ -74,26 +87,28 @@ export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
   if (!ad) {
     return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
   }
-  ad.views! += 1;
-  await ad.save();
+  ad.increment("views", { by: 1 });
+
   res.status(200).json({ ad });
 });
 
 export const incrementWhatsappClicks = asyncHandler(
   async (req: Request, res: Response) => {
-    const { adId } = req.params;
+    const { slug } = sanitizeXSS(req.params);
 
-    const ad = await Ad.findByPk(adId);
-    if (!ad) {
-      return res.status(404).json({ message: "Ad not found" });
+    if (!slug) {
+      return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
+    }
+    const [rows, affectedRows] = await Ad.increment("whatsappClicksCount", {
+      by: 1,
+      where: { slug },
+    });
+
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
     }
 
-    ad.whatsappClicksCount = (ad.whatsappClicksCount ?? 0) + 1;
-    await ad.save();
-
-    res
-      .status(200)
-      .json({ message: "Click counted", count: ad.whatsappClicksCount });
+    res.status(200).json();
   }
 );
 
@@ -137,8 +152,8 @@ export const createAd = asyncHandler(
 
 export const updateAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { adId } = sanitizeXSS(req.params);
-    const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
+    const { id } = sanitizeXSS(req.params);
+    const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
     if (!ad) {
       return res
         .status(404)
@@ -146,7 +161,7 @@ export const updateAd = asyncHandler(
     }
     const { error, value } = updateAdSchema.validate(req.secureBody);
     if (error) {
-      return res.status(400).json({ message: error.details });
+      return res.status(400).json({ message: error.details[0].message });
     }
     await ad.update(value);
 
@@ -163,8 +178,8 @@ export const updateAd = asyncHandler(
 
 export const deleteAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { adId } = sanitizeXSS(req.params);
-    const ad = await Ad.findOne({ where: { id: adId, userId: req.user.id } });
+    const { id } = sanitizeXSS(req.params);
+    const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
     if (!ad) {
       return res
         .status(404)

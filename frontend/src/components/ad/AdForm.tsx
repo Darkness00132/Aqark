@@ -1,17 +1,17 @@
 "use client";
 
-import Select, { SingleValue } from "react-select";
 import { z } from "zod";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createAdSchema } from "@/lib/adValidates";
-import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "@/lib/data";
+import { PROPERTY_TYPES } from "@/lib/data";
 import useCreateAd from "@/hooks/ad/useCreateAd";
 import ImageUpload from "./ImagesUpload";
+import AreaSelect from "./Select/AreaSelect";
+import CitySelect from "./Select/CitySelect";
 
 export default function AdForm() {
-  const [images, setImages] = useState<File[]>([]);
+  const images: Array<File> = [];
 
   type CreateAdSchema = typeof createAdSchema;
 
@@ -29,13 +29,6 @@ export default function AdForm() {
   });
 
   const selectedCity = watch("city");
-  const cityOptions = CITIES.map((city) => ({ value: city, label: city }));
-  const areaOptions = selectedCity
-    ? CITIES_WITH_AREAS[selectedCity].map((area) => ({
-        value: area,
-        label: area,
-      }))
-    : [];
 
   const { mutate, isPending } = useCreateAd();
 
@@ -66,57 +59,14 @@ export default function AdForm() {
       </div>
 
       {/* City */}
-      <div className="form-control">
-        <Controller
-          name="city"
-          control={control}
-          render={({ field }) => (
-            <Select
-              options={cityOptions}
-              placeholder="اختر المحافظة"
-              value={
-                cityOptions.find((option) => option.value === field.value) ||
-                null
-              }
-              onChange={(
-                option: SingleValue<{ value: string; label: string }>
-              ) => field.onChange(option?.value)}
-              onBlur={field.onBlur}
-              instanceId="city-select"
-            />
-          )}
-        />
-        {errors.city && (
-          <span className="text-red-500 mt-1">{errors.city.message}</span>
-        )}
-      </div>
+      <CitySelect control={control} error={errors.city?.message} />
 
       {/* Area */}
-      <div className="form-control">
-        <Controller
-          name="area"
-          control={control}
-          render={({ field }) => (
-            <Select
-              options={areaOptions}
-              placeholder="اختر المنطقة"
-              value={
-                areaOptions.find((option) => option.value === field.value) ||
-                null
-              }
-              onChange={(
-                option: SingleValue<{ value: string; label: string }>
-              ) => field.onChange(option?.value)}
-              onBlur={field.onBlur}
-              instanceId="area-select"
-              isDisabled={!selectedCity}
-            />
-          )}
-        />
-        {errors.area && (
-          <span className="text-red-500 mt-1">{errors.area.message}</span>
-        )}
-      </div>
+      <AreaSelect
+        control={control}
+        selectedCity={selectedCity}
+        error={errors.area?.message}
+      />
 
       {/* Rooms */}
       <div className="form-control">
@@ -235,7 +185,7 @@ export default function AdForm() {
       </div>
 
       {/* Images Upload */}
-      <ImageUpload setImages={setImages} images={images} />
+      <ImageUpload images={images} />
       {/* Submit */}
       <div className="col-span-1 md:col-span-3 mt-4 text-center">
         <button

@@ -14,7 +14,7 @@ export default function useLogout() {
     },
     onSuccess: () => {
       setLogout();
-      router.push("/login");
+      router.push("/user/login");
     },
   });
 }

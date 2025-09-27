@@ -8,6 +8,7 @@ import {
   updateAd,
   deleteAd,
   incrementWhatsappClicks,
+  getMyAd,
 } from "../controller/ads.controller.js";
 
 const router = Router();
@@ -16,9 +17,11 @@ router.get("/all", getAllAds);
 
 router.get("/me", auth, getMyAds);
 
+router.get("/me/:id", auth, getMyAd);
+
 router.get("/:slug", getAdBySlug);
 
-router.post("/increment-whatsapp-clicks/:id", incrementWhatsappClicks);
+router.post("/increment-whatsapp-clicks/:slug", incrementWhatsappClicks);
 
 router.post("/create", auth, createAd);
 

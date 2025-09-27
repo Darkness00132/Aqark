@@ -1,5 +1,5 @@
 "use client";
-import useResetPassword from "@/hooks/useResetPassword";
+import useResetPassword from "@/hooks/user/useResetPassword";
 import { z } from "zod";
 import { resetPasswordSchema } from "@/lib/userValidates";
 import { useForm } from "react-hook-form";

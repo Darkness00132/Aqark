@@ -1,5 +1,5 @@
 "use client";
-import useSignup from "@/hooks/useSignup";
+import useSignup from "@/hooks/user/useSignup";
 import useAuth from "@/store/useAuth";
 import { z } from "zod";
 import { FaExclamationCircle } from "react-icons/fa";

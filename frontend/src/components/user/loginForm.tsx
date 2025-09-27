@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/userValidates";
 import { FaExclamationCircle } from "react-icons/fa";
 import useAuth from "@/store/useAuth";
-import useLogin from "@/hooks/useLogin";
+import useLogin from "@/hooks/user/useLogin";
 
 export default function LoginForm() {
   const router = useRouter();

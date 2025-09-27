@@ -87,13 +87,13 @@ router.get(
   (req, res, next) => {
     passport.authenticate("google", {
       session: false,
-      failureRedirect: process.env.FRONTEND_URL + "/signup",
+      failureRedirect: process.env.FRONTEND_URL + "/user/signup",
     })(req, res, next);
   },
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.redirect(`${process.env.FRONTEND_URL}/signup`);
+        return res.redirect(`${process.env.FRONTEND_URL}/user/signup`);
       }
 
       const token = await req.user.generateAuthToken();

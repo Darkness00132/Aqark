@@ -1,5 +1,5 @@
 "use client";
-import useProfile from "@/hooks/useProfile";
+import useProfile from "@/hooks/user/useProfile";
 
 export default function AuthInitializer({
   login,

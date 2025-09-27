@@ -111,7 +111,7 @@ export default async function AdSlug({
             </h1>
 
             <div className="flex items-center text-gray-600 mb-4">
-              <FaMapMarkerAlt className="ml-2 text-accent w-4 h-4" />
+              <FaMapMarkerAlt className="ml-2 text-red-500 w-4 h-4" />
               <span className="font-medium">
                 {ad.city} - {ad.area}
               </span>
@@ -208,7 +208,7 @@ export default async function AdSlug({
 
             {/* زر الملف الشخصي */}
             <Link
-              href={`/users/${ad.user.publicId}`}
+              href={`/user/${ad.user.publicId}`}
               className="mt-4 inline-block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               عرض صفحة المعلن

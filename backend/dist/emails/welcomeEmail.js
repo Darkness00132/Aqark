@@ -1,12 +1,12 @@
-import { SendEmailCommand } from '@aws-sdk/client-ses';
-import sesClient from '../utils/amazonSES.js';
+import { SendEmailCommand } from "@aws-sdk/client-ses";
+import sesClient from "../utils/amazonSES.js";
 async function WelcomeEmail(email) {
     try {
         const result = await sesClient.send(new SendEmailCommand({
             Source: process.env.EMAIL_SOURCE,
             Destination: { ToAddresses: [email] },
             Message: {
-                Subject: { Data: 'Welcome to Our Service!' },
+                Subject: { Data: "Welcome to Our Service!" },
                 Body: {
                     Html: {
                         Data: `
@@ -21,10 +21,10 @@ async function WelcomeEmail(email) {
                 },
             },
         }));
-        console.log('Email sent: ', result);
+        console.log("Email sent: ", result);
     }
     catch (error) {
-        console.error('Error sending welcome email:', error);
+        console.error("Error sending welcome email:", error);
     }
 }
 export default WelcomeEmail;
