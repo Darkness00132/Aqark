@@ -1,8 +1,17 @@
-// app/sitemap.xml/route.ts
 import axiosInstance from "@/axiosInstance/axiosInstance";
 import { NextResponse } from "next/server";
 import { type Ad } from "@/store/useAd";
-import { CITIES_WITH_AREAS } from "@/lib/data"; // your city/area data
+import { CITIES_WITH_AREAS } from "@/lib/data";
+
+// Escape XML special characters
+function escapeXml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
 
 export async function GET() {
   try {
@@ -61,13 +70,14 @@ export async function GET() {
 
     const allUrls = [...urls, ...adUrls, ...filterUrls];
 
+    // Build XML with escaped URLs
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${allUrls
     .map(
       ({ loc, changefreq, priority }) => `
   <url>
-    <loc>${loc}</loc>
+    <loc>${escapeXml(loc)}</loc>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`

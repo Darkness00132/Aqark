@@ -26,18 +26,20 @@ export default function AdImagesSwiper({ images, alt }: Props) {
         disableOnInteraction: true,
         pauseOnMouseEnter: true,
       }}
-      className="w-full h-[350px] md:h-[450px]"
+      className="w-full aspect-[4/3] sm:aspect-[16/9] rounded-2xl overflow-hidden"
     >
       {images.map((img, idx) => (
         <SwiperSlide key={idx}>
-          <Image
-            src={img.url}
-            alt={alt}
-            width={1200}
-            height={600}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 800px, 1200px"
-            className="object-cover object-center w-full h-[350px] md:h-[450px]"
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={img.url}
+              alt={alt}
+              fill
+              priority={idx === 0}
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 800px, 1200px"
+              className="object-cover object-center"
+            />
+          </div>
         </SwiperSlide>
       ))}
     </Swiper>

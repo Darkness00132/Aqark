@@ -1,52 +1,66 @@
+"use client";
+
 import Image from "next/image";
+import { useDropzone } from "react-dropzone";
+import imageCompression from "browser-image-compression";
 import { FiUploadCloud } from "react-icons/fi";
-import { ChangeEvent, useRef } from "react";
 import useUploadAvatar from "@/hooks/user/useUploadAvatar";
 
-export default function AvatarUplaod({
-  userAvatar,
-}: {
-  userAvatar: string | undefined;
-}) {
-  const avatar = useRef<HTMLInputElement>(null);
+export default function AvatarUpload({ userAvatar }: { userAvatar?: string }) {
   const { mutate, isPending } = useUploadAvatar();
 
-  function handleAvatarUpload(e: ChangeEvent<HTMLInputElement>) {
-    const avatar = e.target.files?.[0];
-    if (!avatar) return;
-    const formData = new FormData();
-    formData.append("avatar", avatar);
-    mutate(formData);
+  async function handleDrop(acceptedFiles: File[]) {
+    if (!acceptedFiles?.[0]) return;
+
+    try {
+      // compress image
+      const compressed = await imageCompression(acceptedFiles[0], {
+        maxSizeMB: 5,
+        maxWidthOrHeight: 500,
+        useWebWorker: true,
+      });
+
+      // prepare form data
+      const formData = new FormData();
+      formData.append("avatar", compressed);
+
+      mutate(formData);
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+    }
   }
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: handleDrop,
+    accept: { "image/*": [] },
+    multiple: false,
+  });
 
   return (
     <div
-      className="flex flex-col justify-center items-center cursor-pointer relative group hover:opacity-85 transition-opacity"
-      onClick={() => avatar.current?.click()}
-      aria-disabled={isPending}
+      {...getRootProps()}
+      className={`flex flex-col justify-center items-center cursor-pointer relative group transition-opacity rounded-full w-[250px] h-[250px] ${
+        isDragActive ? "ring-2 ring-primary opacity-90" : "hover:opacity-85"
+      }`}
     >
       <Image
         src={userAvatar || "/avatar.jpg"}
         alt="user avatar"
-        width={250}
-        height={250}
+        fill
+        sizes="250px"
         className="object-cover object-center rounded-full"
         priority
       />
-      <div className="absolute inset-0 flex justify-center items-center ">
+
+      {/* Overlay icon */}
+      <div className="absolute inset-0 flex justify-center items-center">
         <FiUploadCloud
           size={50}
           className="opacity-0 group-hover:opacity-85 text-base-100 transition-opacity"
         />
       </div>
-      <input
-        type="file"
-        className="hidden"
-        ref={avatar}
-        accept="image/*"
-        onChange={handleAvatarUpload}
-        disabled={isPending}
-      />
+
+      <input {...getInputProps()} disabled={isPending} />
     </div>
   );
 }
