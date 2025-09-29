@@ -31,13 +31,7 @@ const nextConfig: NextConfig = {
       transform: "react-icons/{{member}}",
     },
   },
-  presets: [
-    "next/babel",
-    {
-      loose: true,
-      modules: false,
-    },
-  ],
+  optimizeCss: true,
 };
 
 export default nextConfig;

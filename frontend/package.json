@@ -41,7 +41,6 @@
     "typescript": "^5"
   },
   "browserslist": [
-    "last 2 versions",
     "not dead",
     "not ie 11"
   ]
