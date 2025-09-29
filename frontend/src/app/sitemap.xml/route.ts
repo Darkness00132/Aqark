@@ -67,7 +67,10 @@ ${allUrls
 </urlset>`;
 
     return new NextResponse(sitemapXml, {
-      headers: { "Content-Type": "text/xml" },
+      headers: {
+        "Content-Type": "text/xml",
+        "Cache-Control": "s-maxage=3600, stale-while-revalidate",
+      },
     });
   } catch (err) {
     console.error("Sitemap generation failed:", err);
