@@ -48,6 +48,10 @@ export const getMyAds = asyncHandler(async (req, res) => {
     });
     res.status(200).json({ ads });
 });
+export const getSitemapAds = asyncHandler(async (req, res) => {
+    const ads = (await Ad.findAll({ attributes: ["slug"] })) || [];
+    res.status(200).json({ ads });
+});
 export const getMyAd = asyncHandler(async (req, res) => {
     const { id } = sanitizeXSS(req.params);
     if (!id) {

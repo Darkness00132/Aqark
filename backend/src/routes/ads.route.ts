@@ -9,6 +9,7 @@ import {
   deleteAd,
   incrementWhatsappClicks,
   getMyAd,
+  getSitemapAds,
 } from "../controller/ads.controller.js";
 
 const router = Router();
@@ -16,6 +17,8 @@ const router = Router();
 router.get("/all", getAllAds);
 
 router.get("/me", auth, getMyAds);
+
+router.get("/sitemap", getSitemapAds);
 
 router.get("/me/:id", auth, getMyAd);
 

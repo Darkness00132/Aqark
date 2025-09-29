@@ -61,6 +61,13 @@ export const getMyAds = asyncHandler(
   }
 );
 
+export const getSitemapAds = asyncHandler(
+  async (req: Request, res: Response) => {
+    const ads = (await Ad.findAll({ attributes: ["slug"] })) || [];
+    res.status(200).json({ ads });
+  }
+);
+
 export const getMyAd = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = sanitizeXSS(req.params);
   if (!id) {

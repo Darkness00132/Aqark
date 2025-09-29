@@ -5,7 +5,6 @@ import cors from "cors";
 import sequelize from "./db/sql.js";
 import { RateLimiterMemory, RateLimiterRes } from "rate-limiter-flexible";
 import helmet from "helmet";
-import xss from "xss";
 import googleRouter from "./routes/google.route.js";
 import userRouter from "./routes/user.route.js";
 import uploadRouter from "./routes/upload.route.js";
