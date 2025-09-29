@@ -137,12 +137,16 @@ Ad.init(
 
 Ad.beforeValidate((ad: Ad) => {
   if (!ad.slug) {
-    const base = `${ad.propertyType}-${ad.city}-${ad.area}`;
-    ad.slug = `${getSlug(base, {
-      lang: "ar",
-      separator: "-",
-      maintainCase: false,
-    })}-${nanoid(12)}`;
+    const parts = [
+      ad.title,
+      ad.propertyType,
+      ad.city,
+      ad.area,
+      ad.rooms ? `${ad.rooms}غ` : null,
+      ad.space ? `${ad.space}م` : null,
+    ].filter(Boolean);
+    const baseSlug = parts.join("-");
+    ad.slug = `${baseSlug}-${nanoid(12)}`;
   }
 });
 

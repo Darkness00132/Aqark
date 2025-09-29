@@ -45,9 +45,7 @@ export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
   });
 
   res.status(200).json({
-    totalItems: count,
     totalPages: Math.ceil(count / limit),
-    currentPage: page,
     ads: rows,
   });
 });

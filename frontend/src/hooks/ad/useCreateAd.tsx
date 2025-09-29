@@ -20,14 +20,16 @@ export default function useCreateAd() {
         toast.error("يجب رفع صورة واحدة على الاقل");
         throw new Error("يجب رفع صورة واحدة على الاقل");
       }
-      console.log(data);
+
       const formData = new FormData();
       images.forEach((img) => formData.append("images", img));
+
       const response = await axiosInstance.post("/upload/adImages", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       const adPayload = { ...data, images: response.data.images };
       const response2 = await axiosInstance.post("/ads/create", adPayload);
+
       return response2.data;
     },
     onSuccess: () => {

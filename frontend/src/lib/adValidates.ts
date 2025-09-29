@@ -21,7 +21,7 @@ export const createAdSchema = z
     space: z
       .number({ error: "مساحة العقار يجب أن تكون رقمًا" })
       .int({ message: "مساحة العقار يجب أن تكون رقمًا صحيحًا" })
-      .min(50, "مساحة العقار يجب أن تكون على الأقل 50")
+      .min(10, "مساحة العقار يجب أن تكون على الأقل 10")
       .max(1000, "مساحة العقار يجب أن لا تتجاوز 1000"),
 
     propertyType: z.enum(PROPERTY_TYPES, { error: "نوع العقار غير صحيح" }),
@@ -86,7 +86,7 @@ export const AdfiltersSchema = z
     space: z
       .number({ error: "مساحة العقار يجب أن تكون رقمًا" })
       .int({ message: "مساحة العقار يجب أن تكون رقمًا صحيحًا" })
-      .min(50, "مساحة العقار يجب أن تكون على الأقل 50")
+      .min(10, "مساحة العقار يجب أن تكون على الأقل 10")
       .max(1000, "مساحة العقار يجب أن لا تتجاوز 1000")
       .optional(),
 
@@ -126,7 +126,7 @@ export const AdfiltersSchema = z
       .int({ message: "السعر يجب أن يكون رقمًا صحيحًا" })
       .min(0, "السعر يجب أن لا يكون سالبًا")
       .optional(),
-    orderBy: z.string().optional(),
+    order: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.city && data.area) {
@@ -162,7 +162,7 @@ export const AdEditSchema = z
     space: z
       .number({ error: "مساحة العقار يجب أن تكون رقمًا" })
       .int({ message: "مساحة العقار يجب أن تكون رقمًا صحيحًا" })
-      .min(50, "مساحة العقار يجب أن تكون على الأقل 50")
+      .min(10, "مساحة العقار يجب أن تكون على الأقل 10")
       .max(1000, "مساحة العقار يجب أن لا تتجاوز 1000")
       .optional(),
 

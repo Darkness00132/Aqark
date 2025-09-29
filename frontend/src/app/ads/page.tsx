@@ -3,7 +3,7 @@ import AdsView from "@/components/ad/AdsView";
 
 export default function Ads() {
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen px-4">
       <div className="mb-4">
         <AdFilters />
       </div>

@@ -1,6 +1,7 @@
 import axiosInstance from "@/axiosInstance/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 type EditAdVariables = {
@@ -11,6 +12,7 @@ type EditAdVariables = {
 };
 
 export default function useEditAd() {
+  const router = useRouter();
   return useMutation({
     mutationKey: ["edit-ad"],
     mutationFn: async ({
@@ -20,7 +22,6 @@ export default function useEditAd() {
       images,
     }: EditAdVariables) => {
       if (deletedImages.length > 0 || images.length > 0) {
-        console.log("1");
         const formData = new FormData();
         formData.append("deletedImages", JSON.stringify(deletedImages));
 
@@ -34,12 +35,12 @@ export default function useEditAd() {
       }
 
       if (Object.keys(data).length > 0) {
-        console.log("2");
         await axiosInstance.put("/ads/" + id, data);
       }
     },
     onSuccess: async () => {
       toast.success("تم تعديل الإعلان");
+      router.push("/ads/my-ads");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log("Edit Ad Error:  ", error?.response?.data?.message);

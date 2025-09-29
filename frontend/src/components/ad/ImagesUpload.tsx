@@ -10,12 +10,14 @@ type DefaultImage = { url: string; key?: string };
 
 type ImageUploadProps = {
   images: File[];
+  setImages: React.Dispatch<React.SetStateAction<File[]>>;
   defaultImages?: DefaultImage[];
   deletedImages?: DefaultImage[];
 };
 
 export default function ImageUpload({
   images,
+  setImages,
   defaultImages = [],
   deletedImages,
 }: ImageUploadProps) {
@@ -36,7 +38,8 @@ export default function ImageUpload({
           )
         );
 
-        images.push(...compressedFiles);
+        // Add new files to state
+        setImages((prev) => [...prev, ...compressedFiles]);
 
         const urls = compressedFiles.map((file) => URL.createObjectURL(file));
         setPreviews((prev) => [...prev, ...urls]);
@@ -44,7 +47,7 @@ export default function ImageUpload({
         console.error("Error compressing images:", error);
       }
     },
-    [images]
+    [setImages]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -58,7 +61,7 @@ export default function ImageUpload({
       deletedImages.push(localDefaults[index]);
       setLocalDefaults((prev) => prev.filter((_, i) => i !== index));
     } else {
-      images.splice(index, 1);
+      setImages((prev) => prev.filter((_, i) => i !== index));
       URL.revokeObjectURL(previews[index]);
       setPreviews((prev) => prev.filter((_, i) => i !== index));
     }

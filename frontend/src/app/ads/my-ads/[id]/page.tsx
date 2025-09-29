@@ -18,24 +18,27 @@ export default function EditAd() {
 
   if (!ad) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-lg">
         لا يوجد إعلان بهذا المعرف
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            تعديل الاعلان عقاري
+    <div className="min-h-screen py-12 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
+            تعديل الإعلان العقاري
           </h1>
+          <p className="text-gray-600 text-lg">
+            قم بتحديث بيانات إعلانك بسهولة
+          </p>
         </div>
 
-        <div className="bg-base-200 backdrop-blur-sm rounded-3xl shadow-2xl border border-border/50 overflow-hidden">
-          <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 border-b border-border/50">
-            <h2 className="text-xl font-semibold text-card-foreground">
+        <div className="bg-white rounded-3xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 border-b">
+            <h2 className="text-xl font-semibold text-gray-800">
               معلومات العقار
             </h2>
           </div>

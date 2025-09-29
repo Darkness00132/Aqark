@@ -2,7 +2,6 @@ import { DataTypes, Model } from "sequelize";
 import { CITIES, AREAS, PROPERTY_TYPES } from "../db/data.js";
 import { nanoid } from "nanoid";
 import sequelize from "../db/sql.js";
-import getSlug from "speakingurl";
 class Ad extends Model {
     toJSON() {
         const values = { ...this.get() };
@@ -73,12 +72,16 @@ Ad.init({
 });
 Ad.beforeValidate((ad) => {
     if (!ad.slug) {
-        const base = `${ad.propertyType}-${ad.city}-${ad.area}`;
-        ad.slug = `${getSlug(base, {
-            lang: "ar",
-            separator: "-",
-            maintainCase: false,
-        })}-${nanoid(12)}`;
+        const parts = [
+            ad.title,
+            ad.propertyType,
+            ad.city,
+            ad.area,
+            ad.rooms ? `${ad.rooms}غ` : null,
+            ad.space ? `${ad.space}م` : null,
+        ].filter(Boolean);
+        const baseSlug = parts.join("-");
+        ad.slug = `${baseSlug}-${nanoid(12)}`;
     }
 });
 export default Ad;

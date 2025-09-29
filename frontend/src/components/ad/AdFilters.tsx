@@ -37,18 +37,7 @@ export default function AdFilters() {
         )
       )
     ),
-    defaultValues: {
-      city: "",
-      area: "",
-      propertyType: "",
-      type: "",
-      rooms: undefined,
-      space: undefined,
-      minPrice: undefined,
-      maxPrice: undefined,
-      orderBy: "",
-    },
-    values: filters,
+    defaultValues: filters,
   });
 
   const selectedCity = watch("city");
@@ -62,11 +51,15 @@ export default function AdFilters() {
     : [];
 
   const types = ["تمليك", "إيجار"];
-  const orderOptions = ["تاريخ الإضافة", "السعر"];
   const inputClass = "input input-bordered w-full";
 
   const onSubmit = (data: AdFiltersForm) => {
     setFilters(data);
+    //close drawer
+    const drawerCheckbox = document.getElementById(
+      "filter-drawer"
+    ) as HTMLInputElement;
+    if (drawerCheckbox) drawerCheckbox.checked = false;
   };
 
   return (
@@ -155,10 +148,8 @@ export default function AdFilters() {
 
             {/* Property Type */}
             <div>
-              <select {...register("propertyType")} className={inputClass}>
-                <option value="" disabled>
-                  اختر نوع العقار
-                </option>
+              <select {...register("propertyType")} className="select w-full">
+                <option value="">اختر نوع العقار</option>
                 {PROPERTY_TYPES.map((p) => (
                   <option key={p} value={p}>
                     {p}
@@ -174,10 +165,8 @@ export default function AdFilters() {
 
             {/* Type */}
             <div>
-              <select {...register("type")} className={inputClass}>
-                <option value="" disabled>
-                  اختر نوع العرض
-                </option>
+              <select {...register("type")} className="select w-full">
+                <option value="">اختر نوع العرض</option>
                 {types.map((t) => (
                   <option key={t} value={t}>
                     {t}
@@ -279,17 +268,19 @@ export default function AdFilters() {
 
             {/* Order By */}
             <div>
-              <select {...register("orderBy")} className={inputClass}>
-                <option value="">ترتيب حسب</option>
-                {orderOptions.map((o) => (
-                  <option key={o} value={o === "السعر" ? "price" : "createdAt"}>
-                    {o}
-                  </option>
-                ))}
+              <select
+                {...register("order")}
+                className="select w-full"
+                defaultValue="DESC"
+              >
+                <option value="DESC">الأحدث أولاً</option>
+                <option value="ASC">الأقدم أولاً</option>
+                <option value="lowPrice">السعر الأقل</option>
+                <option value="highPrice">السعر الأعلى</option>
               </select>
-              {errors.orderBy && (
+              {errors.order && (
                 <span className="text-red-500 text-sm">
-                  {errors.orderBy.message}
+                  {errors.order.message}
                 </span>
               )}
             </div>
@@ -306,8 +297,18 @@ export default function AdFilters() {
               <button
                 type="button"
                 onClick={() => {
-                  reset();
                   setFilters({});
+                  reset({
+                    city: undefined,
+                    area: undefined,
+                    propertyType: "",
+                    type: "",
+                    rooms: undefined,
+                    space: undefined,
+                    minPrice: undefined,
+                    maxPrice: undefined,
+                    order: "DESC",
+                  });
                 }}
                 className="btn btn-secondary w-full sm:w-[50%]"
               >
