@@ -20,7 +20,7 @@ export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
     return res.status(400).json({ message: error.details });
   }
   const where = adsFilters(value);
-  const { page = 1, limit = 10, order } = value;
+  const { page = 1, limit = 8, order } = value;
   let orderChoice: Order;
   switch (order) {
     case "ASC":

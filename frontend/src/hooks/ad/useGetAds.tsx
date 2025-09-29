@@ -24,6 +24,7 @@ export default function useGetAds(mine: boolean, page: number) {
       url += `?${params}`;
 
       const response = await axiosInstance.get(url);
+
       return response.data;
     },
   });

@@ -154,7 +154,6 @@ export default async function AdSlug({
               <p className="text-3xl font-bold text-primary mb-1">
                 {ad.price.toLocaleString()} جنيه
               </p>
-              <p className="text-sm text-gray-600">السعر شامل جميع الرسوم</p>
             </div>
 
             {/* واتساب */}
