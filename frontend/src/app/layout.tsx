@@ -6,7 +6,7 @@ import Provider from "@/components/UI/Provider";
 import Script from "next/script";
 import "./globals.css";
 
-const geistCairo = Cairo({ subsets: ["arabic"] });
+const geistCairo = Cairo({ subsets: ["arabic"], display: "swap" });
 
 export const metadata: Metadata = {
   title: {
@@ -67,16 +67,16 @@ export default function RootLayout({
     <html lang="ar" data-theme="mytheme" className="" dir="rtl">
       <head>
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
+          src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
           {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'GA_MEASUREMENT_ID');
-          `}
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  `}
         </Script>
       </head>
       <body

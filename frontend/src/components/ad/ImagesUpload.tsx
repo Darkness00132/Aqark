@@ -16,7 +16,6 @@ type ImageUploadProps = {
 };
 
 export default function ImageUpload({
-  images,
   setImages,
   defaultImages = [],
   deletedImages,
