@@ -3,8 +3,8 @@ import { Cairo } from "next/font/google";
 import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
+import Script from "next/script";
 import "./globals.css";
-import Head from "next/head";
 
 const geistCairo = Cairo({ subsets: ["arabic"] });
 
@@ -65,6 +65,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" data-theme="mytheme" className="" dir="rtl">
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'GA_MEASUREMENT_ID');
+          `}
+        </Script>
+      </head>
       <body
         className={`${geistCairo.className} antialiased bg-gradient-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen`}
       >
