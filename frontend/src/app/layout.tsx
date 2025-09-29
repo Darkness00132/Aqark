@@ -4,6 +4,7 @@ import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
 import "./globals.css";
+import Head from "next/head";
 
 const geistCairo = Cairo({ subsets: ["arabic"] });
 
@@ -61,6 +62,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" data-theme="mytheme" className="" dir="rtl">
+      <Head>
+        <meta
+          name="google-site-verification"
+          content="_83vDkz4KCLQgxlRsNaBPkEQcTip_UmDvyEo9ZksVoM"
+        />
+      </Head>
       <body
         className={`${geistCairo.className} antialiased bg-gradient-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen`}
       >
