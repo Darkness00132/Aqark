@@ -20,19 +20,19 @@ export async function GET() {
 
     // Static pages
     const urls = [
-      { loc: "https://yourwebsite.com/", changefreq: "daily", priority: 1.0 },
+      { loc: "https://aqark.vercel.app/", changefreq: "daily", priority: 1.0 },
       {
-        loc: "https://yourwebsite.com/ads",
+        loc: "https://aqark.vercel.app/ads",
         changefreq: "daily",
         priority: 0.9,
       },
       {
-        loc: "https://yourwebsite.com/ads/my-ads",
+        loc: "https://aqark.vercel.app/ads/my-ads",
         changefreq: "weekly",
         priority: 0.7,
       },
       {
-        loc: "https://yourwebsite.com/ads/create",
+        loc: "https://aqark.vercel.app/ads/create",
         changefreq: "monthly",
         priority: 0.5,
       },
@@ -40,7 +40,7 @@ export async function GET() {
 
     // Dynamic ads
     const adUrls = ads.map((ad) => ({
-      loc: `https://yourwebsite.com/ads/${ad.slug}`,
+      loc: `https://aqark.vercel.app/ads/${ad.slug}`,
       changefreq: "weekly",
       priority: 0.8,
     }));
@@ -50,14 +50,14 @@ export async function GET() {
       ([city, areas]) => {
         // city page
         const cityPage = {
-          loc: `https://yourwebsite.com/ads?city=${encodeURIComponent(city)}`,
+          loc: `https://aqark.vercel.app/ads?city=${encodeURIComponent(city)}`,
           changefreq: "weekly",
           priority: 0.7,
         };
 
         // area pages
         const areaPages = areas.map((area) => ({
-          loc: `https://yourwebsite.com/ads?city=${encodeURIComponent(
+          loc: `https://aqark.vercel.app/ads?city=${encodeURIComponent(
             city
           )}&area=${encodeURIComponent(area)}`,
           changefreq: "weekly",
