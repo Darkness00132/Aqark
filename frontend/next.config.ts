@@ -31,7 +31,6 @@ const nextConfig: NextConfig = {
       transform: "react-icons/{{member}}",
     },
   },
-  optimizeCss: true,
 };
 
 export default nextConfig;

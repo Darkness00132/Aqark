@@ -1,27 +1,36 @@
 import { MetadataRoute } from "next";
 import { CITIES_WITH_AREAS } from "@/lib/data";
 
+// Escape XML special characters
+const escapeXml = (str: string) =>
+  str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Fetch ads from your API
   const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ads/sitemap`)
     .then((res) => res.json())
     .catch(() => ({ ads: [] }));
 
   const ads = data.ads || [];
 
-  // generate city + area pages
+  // Generate city + area URLs
   const cityAndAreaUrls = Object.entries(CITIES_WITH_AREAS).flatMap(
     ([city, areas]) => {
       const cityUrl = {
-        url: `https://aqark.vercel.app/ads?city=${encodeURIComponent(city)}`,
+        url: escapeXml(
+          `https://aqark.vercel.app/ads?city=${encodeURIComponent(city)}`
+        ),
         lastModified: new Date(),
         changeFrequency: "weekly",
         priority: 0.85,
       };
 
       const areaUrls = areas.map((area: string) => ({
-        url: `https://aqark.vercel.app/ads?city=${encodeURIComponent(
-          city
-        )}&area=${encodeURIComponent(area)}`,
+        url: escapeXml(
+          `https://aqark.vercel.app/ads?city=${encodeURIComponent(
+            city
+          )}&area=${encodeURIComponent(area)}`
+        ),
         lastModified: new Date(),
         changeFrequency: "weekly",
         priority: 0.8,
@@ -57,15 +66,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
 
-    // ads detail pages
+    // Ads detail pages
     ...ads.map(({ slug }: { slug: string }) => ({
-      url: `https://aqark.vercel.app/ads/${slug}`,
+      url: escapeXml(
+        `https://aqark.vercel.app/ads/${encodeURIComponent(slug)}`
+      ),
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     })),
 
-    // city + area pages
+    // City + area pages
     ...cityAndAreaUrls,
   ];
 }

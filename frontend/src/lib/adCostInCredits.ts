@@ -2,11 +2,11 @@ export default function adCostInCredits({
   type,
   price,
 }: {
-  type: "ايجار" | "تمليك";
+  type: "إيجار" | "تمليك";
   price: number;
 }) {
   let cost = 0;
-  if (type === "ايجار") {
+  if (type === "إيجار") {
     cost += 1;
     if (price >= 10000) {
       cost += 1;
