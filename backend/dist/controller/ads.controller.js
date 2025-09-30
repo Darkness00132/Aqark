@@ -49,8 +49,14 @@ export const getMyAds = asyncHandler(async (req, res) => {
     res.status(200).json({ ads });
 });
 export const getSitemapAds = asyncHandler(async (req, res) => {
-    const ads = (await Ad.findAll({ attributes: ["slug"] })) || [];
-    res.status(200).json({ ads });
+    const part = parseInt(req.query?.part) || 1;
+    const limit = 50000;
+    const { count, rows } = await Ad.findAndCountAll({
+        attributes: ["slug", "updatedAt"],
+        limit,
+        offset: (part - 1) * limit,
+    });
+    res.status(200).json({ ads: rows, total: count });
 });
 export const getMyAd = asyncHandler(async (req, res) => {
     const { id } = sanitizeXSS(req.params);

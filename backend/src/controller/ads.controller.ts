@@ -63,8 +63,16 @@ export const getMyAds = asyncHandler(
 
 export const getSitemapAds = asyncHandler(
   async (req: Request, res: Response) => {
-    const ads = (await Ad.findAll({ attributes: ["slug"] })) || [];
-    res.status(200).json({ ads });
+    const part = parseInt(req.query?.part as string) || 1;
+    const limit = 50000;
+
+    const { count, rows } = await Ad.findAndCountAll({
+      attributes: ["slug", "updatedAt"],
+      limit,
+      offset: (part - 1) * limit,
+    });
+
+    res.status(200).json({ ads: rows, total: count });
   }
 );
 
