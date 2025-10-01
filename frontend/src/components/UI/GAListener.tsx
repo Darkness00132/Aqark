@@ -2,12 +2,6 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-  }
-}
-
 export default function GAListener() {
   const pathname = usePathname();
 

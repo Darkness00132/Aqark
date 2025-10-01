@@ -3,6 +3,7 @@ import { Cairo } from "next/font/google";
 import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import Script from "next/script";
 import "./globals.css";
 
@@ -63,6 +64,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
   return (
     <html
       lang="ar"
@@ -70,26 +72,13 @@ export default function RootLayout({
       className={geistCairo.className}
       dir="rtl"
     >
-      <head>
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX`}
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-XXXXXXXXXX');
-        `}
-        </Script>
-      </head>
       <body className="antialiased bg-gradient-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen">
         <Provider>
           <Header />
           <main className="min-h-screen pb-15">{children}</main>
           <Footer />
         </Provider>
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );
