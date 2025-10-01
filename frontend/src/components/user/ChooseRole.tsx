@@ -26,7 +26,7 @@ export default function ChooseRole() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {/* User Role */}
           <Link
-            href="/signup?role=user"
+            href="/user/signup?role=user"
             className="group card bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm shadow-2xl border border-primary/20 hover:border-primary/40 transition-all duration-500 hover:scale-105 hover:shadow-primary/25 rounded-3xl p-8"
           >
             <div className="card-body text-center space-y-6">
@@ -53,7 +53,7 @@ export default function ChooseRole() {
 
           {/* Landlord Role */}
           <Link
-            href="/signup?role=landlord"
+            href="/user/signup?role=landlord"
             className="group card bg-gradient-to-br from-secondary/10 to-secondary/5 backdrop-blur-sm shadow-2xl border border-secondary/20 hover:border-secondary/40 transition-all duration-500 hover:scale-105 hover:shadow-secondary/25 rounded-3xl p-8"
           >
             <div className="card-body text-center space-y-6">

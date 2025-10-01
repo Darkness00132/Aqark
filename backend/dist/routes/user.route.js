@@ -6,7 +6,7 @@ const router = Router();
 router.post("/signup", limitReq, signup);
 router.post("/login", limitReq, login);
 router.get("/profile/me", auth, getMyProfile);
-router.get("/profile/:publicId", getProfile);
+router.get("/profile/:slug", getProfile);
 router.get("/verifyEmail", limitReq, verify);
 router.post("/forgetPassword", limitReq, forgetPassword);
 router.post("/resetPassword", limitReq, resetPassword);

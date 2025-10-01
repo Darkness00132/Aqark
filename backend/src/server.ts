@@ -10,7 +10,9 @@ import userRouter from "./routes/user.route.js";
 import uploadRouter from "./routes/upload.route.js";
 import reviewsRouter from "./routes/review.route.js";
 import adsRouter from "./routes/ads.route.js";
+import dataAnlysisRouter from "./routes/dataAnalysis.route.js";
 import sanitizeXSS from "./utils/sanitizeXSS.js";
+import { getClientIP } from "./utils/getClientIp.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -22,7 +24,8 @@ const rateLimiter = new RateLimiterMemory({
 
 app.use(async (req, res, next) => {
   try {
-    await rateLimiter.consume(req.ip || req.socket.remoteAddress || "unknown");
+    const ip = getClientIP(req);
+    await rateLimiter.consume(ip);
     next();
   } catch (err) {
     const rejRes = err as RateLimiterRes;
@@ -80,7 +83,8 @@ app
   .use(googleRouter)
   .use("/api/upload", uploadRouter)
   .use("/api/reviews", reviewsRouter)
-  .use("/api/ads", adsRouter);
+  .use("/api/ads", adsRouter)
+  .use("/api/data-analysis", dataAnlysisRouter);
 
 app.use((err: unknown, _req: any, res: any, _next: any) => {
   console.error("Error:", err);
@@ -88,15 +92,15 @@ app.use((err: unknown, _req: any, res: any, _next: any) => {
   // If err is an Error object
   if (err instanceof Error) {
     // Handle JWT errors
-    if ((err as any).name === "JsonWebTokenError") {
+    if (err.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "Invalid token" });
     }
-    if ((err as any).name === "TokenExpiredError") {
+    if (err.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token has expired" });
     }
 
     // Handle validation errors (if using Joi or similar)
-    if ((err as any).name === "ValidationError") {
+    if (err.name === "ValidationError") {
       const errors = Object.values((err as any).errors || {}).map((e: any) => ({
         field: e.path,
         message: e.message,

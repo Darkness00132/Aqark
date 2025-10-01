@@ -12,15 +12,22 @@ interface Token {
   createdAt: Date;
 }
 
+interface UserIP {
+  ip: string;
+  userAgent: string;
+  lastLogin: Date;
+}
+
 export interface UserAttributes {
   id?: string;
-  publicId?: string;
+  slug?: string;
   googleId?: string;
   name: string;
   email: string;
   password?: string;
   isVerified?: boolean;
   isBlocked?: boolean;
+  ips?: UserIP[];
   role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
   avatar?: string;
   avatarKey?: string;
@@ -45,13 +52,14 @@ class User
   implements UserAttributes, UserMethods
 {
   declare id?: string;
-  declare publicId?: string;
+  declare slug?: string;
   declare googleId?: string;
   declare name: string;
   declare email: string;
   declare password?: string;
   declare isVerified?: boolean;
   declare isBlocked?: boolean;
+  declare ips?: UserIP[];
   declare role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
   declare avatar?: string;
   declare avatarKey?: string;
@@ -81,7 +89,7 @@ class User
     return token;
   }
   public toJSON(): {
-    publicId?: string;
+    slug?: string;
     name: string;
     avatar?: string;
     role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
@@ -90,7 +98,7 @@ class User
     credits?: number;
   } {
     return {
-      publicId: this.publicId,
+      slug: this.slug,
       name: this.name,
       avatar: this.avatar,
       role: this.role,
@@ -108,11 +116,10 @@ User.init(
       defaultValue: () => nanoid(16),
       primaryKey: true,
     },
-    publicId: {
+    slug: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
-      defaultValue: () => nanoid(12),
     },
     googleId: {
       type: DataTypes.STRING,
@@ -165,6 +172,10 @@ User.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    ips: {
+      type: DataTypes.ARRAY(DataTypes.JSONB),
+      defaultValue: [],
+    },
     role: {
       type: DataTypes.ENUM("user", "landlord", "admin", "superAdmin", "owner"),
       allowNull: false,
@@ -215,7 +226,18 @@ User.init(
   }
 );
 
-User.beforeSave(async (user, option) => {
+User.beforeValidate((user) => {
+  if (!user.slug) {
+    const slugName = user.name
+      .trim()
+      .normalize("NFKD")
+      .replace(/\s+/g, "-")
+      .replace(/[^\p{L}\p{N}-]/gu, "");
+    user.slug = `${slugName}-${nanoid(10)}`;
+  }
+});
+
+User.beforeSave(async (user) => {
   if (user.changed("password") && user.password) {
     user.password = await hash(user.password);
   }

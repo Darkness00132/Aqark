@@ -10,7 +10,9 @@ import userRouter from "./routes/user.route.js";
 import uploadRouter from "./routes/upload.route.js";
 import reviewsRouter from "./routes/review.route.js";
 import adsRouter from "./routes/ads.route.js";
+import dataAnlysisRouter from "./routes/dataAnalysis.route.js";
 import sanitizeXSS from "./utils/sanitizeXSS.js";
+import { getClientIP } from "./utils/getClientIp.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 const rateLimiter = new RateLimiterMemory({
@@ -19,7 +21,8 @@ const rateLimiter = new RateLimiterMemory({
 });
 app.use(async (req, res, next) => {
     try {
-        await rateLimiter.consume(req.ip || req.socket.remoteAddress || "unknown");
+        const ip = getClientIP(req);
+        await rateLimiter.consume(ip);
         next();
     }
     catch (err) {
@@ -70,7 +73,8 @@ app
     .use(googleRouter)
     .use("/api/upload", uploadRouter)
     .use("/api/reviews", reviewsRouter)
-    .use("/api/ads", adsRouter);
+    .use("/api/ads", adsRouter)
+    .use("/api/data-analysis", dataAnlysisRouter);
 app.use((err, _req, res, _next) => {
     console.error("Error:", err);
     // If err is an Error object

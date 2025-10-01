@@ -2,10 +2,9 @@ import { DataTypes, Model } from "sequelize";
 import { CITIES, AREAS, PROPERTY_TYPES } from "../db/data.js";
 import { nanoid } from "nanoid";
 import sequelize from "../db/sql.js";
-import getSlug from "speakingurl";
 
 type User = {
-  publicId?: string;
+  slug?: string;
   name: string;
   avatar?: string;
   avgRating?: number;
@@ -68,8 +67,8 @@ class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
     delete values.isDeleted;
 
     if (this.user) {
-      const { publicId, name, avatar, avgRating, totalReviews } = this.user;
-      values.user = { publicId, name, avatar, avgRating, totalReviews };
+      const { slug, name, avatar, avgRating, totalReviews } = this.user;
+      values.user = { slug, name, avatar, avgRating, totalReviews };
     }
 
     return values;
@@ -144,9 +143,19 @@ Ad.beforeValidate((ad: Ad) => {
       ad.area,
       ad.rooms ? `${ad.rooms}غ` : null,
       ad.space ? `${ad.space}م` : null,
-    ].filter(Boolean);
-    const baseSlug = parts.join("-");
-    ad.slug = `${baseSlug}-${nanoid(12)}`;
+    ].filter((x): x is string => Boolean(x));
+
+    // Clean each part: trim, normalize, replace spaces, remove special chars
+    const cleanedParts = parts.map((p) =>
+      p
+        .trim()
+        .normalize("NFKD")
+        .replace(/\s+/g, "-")
+        .replace(/[^\p{L}\p{N}-]/gu, "")
+    );
+
+    const baseSlug = cleanedParts.join("-");
+    ad.slug = `${baseSlug}-${nanoid(10)}`;
   }
 });
 

@@ -20,7 +20,7 @@ class User extends Model {
     }
     toJSON() {
         return {
-            publicId: this.publicId,
+            slug: this.slug,
             name: this.name,
             avatar: this.avatar,
             role: this.role,
@@ -36,11 +36,10 @@ User.init({
         defaultValue: () => nanoid(16),
         primaryKey: true,
     },
-    publicId: {
+    slug: {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false,
-        defaultValue: () => nanoid(12),
     },
     googleId: {
         type: DataTypes.STRING,
@@ -91,6 +90,10 @@ User.init({
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
+    ips: {
+        type: DataTypes.ARRAY(DataTypes.JSONB),
+        defaultValue: [],
+    },
     role: {
         type: DataTypes.ENUM("user", "landlord", "admin", "superAdmin", "owner"),
         allowNull: false,
@@ -138,7 +141,17 @@ User.init({
     timestamps: true,
     indexes: [{ fields: ["id"] }, { fields: ["email"] }],
 });
-User.beforeSave(async (user, option) => {
+User.beforeValidate((user) => {
+    if (!user.slug) {
+        const slugName = user.name
+            .trim()
+            .normalize("NFKD")
+            .replace(/\s+/g, "-")
+            .replace(/[^\p{L}\p{N}-]/gu, "");
+        user.slug = `${slugName}-${nanoid(10)}`;
+    }
+});
+User.beforeSave(async (user) => {
     if (user.changed("password") && user.password) {
         user.password = await hash(user.password);
     }

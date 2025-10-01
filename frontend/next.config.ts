@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
         hostname: "aqark-s3.s3.us-east-1.amazonaws.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "i.pravatar.cc",
+      },
     ],
   },
   async redirects() {

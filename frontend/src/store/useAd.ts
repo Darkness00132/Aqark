@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 type User = {
-  publicId?: string;
+  slug?: string;
   name: string;
   avatar?: string;
   avgRating?: number;

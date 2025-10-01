@@ -9,8 +9,8 @@ class Ad extends Model {
         delete values.costInCredits;
         delete values.isDeleted;
         if (this.user) {
-            const { publicId, name, avatar, avgRating, totalReviews } = this.user;
-            values.user = { publicId, name, avatar, avgRating, totalReviews };
+            const { slug, name, avatar, avgRating, totalReviews } = this.user;
+            values.user = { slug, name, avatar, avgRating, totalReviews };
         }
         return values;
     }
@@ -79,9 +79,15 @@ Ad.beforeValidate((ad) => {
             ad.area,
             ad.rooms ? `${ad.rooms}غ` : null,
             ad.space ? `${ad.space}م` : null,
-        ].filter(Boolean);
-        const baseSlug = parts.join("-");
-        ad.slug = `${baseSlug}-${nanoid(12)}`;
+        ].filter((x) => Boolean(x));
+        // Clean each part: trim, normalize, replace spaces, remove special chars
+        const cleanedParts = parts.map((p) => p
+            .trim()
+            .normalize("NFKD")
+            .replace(/\s+/g, "-")
+            .replace(/[^\p{L}\p{N}-]/gu, ""));
+        const baseSlug = cleanedParts.join("-");
+        ad.slug = `${baseSlug}-${nanoid(10)}`;
     }
 });
 export default Ad;

@@ -8,6 +8,7 @@ import welcomeEmail from "../emails/welcomeEmail.js";
 import forgetPasswordEmail from "../emails/ForgetPasswordEmail.js";
 import passwordChangedEmail from "../emails/passwordChangedEmail.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
+import { getClientIP } from "../utils/getClientIp.js";
 export const signup = asyncHandler(async (req, res) => {
     const { error, value } = signupSchema.validate(req.secureBody);
     if (error)
@@ -16,6 +17,8 @@ export const signup = asyncHandler(async (req, res) => {
     let user = await User.findOne({ where: { email } });
     if (user)
         return res.status(400).json({ message: "انت بالفعل تمتلك حساب" });
+    const ip = getClientIP(req);
+    const userAgent = req.headers["user-agent"] || "unknown";
     user = await User.create({
         name,
         email,
@@ -23,6 +26,7 @@ export const signup = asyncHandler(async (req, res) => {
         role,
         verificationToken: nanoid(16),
         verificationTokenExpire: new Date(Date.now() + 10 * 60 * 1000),
+        ips: [{ ip, userAgent, lastLogin: new Date() }],
     });
     await verifyEmail(user.verificationToken, user.email);
     res.status(201).json({ message: "تم انشاء حساب بنجاح يرجى تحقق من ايميلك" });
@@ -41,6 +45,11 @@ export const verify = asyncHandler(async (req, res) => {
     user.verificationToken = null;
     user.verificationTokenExpire = null;
     user.credits = 20;
+    // Track IP + user agent on verify
+    const ip = getClientIP(req);
+    const userAgent = req.headers["user-agent"] || "unknown";
+    user.ips = user.ips || [];
+    user.ips.push({ ip, userAgent, lastLogin: new Date() });
     await user.save();
     await welcomeEmail(user.email);
     const token = await user.generateAuthToken();
@@ -69,22 +78,35 @@ export const login = asyncHandler(async (req, res) => {
     const isMatch = await user.matchPassword(enteredPassword);
     if (!isMatch)
         return res.status(400).json({ message: "كلمة مرور خاطئة" });
+    // --- Track IP + User Agent on login ---
+    const ip = getClientIP(req);
+    const userAgent = req.headers["user-agent"] || "unknown";
+    user.ips = user.ips || [];
+    const existingEntry = user.ips.find((entry) => entry.ip === ip && entry.userAgent === userAgent);
+    if (existingEntry) {
+        existingEntry.lastLogin = new Date();
+    }
+    else {
+        user.ips.push({ ip, userAgent, lastLogin: new Date() });
+    }
+    await user.save();
     const token = await user.generateAuthToken();
     res.cookie("jwt-auth", token, {
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 * 7, //saved for 7days
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
         secure: process.env.PRODUCTION === "true",
         sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
         priority: "high",
     });
     res.status(200).json({ message: "تم تسجيل الدخول بنجاح" });
 });
+// --- Rest of your functions unchanged ---
 export const getMyProfile = asyncHandler(async (req, res) => {
     return res.status(200).json({ user: req.user });
 });
 export const getProfile = asyncHandler(async (req, res) => {
-    const { publicId } = sanitizeXSS(req.params);
-    let user = await User.findOne({ where: { publicId } });
+    const { slug } = sanitizeXSS(req.params);
+    let user = await User.findOne({ where: { slug } });
     if (!user) {
         return res.status(400).json({ message: "المستخدم غير موجود" });
     }
@@ -99,7 +121,14 @@ export const getProfile = asyncHandler(async (req, res) => {
     const avgRating = parseFloat(result?.avgRating || "0");
     const totalReviews = parseInt(result?.totalReviews || "0");
     await user.update({ avgRating, totalReviews });
-    return res.status(200).json({ user });
+    const reviews = await Review.findAll({
+        where: { reviewedUserId: user.id },
+        order: [["createdAt", "DESC"]],
+        include: [
+            { model: User, as: "reviewer", attributes: ["name", "avatar", "slug"] },
+        ],
+    });
+    return res.status(200).json({ user, reviews });
 });
 export const forgetPassword = asyncHandler(async (req, res) => {
     const { error, value } = forgetPasswordSchema.validate(req.secureBody);

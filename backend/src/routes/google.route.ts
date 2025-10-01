@@ -5,10 +5,46 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import User, { type Role } from "../models/user.model.js";
 import type { AuthRequest } from "../middlewares/auth.js";
 import welcomeEmail from "../emails/welcomeEmail.js";
+import { getClientIP } from "../utils/getClientIp.js";
 
 const router = Router();
 
-// Passport Google Strategy
+// --- Central login/signup handler ---
+async function handleLogin(user: User, req: Request, res: Response) {
+  const ip = getClientIP(req);
+  const userAgent = req.headers["user-agent"] || "unknown";
+
+  user.ips = user.ips || [];
+  const existingEntry = user.ips.find(
+    (entry) => entry.ip === ip && entry.userAgent === userAgent
+  );
+
+  if (existingEntry) {
+    existingEntry.lastLogin = new Date();
+  } else {
+    user.ips.push({ ip, userAgent, lastLogin: new Date() });
+  }
+
+  await user.save();
+
+  const token = await user.generateAuthToken();
+
+  if (!user.isVerified) {
+    welcomeEmail(user.email);
+  }
+
+  res.cookie("jwt-auth", token, {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+    secure: process.env.PRODUCTION === "true",
+    sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+    priority: "high",
+  });
+
+  res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
+}
+
+// --- Passport Google Strategy ---
 passport.use(
   new GoogleStrategy(
     {
@@ -25,12 +61,9 @@ passport.use(
         const { role = "user", mode = "login" }: { role: Role; mode: string } =
           req.secureQuery.state;
 
-        let user = await User.findOne({
-          where: { googleId: profile.id },
-        });
+        let user = await User.findOne({ where: { googleId: profile.id } });
 
         if (!user) {
-          // check by email
           const existUser = await User.findOne({
             where: { email: profile.emails?.[0]?.value },
           });
@@ -40,11 +73,8 @@ passport.use(
             await existUser.save();
             user = existUser;
           } else {
-            if (mode === "login") {
-              // user tried login but no account
-              return done(undefined, false);
-            }
-            // signup mode
+            if (mode === "login") return done(undefined, false);
+
             user = await User.create({
               googleId: profile.id,
               name: profile.displayName,
@@ -53,19 +83,26 @@ passport.use(
               role,
               isVerified: true,
               credits: role === "landlord" ? 10 : 0,
+              ips: [
+                {
+                  ip: getClientIP(req),
+                  userAgent: req.headers["user-agent"] || "unknown",
+                  lastLogin: new Date(),
+                },
+              ],
             });
           }
         }
 
-        return done(undefined, user);
-      } catch (e) {
-        done(e, undefined);
+        done(undefined, user);
+      } catch (err) {
+        done(err, undefined);
       }
     }
   )
 );
 
-// Routes
+// --- Routes ---
 router.get(
   "/auth/google",
   (req: Request, res: Response, next: NextFunction) => {
@@ -87,27 +124,15 @@ router.get(
   (req, res, next) => {
     passport.authenticate("google", {
       session: false,
-      failureRedirect: process.env.FRONTEND_URL + "/user/signup",
+      failureRedirect: `${process.env.FRONTEND_URL}/user/signup`,
     })(req, res, next);
   },
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) {
+      if (!req.user)
         return res.redirect(`${process.env.FRONTEND_URL}/user/signup`);
-      }
 
-      const token = await req.user.generateAuthToken();
-      welcomeEmail(req.user.email);
-
-      res.cookie("jwt-auth", token, {
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        secure: process.env.PRODUCTION === "true",
-        sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
-        priority: "high",
-      });
-
-      res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
+      await handleLogin(req.user, req, res);
     } catch (err) {
       next(err);
     }
