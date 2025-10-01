@@ -1,4 +1,5 @@
 "use client";
+
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -6,7 +7,6 @@ import { useState } from "react";
 import GAListener from "./GAListener";
 
 export default function Provider({ children }: { children: React.ReactNode }) {
-  // create client once per session
   const [queryClient] = useState(() => new QueryClient());
 
   return (
@@ -21,7 +21,9 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <GAListener />
         {children}
-        <ReactQueryDevtools initialIsOpen={false} />
+        {process.env.NODE_ENV === "development" && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
       </QueryClientProvider>
     </>
   );

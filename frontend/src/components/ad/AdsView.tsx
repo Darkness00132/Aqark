@@ -8,7 +8,6 @@ export default function AdsView({ mine = false }: { mine?: boolean }) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isFetching } = useGetAds(mine, currentPage);
-  console.log(data);
 
   if (isFetching) {
     return (
