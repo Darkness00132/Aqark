@@ -4,7 +4,7 @@ import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import Script from "next/script";
+import GAListener from "@/components/UI/GAListener";
 import "./globals.css";
 
 const geistCairo = Cairo({ subsets: ["arabic"], display: "swap" });
@@ -64,7 +64,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
   return (
     <html
       lang="ar"
@@ -78,7 +77,8 @@ export default function RootLayout({
           <main className="min-h-screen pb-15">{children}</main>
           <Footer />
         </Provider>
-        {gaId && <GoogleAnalytics gaId={gaId} />}
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+        <GAListener />
       </body>
     </html>
   );

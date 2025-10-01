@@ -6,6 +6,7 @@ import { useEffect } from "react";
 export default function GAListener() {
   const pathname = usePathname();
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  console.log("GA ID:", gaId);
 
   useEffect(() => {
     if (!gaId || typeof window.gtag !== "function") return;
