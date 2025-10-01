@@ -5,7 +5,7 @@ const baseUrl = "https://aqark.vercel.app";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
-      url: `${baseUrl}/sitemaps/static.xml`,
+      url: `${baseUrl}/sitemaps/sitemap.xml`,
       lastModified: new Date().toISOString(),
     },
     {
