@@ -1,13 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  FaStar,
-  FaRegStar,
-  FaHeart,
-  FaRegHeart,
-  FaUserCircle,
-} from "react-icons/fa";
+import { FaStar, FaRegStar, FaHeart, FaRegHeart } from "react-icons/fa";
+import Image from "next/image";
 
 type Review = {
   id: number;
@@ -81,9 +76,12 @@ export default function UserProfile() {
     <div className="max-w-4xl mx-auto py-8 space-y-8">
       {/* User Header */}
       <div className="card bg-base-100 shadow-xl p-6 flex items-center gap-6">
-        <img
+        <Image
           src={mockUser.avatar}
           alt={mockUser.name}
+          width={80}
+          height={80}
+          sizes="80px"
           className="w-20 h-20 rounded-full ring ring-primary ring-offset-2"
         />
         <div className="flex-1">
@@ -114,9 +112,12 @@ export default function UserProfile() {
               key={r.id}
               className="card bg-base-200 shadow-sm p-5 flex gap-4"
             >
-              <img
+              <Image
                 src={r.avatar}
                 alt={r.user}
+                width={48}
+                height={48}
+                sizes="48px"
                 className="w-12 h-12 rounded-full object-cover"
               />
               <div className="flex-1">
