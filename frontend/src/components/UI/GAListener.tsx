@@ -2,16 +2,24 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { sendGAEvent } from "@next/third-parties/google";
 
 export default function GAListener() {
   const pathname = usePathname();
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
-  console.log("GA ID:", gaId);
 
   useEffect(() => {
-    if (!gaId || typeof window.gtag !== "function") return;
-    window.gtag("config", gaId, { page_path: pathname });
-  }, [pathname, gaId]);
+    if (!pathname) {
+      console.warn("GAListener: pathname is undefined.");
+      return;
+    }
+
+    try {
+      sendGAEvent("event", "page_view", { page_path: pathname });
+      console.log(`GAListener: Pageview sent for ${pathname}`);
+    } catch (error) {
+      console.error("GAListener: Failed to send GA event", error);
+    }
+  }, [pathname]);
 
   return null;
 }
