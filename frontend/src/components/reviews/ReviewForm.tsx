@@ -1,21 +1,79 @@
 "use client";
 import { useState } from "react";
 import useCreateReview from "@/hooks/reviews/createReview";
-import { FaStar, FaRegStar, FaPaperPlane, FaEdit } from "react-icons/fa";
+import {
+  FaStar,
+  FaRegStar,
+  FaPaperPlane,
+  FaEdit,
+  FaLock,
+  FaUserCheck,
+} from "react-icons/fa";
+import useAuth from "@/store/useAuth";
+import { toast } from "sonner";
 
 export default function ReviewForm({ slug }: { slug: string }) {
+  const user = useAuth((state) => state.user);
   const { mutate: createReview } = useCreateReview();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
 
+  // Check if user can review
+  const isOwnProfile = user && user.slug === slug;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createReview({ slug , rating , comment})
-  }
+    if (!user) return toast.error("الرجاء تسجيل الدخول للمراجعة");
+    if (user.slug === slug) return toast.error("لا يمكنك مراجعة نفسك");
+    createReview({ slug, rating, comment });
+  };
 
   const ratingLabels = ["سيء جداً", "سيء", "مقبول", "جيد", "ممتاز"];
 
+  // Show message for unauthorized users
+  if (!user) {
+    return (
+      <div className="card bg-gradient-to-br from-base-200 to-base-300 shadow-xl border border-base-300">
+        <div className="card-body items-center text-center py-12">
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <FaLock className="text-4xl text-primary" />
+          </div>
+          <h3 className="text-2xl font-bold text-base-content mb-2">
+            سجل الدخول لكتابة تقييم
+          </h3>
+          <p className="text-base-content/70 mb-6 max-w-md">
+            يجب عليك تسجيل الدخول أولاً لتتمكن من مشاركة تجربتك وتقييم الخدمة
+          </p>
+          <button className="btn btn-primary btn-lg gap-2">
+            <FaLock />
+            تسجيل الدخول
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message for own profile
+  if (isOwnProfile) {
+    return (
+      <div className="card bg-gradient-to-br from-warning/5 to-warning/10 shadow-xl border border-warning/30">
+        <div className="card-body items-center text-center py-12">
+          <div className="w-20 h-20 rounded-full bg-warning/20 flex items-center justify-center mb-4">
+            <FaUserCheck className="text-4xl text-warning" />
+          </div>
+          <h3 className="text-2xl font-bold text-base-content mb-2">
+            لا يمكنك تقييم ملفك الشخصي
+          </h3>
+          <p className="text-base-content/70 max-w-md">
+            التقييمات مخصصة لتقييم تجارب الآخرين معك، ولا يمكنك تقييم نفسك
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show review form for authorized users
   return (
     <div className="relative">
       <form onSubmit={handleSubmit} className="space-y-8">

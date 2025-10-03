@@ -57,6 +57,10 @@ export const createReview = asyncHandler(
       return res.status(404).json({ message: "لم يتم العثور على المستخدم" });
     }
 
+    if (req.user!.id === user.id) {
+      return res.status(400).json({ message: "لا يمكنك مراجعة نفسك" });
+    }
+
     const review = await Review.create({
       reviewerId: req.user.id,
       reviewedUserId: user.id!,
