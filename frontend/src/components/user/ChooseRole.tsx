@@ -4,13 +4,6 @@ import { FaSearch, FaHome, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 export default function ChooseRole() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 mt-5">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/10 rounded-full blur-3xl"></div>
-      </div>
-
       <div className="relative z-10 max-w-7xl mx-auto w-full">
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16">

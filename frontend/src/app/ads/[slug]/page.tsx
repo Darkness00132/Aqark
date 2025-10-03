@@ -8,11 +8,9 @@ import {
   FaRulerCombined,
   FaMapMarkerAlt,
   FaWhatsapp,
-  FaUser,
   FaStar,
   FaClock,
   FaPhone,
-  FaShare,
 } from "react-icons/fa";
 import Link from "next/link";
 import AdImagesSwiper from "@/components/ad/AdImagesSwiper";
@@ -116,7 +114,7 @@ export default async function AdSlug({
                   </span>
                 )}
                 {ad.propertyType && (
-                  <span className="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full text-xs font-semibold shadow-md">
+                  <span className="px-4 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full text-xs font-semibold shadow-md">
                     {ad.propertyType}
                   </span>
                 )}
@@ -164,8 +162,8 @@ export default async function AdSlug({
                   </div>
                 )}
                 {ad.space && (
-                  <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200/50 hover:shadow-md transition">
-                    <div className="p-3 bg-purple-500 rounded-xl">
+                  <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl border border-yellow-200/50 hover:shadow-md transition">
+                    <div className="p-3 bg-yellow-400 rounded-xl">
                       <FaRulerCombined className="text-white w-5 h-5" />
                     </div>
                     <div>
@@ -221,17 +219,13 @@ export default async function AdSlug({
                 <div className="relative w-24 h-24 mx-auto mb-4">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full animate-pulse"></div>
                   <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border-4 border-white shadow-lg">
-                    {ad.user.avatar ? (
-                      <Image
-                        src={ad.user.avatar}
-                        alt={ad.user.name}
-                        width={96}
-                        height={96}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <FaUser className="text-gray-400" size={40} />
-                    )}
+                    <Image
+                      src={ad.user.avatar || "/avatar.webp"}
+                      alt={ad.user.name}
+                      width={96}
+                      height={96}
+                      className="object-cover w-full h-full"
+                    />
                   </div>
                 </div>
                 <h4 className="text-xl font-bold text-gray-900 mb-1">
@@ -240,7 +234,7 @@ export default async function AdSlug({
                 <p className="text-sm text-gray-500 font-medium">المعلن</p>
               </div>
 
-              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-4 mb-4 border border-amber-200/50">
+              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-4 mb-4">
                 <div className="flex items-center justify-center gap-2">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
