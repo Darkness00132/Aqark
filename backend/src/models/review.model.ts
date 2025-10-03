@@ -17,14 +17,12 @@ class Review extends Model<ReviewAttributes> implements ReviewAttributes {
   declare reviewedUserId: string;
   declare rating: number;
   declare comment?: string;
-  declare loves?: number;
 
   public toJSON() {
-    return {
-      id: this.id,
-      rating: this.rating,
-      comment: this.comment,
-    };
+    const values: any = { ...this.get() };
+    delete values.reviewerId;
+    delete values.reviewedUserId;
+    return values;
   }
 }
 Review.init(

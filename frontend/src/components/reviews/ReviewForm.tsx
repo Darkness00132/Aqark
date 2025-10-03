@@ -27,6 +27,9 @@ export default function ReviewForm({ slug }: { slug: string }) {
     if (!user) return toast.error("الرجاء تسجيل الدخول للمراجعة");
     if (user.slug === slug) return toast.error("لا يمكنك مراجعة نفسك");
     createReview({ slug, rating, comment });
+    setRating(0);
+    setHoveredRating(0);
+    setComment("");
   };
 
   const ratingLabels = ["سيء جداً", "سيء", "مقبول", "جيد", "ممتاز"];

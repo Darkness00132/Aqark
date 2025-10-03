@@ -38,7 +38,7 @@ export default function Header() {
               className="input join-item w-full"
             />
             <button className="btn join-item rounded-l-lg">
-              <FaSearch className="text-sm" />
+              <FaSearch className="text-sm" aria-label="search button" />
             </button>
           </div>
         </div>
@@ -69,10 +69,10 @@ export default function Header() {
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300">
                   <Image
                     alt="Avatar"
-                    src={user?.avatar || "/avatar.jpg"}
+                    src={user?.avatar || "/avatar.webp"}
                     width={32}
                     height={32}
-                    className="rounded-full w-full h-full object-cover sm:w-10 sm:h-10"
+                    className="rounded-full w-full h-full object-cover object-center sm:w-10 sm:h-10"
                   />
                 </div>
               </div>

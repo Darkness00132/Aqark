@@ -28,25 +28,6 @@ export const getMyReviews = asyncHandler(
   }
 );
 
-export const setLove = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { reviewId } = sanitizeXSS(req.params);
-  const review = await Review.findByPk(reviewId);
-  if (!review) {
-    return res.status(404).json({ message: "لم يتم العثور على المراجعة" });
-  }
-
-  const { quantity } = req.secureBody;
-
-  if (quantity !== 1 && quantity !== -1) {
-    return res.status(400).json({ message: "invalid number" });
-  }
-
-  review.loves += quantity;
-  await review.save();
-
-  res.status(200).json({ message: "تم عملية بنجاح" });
-});
-
 export const createReview = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { slug } = sanitizeXSS(req.params);
@@ -59,6 +40,16 @@ export const createReview = asyncHandler(
 
     if (req.user!.id === user.id) {
       return res.status(400).json({ message: "لا يمكنك مراجعة نفسك" });
+    }
+
+    const existingReview = await Review.findOne({
+      where: { reviewerId: req.user!.id, reviewedUserId: user.id },
+    });
+
+    if (existingReview) {
+      return res
+        .status(400)
+        .json({ message: "لقد قمت بمراجعة هذا المستخدم بالفعل" });
     }
 
     const review = await Review.create({

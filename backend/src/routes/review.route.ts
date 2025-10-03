@@ -3,7 +3,6 @@ import auth from "../middlewares/auth.js";
 import {
   getReviews,
   getMyReviews,
-  setLove,
   createReview,
   updateReview,
   deleteReview,
@@ -16,8 +15,6 @@ router.get("/:slug", getReviews);
 router.get("/me", auth, getMyReviews);
 
 router.post("/:slug", auth, createReview);
-
-router.post("/:reviewId/love", auth, setLove);
 
 router.put("/:reviewId", auth, updateReview);
 

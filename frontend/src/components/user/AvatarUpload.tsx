@@ -44,7 +44,7 @@ export default function AvatarUpload({ userAvatar }: { userAvatar?: string }) {
       }`}
     >
       <Image
-        src={userAvatar || "/avatar.jpg"}
+        src={userAvatar || "/avatar.webp"}
         alt="user avatar"
         fill
         sizes="250px"

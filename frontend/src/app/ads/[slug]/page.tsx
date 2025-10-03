@@ -10,9 +10,13 @@ import {
   FaWhatsapp,
   FaUser,
   FaStar,
+  FaClock,
+  FaPhone,
+  FaShare,
 } from "react-icons/fa";
 import Link from "next/link";
 import AdImagesSwiper from "@/components/ad/AdImagesSwiper";
+import formatDateFromNow from "@/lib/formatDateFromNow";
 
 type CachedAd = {
   data: Ad;
@@ -96,122 +100,183 @@ export default async function AdSlug({
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-8">
-      {/* صور العقار */}
-      <div className="rounded-2xl overflow-hidden shadow-md">
-        <AdImagesSwiper images={ad.images} alt={ad.title} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* تفاصيل العقار */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow border border-gray-100">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight">
-              {ad.title}
-            </h1>
-
-            <div className="flex items-center text-gray-600 mb-4">
-              <FaMapMarkerAlt className="ml-2 text-red-500 w-4 h-4" />
-              <span className="font-medium">
-                {ad.city} - {ad.area}
-              </span>
-            </div>
-
-            <p className="text-gray-700 leading-relaxed mb-6">{ad.address}</p>
-
-            {/* الخصائص */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-              {ad.rooms && (
-                <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-xl">
-                  <FaBed className="text-primary w-5 h-5" />
-                  <span className="text-sm font-medium text-gray-700">
-                    {ad.rooms} غرف
-                  </span>
-                </div>
-              )}
-              {ad.space && (
-                <div className="flex items-center gap-2 p-3 bg-accent/5 rounded-xl">
-                  <FaRulerCombined className="text-accent w-5 h-5" />
-                  <span className="text-sm font-medium text-gray-700">
-                    {ad.space} م²
-                  </span>
-                </div>
-              )}
-              {ad.type && (
-                <span className="p-3 bg-secondary/10 text-secondary rounded-xl text-sm font-medium flex items-center justify-center">
-                  {ad.type}
-                </span>
-              )}
-              {ad.propertyType && (
-                <span className="p-3 bg-primary/10 text-primary rounded-xl text-sm font-medium flex items-center justify-center">
-                  {ad.propertyType}
-                </span>
-              )}
-            </div>
-
-            {/* السعر */}
-            <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl p-4 mb-6">
-              <p className="text-3xl font-bold text-primary mb-1">
-                {ad.price.toLocaleString()} جنيه
-              </p>
-            </div>
-
-            {/* واتساب */}
-            {ad.whatsappNumber && (
-              <a
-                href={`https://wa.me/${ad.whatsappNumber}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition shadow"
-              >
-                <FaWhatsapp className="w-5 h-5" />
-                تواصل عبر واتساب
-              </a>
-            )}
-          </div>
-
-          {/* الوصف */}
-          <div className="bg-white rounded-2xl p-6 shadow border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-3">وصف العقار</h3>
-            <p className="text-gray-700 leading-relaxed">{ad.description}</p>
-          </div>
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+        <div className="rounded-3xl overflow-hidden shadow-2xl mb-8 relative group">
+          <AdImagesSwiper images={ad.images} alt={ad.title} />
         </div>
 
-        {/* بيانات المعلن */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow border border-gray-100 text-center">
-            <div className="w-20 h-20 rounded-full overflow-hidden mx-auto bg-gray-200 flex items-center justify-center mb-3">
-              {ad.user.avatar ? (
-                <Image
-                  src={ad.user.avatar}
-                  alt={ad.user.name}
-                  width={80}
-                  height={80}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <FaUser className="text-gray-400" size={32} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-gray-200/50">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {ad.type && (
+                  <span className="px-4 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-xs font-semibold shadow-md">
+                    {ad.type}
+                  </span>
+                )}
+                {ad.propertyType && (
+                  <span className="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full text-xs font-semibold shadow-md">
+                    {ad.propertyType}
+                  </span>
+                )}
+              </div>
+
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+                {ad.title}
+              </h1>
+
+              <div className="flex items-center text-gray-600 mb-6 gap-2">
+                <div className="p-2 bg-red-50 rounded-lg">
+                  <FaMapMarkerAlt className="text-red-500 w-4 h-4" />
+                </div>
+                <span className="font-medium text-base">
+                  {ad.city} - {ad.area}
+                </span>
+              </div>
+
+              <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-6 mb-6 shadow-xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+                <div className="relative z-10">
+                  <p className="text-white/90 text-sm font-medium mb-1">
+                    السعر
+                  </p>
+                  <p className="text-4xl lg:text-5xl font-bold text-white">
+                    {ad.price.toLocaleString()}
+                    <span className="text-xl font-medium mr-2">جنيه</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {ad.rooms && (
+                  <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200/50 hover:shadow-md transition">
+                    <div className="p-3 bg-blue-500 rounded-xl">
+                      <FaBed className="text-white w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">الغرف</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {ad.rooms}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {ad.space && (
+                  <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200/50 hover:shadow-md transition">
+                    <div className="p-3 bg-purple-500 rounded-xl">
+                      <FaRulerCombined className="text-white w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">
+                        المساحة
+                      </p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {ad.space} م²
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <p className="text-gray-600 leading-relaxed mb-6 text-base">
+                {ad.address}
+              </p>
+
+              {/* أزرار التواصل */}
+              {ad.whatsappNumber && (
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <a
+                    href={`https://wa.me/${ad.whatsappNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl hover:from-green-600 hover:to-green-700 transition shadow-lg hover:shadow-xl font-semibold"
+                  >
+                    <FaWhatsapp className="w-6 h-6" />
+                    تواصل عبر واتساب
+                  </a>
+                  <button className="sm:w-auto px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition font-semibold flex items-center justify-center gap-2">
+                    <FaPhone className="w-5 h-5" />
+                    اتصل الآن
+                  </button>
+                </div>
               )}
             </div>
-            <h4 className="font-medium text-gray-900">{ad.user.name}</h4>
-            <p className="text-sm text-gray-500">المعلن</p>
 
-            {/* التقييم */}
-            <div className="flex items-center justify-center gap-1 text-sm text-gray-600 mt-2">
-              <FaStar className="text-yellow-400" size={14} />
-              <span className="font-medium">
-                {ad.user.avgRating?.toFixed(1) || "0.0"}
-              </span>
-              <span>({ad.user.totalReviews || 0} تقييم)</span>
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-gray-200/50">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                <h3 className="text-2xl font-bold text-gray-900">وصف العقار</h3>
+              </div>
+              <p className="text-gray-700 leading-relaxed text-base whitespace-pre-line">
+                {ad.description}
+              </p>
             </div>
+          </div>
 
-            {/* زر الملف الشخصي */}
-            <Link
-              href={`/user/${ad.user.slug}`}
-              className="mt-4 inline-block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              عرض صفحة المعلن
-            </Link>
+          <div className="space-y-6">
+            <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-200/50 sticky top-6">
+              <div className="text-center mb-6">
+                <div className="relative w-24 h-24 mx-auto mb-4">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full animate-pulse"></div>
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border-4 border-white shadow-lg">
+                    {ad.user.avatar ? (
+                      <Image
+                        src={ad.user.avatar}
+                        alt={ad.user.name}
+                        width={96}
+                        height={96}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <FaUser className="text-gray-400" size={40} />
+                    )}
+                  </div>
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-1">
+                  {ad.user.name}
+                </h4>
+                <p className="text-sm text-gray-500 font-medium">المعلن</p>
+              </div>
+
+              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-4 mb-4 border border-amber-200/50">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < Math.floor(ad.user.avgRating || 0)
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">
+                    {ad.user.avgRating?.toFixed(1) || "0.0"}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 text-center mt-1">
+                  ({ad.user.totalReviews || 0} تقييم)
+                </p>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-6 bg-gray-50 rounded-xl p-3">
+                <FaClock className="text-gray-400" size={16} />
+                <span className="font-medium">
+                  نُشر {formatDateFromNow(ad.createdAt)}
+                </span>
+              </div>
+
+              <Link
+                href={`/user/${ad.user.slug}`}
+                className="block w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center rounded-2xl hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl font-semibold"
+              >
+                عرض صفحة المعلن
+              </Link>
+            </div>
           </div>
         </div>
       </div>

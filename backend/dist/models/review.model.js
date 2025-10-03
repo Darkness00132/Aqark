@@ -3,11 +3,10 @@ import { DataTypes, Model } from "sequelize";
 import { nanoid } from "nanoid";
 class Review extends Model {
     toJSON() {
-        return {
-            id: this.id,
-            rating: this.rating,
-            comment: this.comment,
-        };
+        const values = { ...this.get() };
+        delete values.reviewerId;
+        delete values.reviewedUserId;
+        return values;
     }
 }
 Review.init({
