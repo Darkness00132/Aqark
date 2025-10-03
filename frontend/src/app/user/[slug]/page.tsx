@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import ReviewForm from "@/components/reviews/ReviewForm";
 import axiosInstance from "@/axiosInstance/axiosInstance";
 import formatDateFromNow from "@/lib/formatDateFromNow";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "صفحة المستخدم",
@@ -55,11 +56,11 @@ export default async function UserProfile({
             <div className="avatar online placeholder mb-4">
               <div className="w-32 h-32 rounded-full ring ring-primary-content ring-offset-base-100 ring-offset-4 flex items-center justify-center overflow-hidden bg-base-200">
                 <Image
-                  src={user.avatar || "/avatar.webg"}
+                  src={user.avatar || "/avatar.webp"}
                   alt={user.name}
                   width={128}
                   height={128}
-                  className="rounded-full object-cover"
+                  className="rounded-full object-cover object-center"
                 />
               </div>
             </div>
@@ -126,7 +127,8 @@ export default async function UserProfile({
               <div className="space-y-4">
                 {reviews.map(
                   ({ id, reviewer, createdAt, rating, comment }: Review) => (
-                    <div
+                    <Link
+                      href={`/user/${reviewer.slug}`}
                       key={id}
                       className="card bg-base-200 shadow-md hover:shadow-lg transition-all"
                     >
@@ -135,7 +137,7 @@ export default async function UserProfile({
                           <div className="avatar">
                             <div className="relative w-14 h-14 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center overflow-hidden bg-base-200">
                               <Image
-                                src={reviewer.avatar || "/avatar.jpg"}
+                                src={reviewer.avatar || "/avatar.webp"}
                                 alt={reviewer.name}
                                 fill
                                 className="object-cover object-center"
@@ -164,7 +166,7 @@ export default async function UserProfile({
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   )
                 )}
               </div>
