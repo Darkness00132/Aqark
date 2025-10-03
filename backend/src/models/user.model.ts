@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import sequelize from "../db/sql.js";
 import jwt from "jsonwebtoken";
 import validator from "validator";
+import slugify from "../utils/slugify.js";
 
 export type Role = "user" | "landlord" | "admin" | "superAdmin" | "owner";
 
@@ -222,24 +223,25 @@ User.init(
     schema: "public",
     tableName: "users",
     timestamps: true,
-    indexes: [{ fields: ["id"] }, { fields: ["email"] }],
+    indexes: [{ fields: ["id"] }, { fields: ["email"] }, { fields: ["slug"] }],
   }
 );
-
 User.beforeValidate((user) => {
   if (!user.slug) {
-    const slugName = user.name
-      .trim()
-      .normalize("NFKD")
-      .replace(/\s+/g, "-")
-      .replace(/[^\p{L}\p{N}-]/gu, "");
+    const slugName = slugify([user.name]);
     user.slug = `${slugName}-${nanoid(10)}`;
   }
 });
 
-User.beforeSave(async (user) => {
-  if (user.changed("password") && user.password) {
-    user.password = await hash(user.password);
+User.beforeSave((user) => {
+  if (user.changed("name")) {
+    const slugName = slugify([user.name]);
+
+    // keep old nanoid / id part (so url stays stable except for name)
+    const oldSlug = user.slug?.split("-");
+    const uniquePart = oldSlug?.[oldSlug.length - 1] || nanoid(10);
+
+    user.slug = `${slugName}-${uniquePart}`;
   }
 });
 

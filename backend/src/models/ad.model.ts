@@ -2,6 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { CITIES, AREAS, PROPERTY_TYPES } from "../db/data.js";
 import { nanoid } from "nanoid";
 import sequelize from "../db/sql.js";
+import slugify from "../utils/slugify.js";
 
 type User = {
   slug?: string;
@@ -130,32 +131,45 @@ Ad.init(
     schema: "public",
     tableName: "ads",
     timestamps: true,
-    indexes: [{ fields: ["city", "area"] }, { fields: ["type"] }],
   }
 );
 
 Ad.beforeValidate((ad: Ad) => {
   if (!ad.slug) {
-    const parts = [
+    const baseSlug = slugify([
       ad.title,
       ad.propertyType,
       ad.city,
       ad.area,
       ad.rooms ? `${ad.rooms}غ` : null,
       ad.space ? `${ad.space}م` : null,
-    ].filter((x): x is string => Boolean(x));
-
-    // Clean each part: trim, normalize, replace spaces, remove special chars
-    const cleanedParts = parts.map((p) =>
-      p
-        .trim()
-        .normalize("NFKD")
-        .replace(/\s+/g, "-")
-        .replace(/[^\p{L}\p{N}-]/gu, "")
-    );
-
-    const baseSlug = cleanedParts.join("-");
+    ]);
     ad.slug = `${baseSlug}-${nanoid(10)}`;
+  }
+});
+
+Ad.beforeSave((ad: Ad) => {
+  if (
+    ad.changed("title") ||
+    ad.changed("propertyType") ||
+    ad.changed("city") ||
+    ad.changed("area") ||
+    ad.changed("rooms") ||
+    ad.changed("space")
+  ) {
+    const baseSlug = slugify([
+      ad.title,
+      ad.propertyType,
+      ad.city,
+      ad.area,
+      ad.rooms ? `${ad.rooms}غ` : null,
+      ad.space ? `${ad.space}م` : null,
+    ]);
+
+    const oldSlug = ad.slug?.split("-");
+    const uniquePart = oldSlug?.[oldSlug.length - 1] || nanoid(10);
+
+    ad.slug = `${baseSlug}-${uniquePart}`;
   }
 });
 
