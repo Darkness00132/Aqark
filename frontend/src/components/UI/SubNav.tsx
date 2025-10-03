@@ -68,9 +68,9 @@ export default function SubNav() {
         {/* المفضلة */}
         <li>
           <Link
-            href="/favorites"
+            href="/wishlist"
             className={`btn btn-sm sm:btn-md rounded-full gap-2 px-3 sm:px-5 transition-colors ${
-              pathname === "/favorites"
+              pathname === "/wishlist"
                 ? "btn-primary text-white"
                 : "btn-ghost hover:bg-base-300"
             }`}
