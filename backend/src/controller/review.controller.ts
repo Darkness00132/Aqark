@@ -5,8 +5,8 @@ import { User, Review } from "../models/associations.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
 
 export const getReviews = asyncHandler(async (req: Request, res: Response) => {
-  const { publicId } = sanitizeXSS(req.params);
-  const user = await User.findOne({ where: { publicId } });
+  const { slug } = sanitizeXSS(req.params);
+  const user = await User.findOne({ where: { slug } });
   if (!user) {
     return res.status(404).json({ message: "لم يتم العثور على المستخدم" });
   }
@@ -49,10 +49,10 @@ export const setLove = asyncHandler(async (req: AuthRequest, res: Response) => {
 
 export const createReview = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { publicId } = sanitizeXSS(req.params);
+    const { slug } = sanitizeXSS(req.params);
     const { rating, comment } = req.body;
 
-    const user = await User.findOne({ where: { publicId } });
+    const user = await User.findOne({ where: { slug } });
     if (!user) {
       return res.status(404).json({ message: "لم يتم العثور على المستخدم" });
     }

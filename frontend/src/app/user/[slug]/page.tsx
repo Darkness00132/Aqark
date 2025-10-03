@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { FaStar, FaRegStar, FaUserCircle, FaAward } from "react-icons/fa";
 import { Metadata } from "next";
-import ReviewForm from "@/components/user/ReviewForm";
+import ReviewForm from "@/components/reviews/ReviewForm";
 import axiosInstance from "@/axiosInstance/axiosInstance";
 
 export const metadata: Metadata = {
@@ -170,7 +170,7 @@ export default async function UserProfile({
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <h2 className="card-title text-4xl font-bold mb-4">أضف تقييمك</h2>
-            <ReviewForm />
+            <ReviewForm slug={slug} />
           </div>
         </div>
       </div>

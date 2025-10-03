@@ -7,7 +7,7 @@ export interface ReviewAttributes {
   reviewerId: string;
   reviewedUserId: string;
   rating: number;
-  comment: string;
+  comment?: string;
   loves?: number;
 }
 
@@ -16,7 +16,7 @@ class Review extends Model<ReviewAttributes> implements ReviewAttributes {
   declare reviewerId: string;
   declare reviewedUserId: string;
   declare rating: number;
-  declare comment: string;
+  declare comment?: string;
   declare loves?: number;
 
   public toJSON() {
@@ -52,7 +52,7 @@ Review.init(
     },
     comment: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     loves: {
       type: DataTypes.INTEGER,

@@ -1,25 +1,18 @@
 "use client";
 import { useState } from "react";
+import useCreateReview from "@/hooks/reviews/createReview";
 import { FaStar, FaRegStar, FaPaperPlane, FaEdit } from "react-icons/fa";
 
-export default function ReviewForm() {
+export default function ReviewForm({ slug }: { slug: string }) {
+  const { mutate: createReview } = useCreateReview();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (rating === 0) {
-      alert("الرجاء اختيار تقييم");
-      return;
-    }
-    console.log({ rating, comment });
-
-    setTimeout(() => {
-      setRating(0);
-      setComment("");
-    }, 2000);
-  };
+    createReview({ slug , rating , comment})
+  }
 
   const ratingLabels = ["سيء جداً", "سيء", "مقبول", "جيد", "ممتاز"];
 

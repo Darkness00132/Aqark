@@ -11,11 +11,11 @@ import {
 
 const router = Router();
 
-router.get("/:publicId", getReviews);
+router.get("/:slug", getReviews);
 
 router.get("/me", auth, getMyReviews);
 
-router.post("/:publicId", auth, createReview);
+router.post("/:slug", auth, createReview);
 
 router.post("/:reviewId/love", auth, setLove);
 
