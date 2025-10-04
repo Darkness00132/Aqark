@@ -7,7 +7,13 @@ import {
 import { AuthRequest } from "../middlewares/auth.js";
 import { s3Client, Bucket } from "./upload.controller.js";
 import asyncHandler from "../utils/asyncHnadler.js";
-import { User, Ad, AdLogs, Transaction } from "../models/associations.js";
+import {
+  User,
+  Ad,
+  AdLogs,
+  Transaction,
+  Wishlist,
+} from "../models/associations.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import adsFilters from "../utils/adsFilter.js";
 import { Order } from "sequelize";
@@ -87,6 +93,43 @@ export const getMyAd = asyncHandler(async (req: AuthRequest, res: Response) => {
   }
   res.status(200).json({ ad });
 });
+
+export const addToWishlist = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const { slug } = sanitizeXSS(req.params);
+    if (!slug) {
+      return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
+    }
+    const ad = await Ad.findOne({ where: { slug } });
+    if (!ad) {
+      return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
+    }
+    const existingWishlist = await Wishlist.findOne({
+      where: { userId: req.user.id, AdId: ad.id },
+    });
+    if (existingWishlist) {
+      return res
+        .status(400)
+        .json({ message: "الإعلان موجود بالفعل في قائمة المفضلة" });
+    }
+    await Wishlist.create({ userId: req.user.id, AdId: ad.id! });
+
+    res.status(201).json({ message: "تم إضافة الإعلان إلى قائمة المفضلة" });
+  }
+);
+
+export const getMyWishlist = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const wishlist = await Wishlist.findAll({
+      where: { userId: req.user.id },
+      include: [
+        { model: Ad, as: "ad", include: [{ model: User, as: "user" }] },
+      ],
+    });
+
+    res.status(200).json({ wishlist });
+  }
+);
 
 export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
   const { slug } = sanitizeXSS(req.params);

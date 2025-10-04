@@ -11,6 +11,7 @@ import {
   FaClock,
 } from "react-icons/fa";
 import formatDateFromNow from "@/lib/formatDateFromNow";
+import axiosInstance from "@/axiosInstance/axiosInstance";
 
 export default function AdCard({
   ad,
@@ -44,6 +45,9 @@ export default function AdCard({
             <button
               className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors z-20 group/heart"
               aria-label="أضف إلى المفضلة"
+              onClick={() =>
+                axiosInstance.post("/ads/add-to-wishlist/" + ad.slug)
+              }
             >
               <FaHeart
                 className="text-gray-400 group-hover/heart:text-red-500 transition-colors"

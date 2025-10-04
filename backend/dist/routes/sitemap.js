@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { SitemapStream, streamToPromise } from "sitemap";
 import { createGzip } from "zlib";
 import asyncHandler from "../utils/asyncHnadler.js";
 import Ad from "../models/ad.model.js";

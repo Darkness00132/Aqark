@@ -3,7 +3,7 @@ import { Cairo } from "next/font/google";
 import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
-import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import GAListener from "@/components/UI/GAListener";
 import "./globals.css";
 
@@ -78,7 +78,6 @@ export default function RootLayout({
           <Footer />
         </Provider>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
-        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
         <GAListener />
       </body>
     </html>

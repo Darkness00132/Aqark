@@ -2,9 +2,12 @@ import Image from "next/image";
 import { FaStar, FaRegStar, FaUserCircle, FaAward } from "react-icons/fa";
 import { Metadata } from "next";
 import ReviewForm from "@/components/reviews/ReviewForm";
-import axiosInstance from "@/axiosInstance/axiosInstance";
 import formatDateFromNow from "@/lib/formatDateFromNow";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
+export const revalidate = 300;
+export const dynamicParams = true;
 
 export const metadata: Metadata = {
   title: "صفحة المستخدم",
@@ -43,9 +46,18 @@ export default async function UserProfile({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { user, reviews } = await axiosInstance
-    .get(`/users/profile/${slug}`)
-    .then((res) => res.data);
+  const res = await fetch(
+    process.env.NEXT_PUBLIC_API_URL + `/api/users/profile/${slug}`
+  );
+
+  if (!res.ok) notFound();
+
+  let user, reviews;
+  try {
+    ({ user, reviews } = await res.json());
+  } catch {
+    notFound();
+  }
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 space-y-8">

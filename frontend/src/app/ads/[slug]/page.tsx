@@ -1,4 +1,3 @@
-import axiosInstance from "@/axiosInstance/axiosInstance";
 import Image from "next/image";
 import type { Ad } from "@/store/useAd";
 import type { Metadata } from "next";
@@ -16,32 +15,20 @@ import Link from "next/link";
 import AdImagesSwiper from "@/components/ad/AdImagesSwiper";
 import formatDateFromNow from "@/lib/formatDateFromNow";
 
-type CachedAd = {
-  data: Ad;
-  expire: number;
-};
-
-const adCache = new Map<string, CachedAd>();
-const CACHE_DURATION = 5 * 60 * 1000;
+export const revalidate = 300;
+export const dynamicParams = true;
 
 async function getAd(slug: string): Promise<Ad | null> {
-  const now = Date.now();
-
-  if (adCache.has(slug)) {
-    const cached = adCache.get(slug)!;
-    if (cached.expire > now) {
-      return cached.data;
-    }
-    adCache.delete(slug);
-  }
-
   try {
-    const { data } = await axiosInstance.get(`/ads/${slug}`);
-    const ad: Ad = data.ad;
-    adCache.set(slug, { data: ad, expire: now + CACHE_DURATION });
-    return ad;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/ads/${slug}`
+    );
+
+    if (!res.ok) return null;
+
+    return (await res.json()).ad;
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return null;
   }
 }
@@ -51,8 +38,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const param = await params;
-  const ad = await getAd(param.slug);
+  const { slug } = await params;
+  const ad = await getAd(slug);
 
   if (!ad) {
     return {
@@ -80,11 +67,12 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: ad.title,
       description: ad.address,
-      images: ad.images,
+      images: ad.images.map((img) => img.url),
     },
   };
 }
 
+// 🏡 Main Page
 export default async function AdSlug({
   params,
 }: {
@@ -106,6 +94,7 @@ export default async function AdSlug({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-2 space-y-6">
+            {/* 🧱 Main Ad Info */}
             <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-gray-200/50">
               <div className="flex flex-wrap gap-2 mb-4">
                 {ad.type && (
@@ -133,6 +122,7 @@ export default async function AdSlug({
                 </span>
               </div>
 
+              {/* 💰 Price */}
               <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-6 mb-6 shadow-xl">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
@@ -147,6 +137,7 @@ export default async function AdSlug({
                 </div>
               </div>
 
+              {/* 🛏️ Features */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {ad.rooms && (
                   <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200/50 hover:shadow-md transition">
@@ -182,7 +173,7 @@ export default async function AdSlug({
                 {ad.address}
               </p>
 
-              {/* أزرار التواصل */}
+              {/* ☎️ Contact */}
               {ad.whatsappNumber && (
                 <div className="flex flex-col sm:flex-row gap-3">
                   <a
@@ -202,6 +193,7 @@ export default async function AdSlug({
               )}
             </div>
 
+            {/* 🧾 Description */}
             <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-gray-200/50">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
@@ -213,6 +205,7 @@ export default async function AdSlug({
             </div>
           </div>
 
+          {/* 👤 Sidebar */}
           <div className="space-y-6">
             <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-200/50 sticky top-6">
               <div className="text-center mb-6">
