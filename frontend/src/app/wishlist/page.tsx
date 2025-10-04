@@ -1,21 +1,30 @@
 import AdCard from "@/components/ad/AdCard";
 import { Ad } from "@/store/useAd";
+import { Metadata } from "next";
+import { cookies } from "next/headers";
+
+export const metadata: Metadata = {
+  title: "",
+  description: "",
+};
 
 export default async function WishlistPage() {
   try {
+    const cookieStore = await cookies();
+    const jwt = cookieStore.get("jwt-auth")?.value;
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/ads/wishlist`,
       {
-        credentials: "include",
+        headers: {
+          Cookie: `jwt-auth=${jwt}`,
+        },
         cache: "no-store",
       }
     );
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch wishlist");
-    }
-
     const { wishlist } = await res.json();
+    console.log(wishlist);
 
     if (!wishlist || wishlist.length === 0) {
       return (

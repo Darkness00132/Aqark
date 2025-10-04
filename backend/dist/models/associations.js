@@ -21,6 +21,7 @@ Transaction.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 AdLogs.belongsTo(User, { as: "user", foreignKey: "userId" });
 AdLogs.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 Ad.hasMany(AdLogs, { foreignKey: "adId", onDelete: "CASCADE" });
+Ad.hasMany(Transaction, { as: "transactions", foreignKey: "adId" });
 //wishlist model
 Wishlist.belongsTo(User, { foreignKey: "userId", as: "user" });
 Wishlist.belongsTo(Ad, { foreignKey: "adId", as: "ad" });

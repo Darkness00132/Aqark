@@ -14,7 +14,7 @@ Wishlist.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    AdId: {
+    adId: {
         type: DataTypes.STRING,
         allowNull: false,
     },

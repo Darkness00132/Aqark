@@ -5,13 +5,13 @@ import { nanoid } from "nanoid";
 interface WishlistAttributes {
   id?: string;
   userId: string;
-  AdId: string;
+  adId: string;
 }
 
 class Wishlist extends Model<WishlistAttributes> implements WishlistAttributes {
   declare id?: string;
   declare userId: string;
-  declare AdId: string;
+  declare adId: string;
 }
 
 Wishlist.init(
@@ -26,7 +26,7 @@ Wishlist.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    AdId: {
+    adId: {
       type: DataTypes.STRING,
       allowNull: false,
     },

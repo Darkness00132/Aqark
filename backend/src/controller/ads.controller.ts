@@ -100,19 +100,21 @@ export const addToWishlist = asyncHandler(
     if (!slug) {
       return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
     }
+
     const ad = await Ad.findOne({ where: { slug } });
-    if (!ad) {
+    if (!ad || !ad.id) {
       return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
     }
-    const existingWishlist = await Wishlist.findOne({
-      where: { userId: req.user.id, AdId: ad.id },
+
+    const [wishlist, created] = await Wishlist.findOrCreate({
+      where: { userId: req.user.id, adId: ad.id },
     });
-    if (existingWishlist) {
+
+    if (!created) {
       return res
         .status(400)
         .json({ message: "الإعلان موجود بالفعل في قائمة المفضلة" });
     }
-    await Wishlist.create({ userId: req.user.id, AdId: ad.id! });
 
     res.status(201).json({ message: "تم إضافة الإعلان إلى قائمة المفضلة" });
   }
@@ -121,12 +123,12 @@ export const addToWishlist = asyncHandler(
 export const getMyWishlist = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const wishlist = await Wishlist.findAll({
-      where: { userId: req.user.id },
-      include: [
-        { model: Ad, as: "ad", include: [{ model: User, as: "user" }] },
-      ],
+      where: {
+        userId: req.user.id,
+      },
+      include: [{ model: Ad, as: "ad" }],
     });
-
+    console.log(wishlist);
     res.status(200).json({ wishlist });
   }
 );

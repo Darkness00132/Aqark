@@ -59,7 +59,7 @@ app
 try {
     await sequelize.authenticate();
     if (process.env.PRODUCTION === "false") {
-        await sequelize.sync({ alter: true });
+        await sequelize.sync({ force: true });
         console.log("data base sync");
     }
     console.log("Connected to Supabase");
