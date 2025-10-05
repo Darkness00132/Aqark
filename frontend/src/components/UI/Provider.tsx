@@ -14,8 +14,14 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         dir="rtl"
         richColors
         position="top-left"
-        className="text-4xl"
         duration={3000}
+        toastOptions={{
+          classNames: {
+            toast: "text-xl font-meduim",
+            title: "text-xl font-meduim",
+            icon: "text-2xl",
+          },
+        }}
       />
       <QueryClientProvider client={queryClient}>
         {children}

@@ -152,6 +152,7 @@ export default function AdForm() {
                 </label>
                 <input
                   {...register("rooms", {
+                    valueAsNumber: true,
                     setValueAs: (v) =>
                       v === "" || isNaN(v) ? undefined : parseInt(v),
                   })}

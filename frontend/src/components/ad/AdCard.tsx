@@ -1,3 +1,4 @@
+"use client";
 import type { Ad } from "@/store/useAd";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,13 +6,11 @@ import {
   FaBed,
   FaRulerCombined,
   FaMapMarkerAlt,
-  FaHeart,
   FaUser,
   FaStar,
   FaClock,
 } from "react-icons/fa";
 import formatDateFromNow from "@/lib/formatDateFromNow";
-import axiosInstance from "@/axiosInstance/axiosInstance";
 
 export default function AdCard({
   ad,
@@ -38,28 +37,12 @@ export default function AdCard({
         <span className="absolute top-4 right-4 bg-primary text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg z-20">
           {ad.type}
         </span>
-
-        {/* Favorite button */}
-        {!mine && (
-          <button
-            className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors z-20 group/heart"
-            aria-label="أضف إلى المفضلة"
-            onClick={() =>
-              axiosInstance.post("/ads/add-to-wishlist/" + ad.slug)
-            }
-          >
-            <FaHeart
-              className="text-gray-400 group-hover/heart:text-red-500 transition-colors"
-              size={16}
-            />
-          </button>
-        )}
       </figure>
 
       {/* Content */}
       <Link
         href={`/ads/${mine ? "my-ads/" + ad.id : ad.slug}`}
-        className="p-6 space-y-4"
+        className="p-6 space-y-4 block"
       >
         {/* Title */}
         <h2 className="text-xl font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-primary transition-colors">

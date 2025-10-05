@@ -10,8 +10,6 @@ import {
   incrementWhatsappClicks,
   getMyAd,
   getSitemapAds,
-  getMyWishlist,
-  addToWishlist,
 } from "../controller/ads.controller.js";
 
 const router = Router();
@@ -23,10 +21,6 @@ router.get("/me", auth, getMyAds);
 router.get("/sitemap", getSitemapAds);
 
 router.get("/me/:id", auth, getMyAd);
-
-router.post("/add-to-wishlist/:slug", auth, addToWishlist);
-
-router.get("/wishlist", auth, getMyWishlist);
 
 router.post("/increment-whatsapp-clicks/:slug", incrementWhatsappClicks);
 
