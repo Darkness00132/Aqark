@@ -1,9 +1,10 @@
 import { createAdSchema, getAdsSchema, updateAdSchema, } from "../validates/ad.js";
 import { s3Client, Bucket } from "./upload.controller.js";
 import asyncHandler from "../utils/asyncHnadler.js";
-import { User, Ad, AdLogs, Transaction, } from "../models/associations.js";
+import { User, Ad, AdLogs, CreditsLogs } from "../models/associations.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import adsFilters from "../utils/adsFilter.js";
+import sequelize from "../db/sql.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
 import adCostInCredits from "../utils/adCostInCredits.js";
 export const getAllAds = asyncHandler(async (req, res) => {
@@ -107,27 +108,34 @@ export const createAd = asyncHandler(async (req, res) => {
         type: value.type,
         price: value.price,
     });
-    const ad = await Ad.create({
-        ...value,
-        userId: req.user.id,
-        costInCredits,
+    if (req.user.credits < costInCredits) {
+        return res
+            .status(400)
+            .json({ message: "رصيدك الحالى لا يكفى لعمل اعلان" });
+    }
+    await sequelize.transaction(async (t) => {
+        const ad = await Ad.create({
+            ...value,
+            userId: req.user.id,
+            costInCredits,
+        }, { transaction: t });
+        req.user.credits -= costInCredits;
+        await req.user.save({ transaction: t });
+        await AdLogs.create({
+            userId: req.user.id,
+            adId: ad.id,
+            action: "create",
+            description: `Created ad with title: ${ad.title}`,
+        }, { transaction: t });
+        await CreditsLogs.create({
+            userId: req.user.id,
+            adId: ad.id,
+            description: "Spent credits for creating ad",
+            type: "spend",
+            credits: costInCredits,
+        }, { transaction: t });
     });
-    req.user.credits -= costInCredits;
-    await req.user.save();
-    await AdLogs.create({
-        userId: req.user.id,
-        adId: ad.id,
-        action: "create",
-        description: `Created ad with title: ${ad.title}`,
-    });
-    await Transaction.create({
-        userId: req.user.id,
-        adId: ad.id,
-        description: "Spent credits for creating ad",
-        type: "spend",
-        credits: 2,
-    });
-    res.status(201).json({ ad });
+    res.status(201).json({ message: "تم انشاء اعلان بنجاح" });
 });
 export const updateAd = asyncHandler(async (req, res) => {
     const { id } = sanitizeXSS(req.params);

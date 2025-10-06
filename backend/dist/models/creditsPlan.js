@@ -9,6 +9,10 @@ CreditsPlan.init({
         primaryKey: true,
         defaultValue: () => nanoid(16),
     },
+    userId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     credits: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -24,7 +28,8 @@ CreditsPlan.init({
     bonus: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 0,
     },
-}, { sequelize, schema: "public", modelName: "creditsPlans", timestamps: false });
+}, { sequelize, schema: "public", modelName: "credits_plans", timestamps: true });
 export default CreditsPlan;
 //# sourceMappingURL=creditsPlan.js.map

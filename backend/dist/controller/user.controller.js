@@ -1,5 +1,6 @@
-import { User, Review } from "../models/associations.js";
+import { User, Review, CreditsLogs } from "../models/associations.js";
 import { signupSchema, loginSchema, forgetPasswordSchema, resetPasswordSchema, updateProfileSchema, } from "../validates/user.js";
+import sequelize from "../db/sql.js";
 import { col, fn } from "sequelize";
 import { nanoid } from "nanoid";
 import asyncHandler from "../utils/asyncHnadler.js";
@@ -44,13 +45,21 @@ export const verify = asyncHandler(async (req, res) => {
     user.isVerified = true;
     user.verificationToken = null;
     user.verificationTokenExpire = null;
-    user.credits = 20;
+    user.credits = 100;
     // Track IP + user agent on verify
     const ip = getClientIP(req);
     const userAgent = req.headers["user-agent"] || "unknown";
     user.ips = user.ips || [];
     user.ips.push({ ip, userAgent, lastLogin: new Date() });
-    await user.save();
+    await sequelize.transaction(async (t) => {
+        await user.save({ transaction: t });
+        await CreditsLogs.create({
+            userId: user.id,
+            type: "gift",
+            description: "Signup verification bonus",
+            credits: 100,
+        }, { transaction: t });
+    });
     await welcomeEmail(user.email);
     const token = await user.generateAuthToken();
     res.cookie("jwt-auth", token, {
@@ -100,7 +109,6 @@ export const login = asyncHandler(async (req, res) => {
     });
     res.status(200).json({ message: "تم تسجيل الدخول بنجاح" });
 });
-// --- Rest of your functions unchanged ---
 export const getMyProfile = asyncHandler(async (req, res) => {
     return res.status(200).json({ user: req.user });
 });

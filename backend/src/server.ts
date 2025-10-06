@@ -10,6 +10,7 @@ import userRouter from "./routes/user.route.js";
 import uploadRouter from "./routes/upload.route.js";
 import reviewsRouter from "./routes/review.route.js";
 import adsRouter from "./routes/ads.route.js";
+import creditsRouter from "./routes/credits.routes.js";
 import dataAnlysisRouter from "./routes/dataAnalysis.route.js";
 import sanitizeXSS from "./utils/sanitizeXSS.js";
 import { getClientIP } from "./utils/getClientIp.js";
@@ -84,7 +85,8 @@ app
   .use("/api/upload", uploadRouter)
   .use("/api/reviews", reviewsRouter)
   .use("/api/ads", adsRouter)
-  .use("/api/data-analysis", dataAnlysisRouter);
+  .use("/api/data-analysis", dataAnlysisRouter)
+  .use("/api/credits", creditsRouter);
 
 app.use((err: unknown, _req: any, res: any, _next: any) => {
   console.error("Error:", err);

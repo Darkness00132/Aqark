@@ -1,39 +1,62 @@
+import { nanoid } from "nanoid";
 import sequelize from "../db/sql.js";
 import { DataTypes, Model } from "sequelize";
-import { nanoid } from "nanoid";
 class Transaction extends Model {
 }
 Transaction.init({
     id: {
         type: DataTypes.STRING,
+        defaultValue: nanoid(16),
         primaryKey: true,
-        defaultValue: () => nanoid(16),
     },
     userId: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    adId: {
-        type: DataTypes.STRING,
-    },
-    description: {
+    planId: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    planName: {
+    paymentId: {
         type: DataTypes.STRING,
+        allowNull: false,
+    },
+    cardLast4: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    paymentMethod: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    gatewayFee: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
     },
     type: {
-        type: DataTypes.ENUM("purchase", "spend", "refund"),
+        type: DataTypes.ENUM("purchase", "refund"),
         allowNull: false,
-    },
-    amount: {
-        type: DataTypes.INTEGER,
     },
     credits: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-}, { sequelize, schema: "public", modelName: "transaction", timestamps: true });
+    price: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    description: {
+        type: DataTypes.STRING,
+    },
+    paymentStatus: {
+        type: DataTypes.ENUM("pending", "completed", "failed"),
+        allowNull: false,
+    },
+}, {
+    sequelize,
+    schema: "public",
+    modelName: "transactions",
+    timestamps: true,
+});
 export default Transaction;
 //# sourceMappingURL=transaction.model.js.map

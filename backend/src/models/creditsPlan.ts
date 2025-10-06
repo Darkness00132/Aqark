@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 
 interface CreditsPlanAttributes {
   id?: string;
+  userId?: string;
   credits: number;
   price: number;
   name: string;
@@ -15,6 +16,7 @@ class CreditsPlan
   implements CreditsPlanAttributes
 {
   declare id?: string;
+  declare userId?: string;
   declare credits: number;
   declare price: number;
   declare name: string;
@@ -27,6 +29,10 @@ CreditsPlan.init(
       type: DataTypes.STRING,
       primaryKey: true,
       defaultValue: () => nanoid(16),
+    },
+    userId: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     credits: {
       type: DataTypes.INTEGER,
@@ -43,9 +49,10 @@ CreditsPlan.init(
     bonus: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 0,
     },
   },
-  { sequelize, schema: "public", modelName: "creditsPlans", timestamps: false }
+  { sequelize, schema: "public", modelName: "credits_plans", timestamps: true }
 );
 
 export default CreditsPlan;
