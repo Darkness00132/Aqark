@@ -1,5 +1,5 @@
 import User from "./user.model.js";
-import CreditsLogs from "./creditsLog.model.js";
+import CreditsLog from "./creditsLog.model.js";
 import Review from "./review.model.js";
 import AdLogs from "./adLogs.model.js";
 import Ad from "./ad.model.js";
@@ -18,15 +18,15 @@ User.hasMany(Review, { as: "givenReviews", foreignKey: "reviewerId" });
 User.hasMany(Review, { as: "receivedReviews", foreignKey: "reviewedUserId" });
 
 //transaction model
-User.hasMany(CreditsLogs, { as: "creditLogs", foreignKey: "userId" });
-CreditsLogs.belongsTo(User, { as: "user", foreignKey: "userId" });
-CreditsLogs.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
+User.hasMany(CreditsLog, { as: "creditLogs", foreignKey: "userId" });
+CreditsLog.belongsTo(User, { as: "user", foreignKey: "userId" });
+CreditsLog.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 
 //adLogs model
 AdLogs.belongsTo(User, { as: "user", foreignKey: "userId" });
 AdLogs.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 Ad.hasMany(AdLogs, { foreignKey: "adId", onDelete: "CASCADE" });
-Ad.hasMany(CreditsLogs, { as: "creditLogs", foreignKey: "adId" });
+Ad.hasMany(CreditsLog, { as: "creditLogs", foreignKey: "adId" });
 
 //credits plan model
 CreditsPlan.belongsTo(User, { as: "user", foreignKey: "userId" });
@@ -35,9 +35,9 @@ CreditsPlan.belongsTo(User, { as: "user", foreignKey: "userId" });
 Transaction.belongsTo(User, { as: "user", foreignKey: "userId" });
 Transaction.belongsTo(CreditsPlan, { as: "plan", foreignKey: "planId" });
 User.hasMany(Transaction, { as: "transactions", foreignKey: "userId" });
-CreditsLogs.belongsTo(Transaction, {
+CreditsLog.belongsTo(Transaction, {
   as: "transaction",
   foreignKey: "transactionId",
 });
 
-export { User, Ad, AdLogs, CreditsLogs, Transaction, CreditsPlan, Review };
+export { User, Ad, AdLogs, CreditsLog, Transaction, CreditsPlan, Review };

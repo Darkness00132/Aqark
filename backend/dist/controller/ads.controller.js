@@ -1,7 +1,7 @@
 import { createAdSchema, getAdsSchema, updateAdSchema, } from "../validates/ad.js";
 import { s3Client, Bucket } from "./upload.controller.js";
 import asyncHandler from "../utils/asyncHnadler.js";
-import { User, Ad, AdLogs, CreditsLogs } from "../models/associations.js";
+import { User, Ad, AdLogs, CreditsLog } from "../models/associations.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import adsFilters from "../utils/adsFilter.js";
 import sequelize from "../db/sql.js";
@@ -127,7 +127,7 @@ export const createAd = asyncHandler(async (req, res) => {
             action: "create",
             description: `Created ad with title: ${ad.title}`,
         }, { transaction: t });
-        await CreditsLogs.create({
+        await CreditsLog.create({
             userId: req.user.id,
             adId: ad.id,
             description: "Spent credits for creating ad",

@@ -1,6 +1,6 @@
 import type { Response, Request } from "express";
 import type { AuthRequest } from "../middlewares/auth.js";
-import { User, Review, CreditsLogs } from "../models/associations.js";
+import { User, Review, CreditsLog } from "../models/associations.js";
 import {
   signupSchema,
   loginSchema,
@@ -74,7 +74,7 @@ export const verify = asyncHandler(async (req: Request, res: Response) => {
 
   await sequelize.transaction(async (t) => {
     await user.save({ transaction: t });
-    await CreditsLogs.create(
+    await CreditsLog.create(
       {
         userId: user.id!,
         type: "gift",

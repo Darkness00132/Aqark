@@ -7,7 +7,7 @@ import {
 import { AuthRequest } from "../middlewares/auth.js";
 import { s3Client, Bucket } from "./upload.controller.js";
 import asyncHandler from "../utils/asyncHnadler.js";
-import { User, Ad, AdLogs, CreditsLogs } from "../models/associations.js";
+import { User, Ad, AdLogs, CreditsLog } from "../models/associations.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import adsFilters from "../utils/adsFilter.js";
 import { Order } from "sequelize";
@@ -166,7 +166,7 @@ export const createAd = asyncHandler(
         { transaction: t }
       );
 
-      await CreditsLogs.create(
+      await CreditsLog.create(
         {
           userId: req.user.id,
           adId: ad.id,

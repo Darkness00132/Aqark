@@ -1,4 +1,4 @@
-import { User, Review, CreditsLogs } from "../models/associations.js";
+import { User, Review, CreditsLog } from "../models/associations.js";
 import { signupSchema, loginSchema, forgetPasswordSchema, resetPasswordSchema, updateProfileSchema, } from "../validates/user.js";
 import sequelize from "../db/sql.js";
 import { col, fn } from "sequelize";
@@ -53,7 +53,7 @@ export const verify = asyncHandler(async (req, res) => {
     user.ips.push({ ip, userAgent, lastLogin: new Date() });
     await sequelize.transaction(async (t) => {
         await user.save({ transaction: t });
-        await CreditsLogs.create({
+        await CreditsLog.create({
             userId: user.id,
             type: "gift",
             description: "Signup verification bonus",

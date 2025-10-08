@@ -16,12 +16,12 @@ import {
 export default function Sidebar({
   open,
   setOpen,
+  pathname,
 }: {
   open: boolean;
+  pathname: string;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const pathname = usePathname();
-
   const links = [
     { href: "/", label: "Dashboard", icon: <FaTachometerAlt /> },
     { href: "/ads", label: "Ads", icon: <FaBuilding /> },

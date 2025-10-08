@@ -1,15 +1,14 @@
-import { Router } from "express";
-import type { Request, Response, NextFunction } from "express";
 import passport from "passport";
+import { Router, Request, Response, NextFunction } from "express";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import User, { type Role } from "../models/user.model.js";
-import type { AuthRequest } from "../middlewares/auth.js";
 import welcomeEmail from "../emails/welcomeEmail.js";
 import { getClientIP } from "../utils/getClientIp.js";
+import { CreditsLog } from "../models/associations.js";
 
 const router = Router();
 
-// --- Central login/signup handler ---
+/* ----------------------------- Helper: handle login ----------------------------- */
 async function handleLogin(user: User, req: Request, res: Response) {
   const ip = getClientIP(req);
   const userAgent = req.headers["user-agent"] || "unknown";
@@ -19,19 +18,14 @@ async function handleLogin(user: User, req: Request, res: Response) {
     (entry) => entry.ip === ip && entry.userAgent === userAgent
   );
 
-  if (existingEntry) {
-    existingEntry.lastLogin = new Date();
-  } else {
-    user.ips.push({ ip, userAgent, lastLogin: new Date() });
-  }
+  if (existingEntry) existingEntry.lastLogin = new Date();
+  else user.ips.push({ ip, userAgent, lastLogin: new Date() });
 
   await user.save();
 
   const token = await user.generateAuthToken();
 
-  if (!user.isVerified) {
-    welcomeEmail(user.email);
-  }
+  if (!user.isVerified) welcomeEmail(user.email);
 
   res.cookie("jwt-auth", token, {
     httpOnly: true,
@@ -44,45 +38,60 @@ async function handleLogin(user: User, req: Request, res: Response) {
   res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
 }
 
-// --- Passport Google Strategy ---
+/* ----------------------------- Google Strategy ----------------------------- */
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: process.env.API_URL + "/auth/google/callback",
+      callbackURL: `${process.env.API_URL}/auth/google/callback`,
       passReqToCallback: true,
     },
     async (req: Request, accessToken, refreshToken, profile, done) => {
       try {
-        if (req.secureQuery.state) {
-          req.secureQuery.state = JSON.parse(req.secureQuery.state);
+        // Safely parse state
+        let parsedState: { role: Role; mode: string } = {
+          role: "user",
+          mode: "login",
+        };
+        if (typeof (req.query.state as string) === "string") {
+          try {
+            parsedState = JSON.parse(req.query.state as string);
+          } catch {
+            return done(new Error("Invalid state data"), false);
+          }
         }
-        const { role = "user", mode = "login" }: { role: Role; mode: string } =
-          req.secureQuery.state;
+
+        const { role, mode } = parsedState;
 
         let user = await User.findOne({ where: { googleId: profile.id } });
 
+        // --- New user or linking existing ---
         if (!user) {
-          const existUser = await User.findOne({
-            where: { email: profile.emails?.[0]?.value },
-          });
+          const email = profile.emails?.[0]?.value;
 
-          if (existUser) {
-            existUser.googleId = profile.id;
-            await existUser.save();
-            user = existUser;
+          // If account already exists by email
+          const existing = await User.findOne({ where: { email } });
+
+          if (existing) {
+            existing.googleId = profile.id;
+            await existing.save();
+            user = existing;
           } else {
-            if (mode === "login") return done(undefined, false);
+            // Prevent new signup if mode = login or adminLogin
+            if (mode === "login" || mode === "adminLogin") {
+              return done(new Error("You do not have admin access"), false);
+            }
 
+            // Create new user
             user = await User.create({
               googleId: profile.id,
               name: profile.displayName,
-              email: profile.emails?.[0]?.value!,
+              email: email!,
               avatar: profile.photos?.[0]?.value || "",
               role,
               isVerified: true,
-              credits: role === "landlord" ? 10 : 0,
+              credits: role === "landlord" ? 100 : 0,
               ips: [
                 {
                   ip: getClientIP(req),
@@ -91,25 +100,44 @@ passport.use(
                 },
               ],
             });
+
+            // Log signup credits
+            await CreditsLog.create({
+              userId: user.id!,
+              type: "gift",
+              description: "Signup verification bonus",
+              credits: 100,
+            });
           }
         }
 
-        done(undefined, user);
+        // --- Admin login validation ---
+        if (
+          mode === "adminLogin" &&
+          !["admin", "superAdmin", "owner"].includes(user.role)
+        ) {
+          return done(new Error("You do not have admin access"), false);
+        }
+
+        return done(null, user);
       } catch (err) {
-        done(err, undefined);
+        return done(err as Error, false);
       }
     }
   )
 );
 
-// --- Routes ---
+/* ----------------------------- Routes ----------------------------- */
+
+// Start Google Auth
 router.get(
   "/auth/google",
   (req: Request, res: Response, next: NextFunction) => {
     const role =
-      typeof req.secureQuery.role === "string" ? req.secureQuery.role : "user";
+      typeof req.query.role === "string" ? (req.query.role as Role) : "user";
     const mode =
-      typeof req.secureQuery.mode === "string" ? req.secureQuery.mode : "login";
+      typeof req.query.mode === "string" ? (req.query.mode as string) : "login";
+
     const state = JSON.stringify({ role, mode });
 
     passport.authenticate("google", {
@@ -119,23 +147,26 @@ router.get(
   }
 );
 
+// Callback
 router.get(
   "/auth/google/callback",
-  (req, res, next) => {
-    passport.authenticate("google", {
-      session: false,
-      failureRedirect: `${process.env.FRONTEND_URL}/user/signup`,
-    })(req, res, next);
-  },
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      if (!req.user)
-        return res.redirect(`${process.env.FRONTEND_URL}/user/signup`);
+  (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate(
+      "google",
+      { session: false },
+      async (err, user, info) => {
+        if (err) {
+          console.error("Google Auth Error:", err.message);
+          return res.redirect(`${process.env.FRONTEND_URL}/?login=failed`);
+        }
 
-      await handleLogin(req.user, req, res);
-    } catch (err) {
-      next(err);
-    }
+        if (!user) {
+          return res.redirect(`${process.env.FRONTEND_URL}/?login=failed`);
+        }
+
+        await handleLogin(user as User, req, res);
+      }
+    )(req, res, next);
   }
 );
 
