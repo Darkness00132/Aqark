@@ -1,14 +1,29 @@
 "use client";
+import { useEffect } from "react";
 import useProfile from "@/hooks/user/useProfile";
+import { toast } from "sonner";
 
 export default function AuthInitializer({
-  login,
+  status,
+  message,
 }: {
-  login: string | undefined;
+  status?: string;
+  message?: string;
 }) {
   const { refetch } = useProfile();
-  if (login === "success") {
-    refetch();
-  }
-  return <></>;
+
+  useEffect(() => {
+    if (status === "success") {
+      refetch();
+      toast.success("تم تسجيل الدخول بنجاح");
+    } else if (status === "failed") {
+      toast.error("فشل تسجيل الدخول، يرجى المحاولة مجددًا");
+    }
+
+    if (message) {
+      toast.error(message);
+    }
+  }, [status, message, refetch]);
+
+  return null;
 }

@@ -4,6 +4,6 @@ import admin from "../middlewares/admin.js";
 import { getStatus } from "../controller/admin.controller.js";
 const router = Router();
 router.use(auth, admin);
-router.get("/stats", getStatus);
+router.get("/status", getStatus);
 export default router;
 //# sourceMappingURL=admin.route.js.map

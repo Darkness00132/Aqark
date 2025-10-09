@@ -7,6 +7,6 @@ const router = Router();
 
 router.use(auth, admin);
 
-router.get("/stats", getStatus);
+router.get("/status", getStatus);
 
 export default router;

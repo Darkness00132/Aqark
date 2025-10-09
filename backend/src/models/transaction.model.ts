@@ -14,7 +14,7 @@ interface TransactionAttributes {
   description?: string;
   paymentStatus: "pending" | "completed" | "failed";
   paymentMethod: string;
-  gatewayFee: number;
+  gatewayfee: number;
 }
 
 class Transaction extends Model<TransactionAttributes> {
@@ -29,7 +29,7 @@ class Transaction extends Model<TransactionAttributes> {
   declare credits: number;
   declare price: number;
   declare description?: string;
-  declare gatewayFee: number;
+  declare gatewayfee: number;
 }
 
 Transaction.init(
@@ -59,7 +59,7 @@ Transaction.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    gatewayFee: {
+    gatewayfee: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },

@@ -29,7 +29,7 @@ Transaction.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    gatewayFee: {
+    gatewayfee: {
         type: DataTypes.FLOAT,
         allowNull: false,
     },

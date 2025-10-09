@@ -52,7 +52,16 @@ app.use((req, _res, next) => {
 app
   .use(
     cors({
-      origin: process.env.FRONTEND_URL,
+      origin: (origin, cb) => {
+        if (!origin) return cb(null, true);
+        if (
+          [process.env.FRONTEND_URL, process.env.ADMIN_URL].includes(origin)
+        ) {
+          return cb(null, true);
+        } else {
+          cb(new Error("Not allowed by CORS"));
+        }
+      },
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE"],
     })

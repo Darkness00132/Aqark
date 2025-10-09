@@ -6,7 +6,7 @@ export default function useStatus() {
   return useQuery({
     queryKey: ["status"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/status");
+      const response = await axiosInstance.get("/admin/status");
       return response.data;
     },
   });

@@ -17,9 +17,9 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         duration={3000}
         toastOptions={{
           classNames: {
-            toast: "text-xl font-meduim",
-            title: "text-xl font-meduim",
-            icon: "text-2xl",
+            toast: "text-lg",
+            title: "text-lg",
+            icon: "text-xl",
           },
         }}
       />

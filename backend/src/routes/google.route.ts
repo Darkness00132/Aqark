@@ -8,8 +8,15 @@ import { CreditsLog } from "../models/associations.js";
 
 const router = Router();
 
-/* ----------------------------- Helper: handle login ----------------------------- */
-async function handleLogin(user: User, req: Request, res: Response) {
+/* -------------------------------------------------------------------------- */
+/*                              Handle Successful Login                       */
+/* -------------------------------------------------------------------------- */
+async function handleLogin(
+  user: User,
+  req: Request,
+  res: Response,
+  isAdminMode: boolean
+) {
   const ip = getClientIP(req);
   const userAgent = req.headers["user-agent"] || "unknown";
 
@@ -18,59 +25,69 @@ async function handleLogin(user: User, req: Request, res: Response) {
     (entry) => entry.ip === ip && entry.userAgent === userAgent
   );
 
-  if (existingEntry) existingEntry.lastLogin = new Date();
-  else user.ips.push({ ip, userAgent, lastLogin: new Date() });
+  if (existingEntry) {
+    existingEntry.lastLogin = new Date();
+  } else {
+    user.ips.push({ ip, userAgent, lastLogin: new Date() });
+  }
 
   await user.save();
 
   const token = await user.generateAuthToken();
 
-  if (!user.isVerified) welcomeEmail(user.email);
+  // إرسال رسالة ترحيب عند أول تسجيل تحقق
+  if (!user.isVerified) {
+    welcomeEmail(user.email);
+  }
 
+  // حفظ التوكن داخل كوكي محمية
   res.cookie("jwt-auth", token, {
     httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24 * 7,
     secure: process.env.PRODUCTION === "true",
     sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
+    maxAge: 1000 * 60 * 60 * 24 * 7, // أسبوع
     priority: "high",
   });
 
-  res.redirect(`${process.env.FRONTEND_URL}/?login=success`);
+  const redirectUrl = isAdminMode
+    ? `${process.env.ADMIN_URL}/login?status=success`
+    : `${process.env.FRONTEND_URL}/user/login?status=success`;
+
+  res.redirect(redirectUrl);
 }
 
-/* ----------------------------- Google Strategy ----------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                               Google Strategy                              */
+/* -------------------------------------------------------------------------- */
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: `${process.env.API_URL}/auth/google/callback`,
+      callbackURL: process.env.API_URL + "/auth/google/callback",
       passReqToCallback: true,
     },
     async (req: Request, accessToken, refreshToken, profile, done) => {
       try {
-        // Safely parse state
         let parsedState: { role: Role; mode: string } = {
           role: "user",
           mode: "login",
         };
-        if (typeof (req.query.state as string) === "string") {
+
+        if (typeof req.query.state === "string") {
           try {
-            parsedState = JSON.parse(req.query.state as string);
+            parsedState = JSON.parse(req.query.state);
           } catch {
-            return done(new Error("Invalid state data"), false);
+            return done(new Error("بيانات الحالة غير صالحة"), false);
           }
         }
 
         const { role, mode } = parsedState;
-
         let user = await User.findOne({ where: { googleId: profile.id } });
 
-        // --- New user or linking existing ---
+        /* --------------------------- الحالة ١: المستخدم غير موجود --------------------------- */
         if (!user) {
           const email = profile.emails?.[0]?.value;
-
-          // If account already exists by email
           const existing = await User.findOne({ where: { email } });
 
           if (existing) {
@@ -78,12 +95,12 @@ passport.use(
             await existing.save();
             user = existing;
           } else {
-            // Prevent new signup if mode = login or adminLogin
+            // منع تسجيل جديد في وضع تسجيل الدخول أو المشرف
             if (mode === "login" || mode === "adminLogin") {
-              return done(new Error("You do not have admin access"), false);
+              return done(new Error("ليس لديك صلاحية تسجيل الدخول"), false);
             }
 
-            // Create new user
+            // إنشاء مستخدم جديد
             user = await User.create({
               googleId: profile.id,
               name: profile.displayName,
@@ -101,7 +118,7 @@ passport.use(
               ],
             });
 
-            // Log signup credits
+            // منح نقاط ترحيبية
             await CreditsLog.create({
               userId: user.id!,
               type: "gift",
@@ -111,15 +128,15 @@ passport.use(
           }
         }
 
-        // --- Admin login validation ---
+        /* ------------------------ الحالة ٢: التحقق من صلاحيات المشرف ------------------------ */
         if (
           mode === "adminLogin" &&
           !["admin", "superAdmin", "owner"].includes(user.role)
         ) {
-          return done(new Error("You do not have admin access"), false);
+          return done(new Error("ليس لديك صلاحية دخول إلى لوحة التحكم"), false);
         }
 
-        return done(null, user);
+        return done(null, { user, mode });
       } catch (err) {
         return done(err as Error, false);
       }
@@ -127,9 +144,11 @@ passport.use(
   )
 );
 
-/* ----------------------------- Routes ----------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                                    Routes                                  */
+/* -------------------------------------------------------------------------- */
 
-// Start Google Auth
+// الخطوة ١: بدء تسجيل الدخول عبر Google
 router.get(
   "/auth/google",
   (req: Request, res: Response, next: NextFunction) => {
@@ -147,24 +166,49 @@ router.get(
   }
 );
 
-// Callback
+// الخطوة ٢: استقبال رد Google بعد تسجيل الدخول
 router.get(
   "/auth/google/callback",
   (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate(
       "google",
       { session: false },
-      async (err, user, info) => {
+      async (err, data: { user: User; mode: string } | false) => {
+        let parsedState: { mode: string } = { mode: "login" };
+
+        try {
+          if (typeof req.query.state === "string") {
+            parsedState = JSON.parse(req.query.state);
+          }
+        } catch {
+          // تجاهل الأخطاء
+        }
+
+        const isAdminMode = parsedState.mode === "adminLogin";
+        const redirectBase = isAdminMode
+          ? process.env.ADMIN_URL
+          : process.env.FRONTEND_URL + "/user";
+
+        /* -------------------------- معالجة جميع حالات الفشل -------------------------- */
         if (err) {
           console.error("Google Auth Error:", err.message);
-          return res.redirect(`${process.env.FRONTEND_URL}/?login=failed`);
+          return res.redirect(
+            `${redirectBase}/login?status=failed&message=${encodeURIComponent(
+              err.message || "حدث خطأ أثناء تسجيل الدخول عبر Google"
+            )}`
+          );
         }
 
-        if (!user) {
-          return res.redirect(`${process.env.FRONTEND_URL}/?login=failed`);
+        if (!data || !data.user) {
+          return res.redirect(
+            `${redirectBase}/login?status=failed&message=${encodeURIComponent(
+              "تعذر العثور على حساب مرتبط بهذا البريد الإلكتروني"
+            )}`
+          );
         }
 
-        await handleLogin(user as User, req, res);
+        /* -------------------------- تسجيل الدخول بنجاح -------------------------- */
+        await handleLogin(data.user, req, res, isAdminMode);
       }
     )(req, res, next);
   }

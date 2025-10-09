@@ -30,7 +30,7 @@ export default function useLogin() {
     },
     onSuccess: (data) => {
       toast.success(data?.message || "Welcome back, Admin");
-      router.push("/?login=success");
+      router.push("/login?status=success");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(

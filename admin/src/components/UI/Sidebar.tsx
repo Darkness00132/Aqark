@@ -1,5 +1,5 @@
 "use client";
-import { usePathname } from "next/navigation";
+import useLogout from "@/hooks/user/useLogout";
 import Link from "next/link";
 import {
   FaBars,
@@ -31,7 +31,7 @@ export default function Sidebar({
     { href: "/statistics", label: "Analytics", icon: <FaChartBar /> },
     { href: "/settings", label: "Settings", icon: <FaCog /> },
   ];
-
+  const { mutate, isPending } = useLogout();
   return (
     <aside
       className={`fixed top-0 left-0 h-screen bg-[#f8f9fa] border-r border-gray-200 flex flex-col z-40 transition-all duration-300 ease-in-out
@@ -106,6 +106,8 @@ export default function Sidebar({
                 : "justify-start"
             }
           `}
+          onClick={() => mutate()}
+          disabled={isPending}
           data-tip={!open ? "Logout" : undefined}
         >
           <FaSignOutAlt className="text-2xl text-white" />

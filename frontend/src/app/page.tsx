@@ -1,17 +1,9 @@
-import AuthInitializer from "@/components/UI/AuthInitializer";
 import Hero from "@/components/UI/Hero";
 import { FaSearch, FaHome, FaCheckCircle } from "react-icons/fa";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ login?: string }>;
-}) {
-  const params = await searchParams;
+export default async function Home() {
   return (
     <div className="min-h-screen">
-      <AuthInitializer login={params.login} />
-
       {/* Hero Section */}
       <Hero />
 

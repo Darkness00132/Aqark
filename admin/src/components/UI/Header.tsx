@@ -2,8 +2,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FaBell } from "react-icons/fa";
+import useProfile from "@/hooks/user/useProfile";
 
 export default function Header() {
+  const { data: user } = useProfile();
   return (
     <div className="navbar bg-base-100 shadow-lg rounded-full mt-4 p-4 mx-auto w-[97%]">
       <div className="navbar-start">
@@ -22,7 +24,7 @@ export default function Header() {
         <div className="avatar">
           <div className="w-9 rounded-full ring ring-primary/10">
             <Image
-              src="/avatar.webp"
+              src={user?.avatar || "/avatar.webp"}
               alt="User"
               width={36}
               height={36}

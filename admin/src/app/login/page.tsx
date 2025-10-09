@@ -1,16 +1,25 @@
-import { Metadata } from "next";
+"use client";
 import { FcGoogle } from "react-icons/fc";
 import LoginForm from "@/components/users/loginForm";
 import ForgetPasswordModal from "@/components/users/ForgetPasswordModal";
-import Link from "next/link";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
+import useProfile from "@/hooks/user/useProfile";
 
-export const metadata: Metadata = {
-  title: "Admin Login",
-  description:
-    "Securely log in to the admin dashboard to manage your platform.",
-};
+export default function Login() {
+  const { refetch } = useProfile();
+  const searchParams = useSearchParams();
+  const loginStatus = searchParams.get("status");
+  useEffect(() => {
+    if (loginStatus === "success") {
+      toast.success("Logged in successfully!");
+      refetch();
+    } else if (loginStatus === "failed") {
+      toast.error("Login failed. Please try again.");
+    }
+  }, [loginStatus, refetch]);
 
-export default async function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-bl from-primary/30 via-base-100 to-secondary/30">
       <div className="relative z-10 w-full max-w-sm sm:max-w-md">
@@ -33,7 +42,7 @@ export default async function Login() {
 
             {/* Google Login */}
             <a
-              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google?mode=login`}
+              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google?mode=adminLogin`}
               className="btn btn-outline lg:btn-lg w-full rounded-lg border-base-300 hover:bg-base-200 hover:border-primary/50 transition-all duration-300 group"
             >
               <FcGoogle
@@ -46,15 +55,6 @@ export default async function Login() {
             {/* Footer Links */}
             <div className="text-center space-y-4 mt-6">
               <ForgetPasswordModal />
-              <div className="text-sm text-base-content/70">
-                Need an account?{" "}
-                <Link
-                  href="/signup"
-                  className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline"
-                >
-                  Request Admin Access
-                </Link>
-              </div>
             </div>
           </div>
         </div>

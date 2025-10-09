@@ -2,22 +2,22 @@ import { col, fn, literal } from "sequelize";
 import { Ad, CreditsPlan, Transaction, User } from "../models/associations.js";
 import asyncHandler from "../utils/asyncHnadler.js";
 export const getStatus = asyncHandler(async (req, res) => {
-    const users = User.findAndCountAll();
-    const ads = Ad.findAndCountAll();
-    const boughtCredits = await Transaction.findAll({
-        where: { type: "purchase" },
-        attributes: [
-            [fn("SUM", col("credits")), "totalCreditsBought"],
-            [
-                // total revenue = price + gatewayFee
-                fn("SUM", literal("price + gatewayFee")),
-                "totalRevenue",
+    const [userCount, users, ads, boughtCredits] = await Promise.all([
+        User.count(),
+        User.findAll({ attributes: ["createdAt"], raw: true }),
+        Ad.count(),
+        Transaction.findAll({
+            where: { type: "purchase" },
+            attributes: [
+                [fn("SUM", col("credits")), "totalCreditsBought"],
+                [fn("SUM", literal(`"price" + "gatewayfee"`)), "totalRevenue"],
             ],
-        ],
-        raw: true,
-    });
+            raw: true,
+        }),
+    ]);
     const { totalCreditsBought, totalRevenue } = boughtCredits[0];
     res.status(200).json({
+        userCount,
         users,
         ads,
         totalCreditsBought: Number(totalCreditsBought || 0),

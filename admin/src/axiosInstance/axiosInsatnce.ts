@@ -2,7 +2,7 @@ import axios from "axios";
 import useAuth from "@/store/useAuth";
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL + "/api/admin",
+  baseURL: process.env.NEXT_PUBLIC_API_URL + "/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

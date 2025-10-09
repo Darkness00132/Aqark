@@ -6,24 +6,24 @@ import { Response } from "express";
 
 export const getStatus = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const users = User.findAndCountAll();
-    const ads = Ad.findAndCountAll();
-    const boughtCredits: any = await Transaction.findAll({
-      where: { type: "purchase" },
-      attributes: [
-        [fn("SUM", col("credits")), "totalCreditsBought"],
-        [
-          // total revenue = price + gatewayFee
-          fn("SUM", literal("price + gatewayFee")),
-          "totalRevenue",
+    const [userCount, users, ads, boughtCredits] = await Promise.all([
+      User.count(),
+      User.findAll({ attributes: ["createdAt"], raw: true }),
+      Ad.count(),
+      Transaction.findAll({
+        where: { type: "purchase" },
+        attributes: [
+          [fn("SUM", col("credits")), "totalCreditsBought"],
+          [fn("SUM", literal(`"price" + "gatewayfee"`)), "totalRevenue"],
         ],
-      ],
-      raw: true,
-    });
+        raw: true,
+      }),
+    ]);
 
-    const { totalCreditsBought, totalRevenue } = boughtCredits[0];
+    const { totalCreditsBought, totalRevenue } = boughtCredits[0] as any;
 
     res.status(200).json({
+      userCount,
       users,
       ads,
       totalCreditsBought: Number(totalCreditsBought || 0),
