@@ -6,7 +6,21 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 
 export default function Provider({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 60_000,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: true,
+            retry: 1,
+            retryDelay: (i) => Math.min(1000 * 2 ** i, 10_000),
+          },
+          mutations: { retry: 0 },
+        },
+      })
+  );
 
   return (
     <>

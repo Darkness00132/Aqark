@@ -11,5 +11,6 @@ export default function useGetAdById(id: string) {
       return ad;
     },
     enabled: !!id,
+    staleTime: 10 * 60_000,
   });
 }

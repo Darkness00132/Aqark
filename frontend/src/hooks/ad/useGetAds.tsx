@@ -27,5 +27,6 @@ export default function useGetAds(mine: boolean, page: number) {
 
       return response.data;
     },
+    staleTime: 10 * 60_000,
   });
 }

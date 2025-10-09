@@ -26,7 +26,7 @@ export default function Sidebar({
     { href: "/", label: "Dashboard", icon: <FaTachometerAlt /> },
     { href: "/ads", label: "Ads", icon: <FaBuilding /> },
     { href: "/users", label: "Users", icon: <FaUsers /> },
-    { href: "/transactions", label: "Payments", icon: <FaMoneyBill /> },
+    { href: "/transactions", label: "Transactions", icon: <FaMoneyBill /> },
     { href: "/credits", label: "Credits", icon: <FaCoins /> },
     { href: "/statistics", label: "Analytics", icon: <FaChartBar /> },
     { href: "/settings", label: "Settings", icon: <FaCog /> },
