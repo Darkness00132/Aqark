@@ -1,24 +1,12 @@
 "use client";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/userValidates";
 import { FaExclamationCircle } from "react-icons/fa";
-import useAuth from "@/store/useAuth";
 import useLogin from "@/hooks/user/useLogin";
 
 export default function LoginForm() {
-  const router = useRouter();
-  const isAuth = useAuth((state) => state.isAuth);
-
-  useEffect(() => {
-    if (isAuth) {
-      router.push("/");
-    }
-  }, [isAuth, router]);
-
   const { mutate, isPending } = useLogin();
 
   const {

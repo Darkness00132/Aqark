@@ -1,7 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/store/useAuth";
-import axiosInstance from "@/axiosInstance/axiosInstance";
+import axiosInstance from "@/axiosInstance/axiosInsatnce";
 
 export default function useProfile() {
   const setLoggedIn = useAuth((state) => state.setLoggedIn);
@@ -16,7 +16,7 @@ export default function useProfile() {
       setLoggedIn();
       return data.user;
     },
-    enabled: !isAuth,
+    enabled: isAuth,
     retry: false,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,

@@ -35,25 +35,23 @@ async function handleLogin(
 
   const token = await user.generateAuthToken();
 
-  // إرسال رسالة ترحيب عند أول تسجيل تحقق
   if (!user.isVerified) {
     welcomeEmail(user.email);
   }
 
-  // حفظ التوكن داخل كوكي محمية
   res.cookie("jwt-auth", token, {
     httpOnly: true,
     secure: process.env.PRODUCTION === "true",
     sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
-    maxAge: 1000 * 60 * 60 * 24 * 7, // أسبوع
+    maxAge: 1000 * 60 * 60 * 24 * 7,
     priority: "high",
   });
 
   const redirectUrl = isAdminMode
-    ? `${process.env.ADMIN_URL}/login?status=success`
-    : `${process.env.FRONTEND_URL}/user/login?status=success`;
+    ? process.env.ADMIN_URL
+    : process.env.FRONTEND_URL;
 
-  res.redirect(redirectUrl);
+  res.redirect(redirectUrl!);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -97,7 +95,7 @@ passport.use(
           } else {
             // منع تسجيل جديد في وضع تسجيل الدخول أو المشرف
             if (mode === "login" || mode === "adminLogin") {
-              return done(new Error("ليس لديك صلاحية تسجيل الدخول"), false);
+              return done(new Error("لا تمتلك حساب"), false);
             }
 
             // إنشاء مستخدم جديد
@@ -118,7 +116,6 @@ passport.use(
               ],
             });
 
-            // منح نقاط ترحيبية
             await CreditsLog.create({
               userId: user.id!,
               type: "gift",

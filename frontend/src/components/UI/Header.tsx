@@ -12,11 +12,12 @@ import {
   FaClipboardList,
   FaPlusCircle,
 } from "react-icons/fa";
+import useProfile from "@/hooks/user/useProfile";
 
 export default function Header() {
   const { mutate, isPending } = useLogout();
+  const { data:user } = useProfile();
   const isAuth = useAuth((state) => state.isAuth);
-  const user = useAuth((state) => state.user);
 
   return (
     <header className="mb-3 sticky top-0 z-50 bg-base-100 shadow-md">

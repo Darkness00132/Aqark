@@ -95,7 +95,7 @@ export const verify = asyncHandler(async (req: Request, res: Response) => {
     priority: "high",
   });
 
-  res.redirect(process.env.FRONTEND_URL + "/?login=success");
+  res.redirect(process.env.FRONTEND_URL!);
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {

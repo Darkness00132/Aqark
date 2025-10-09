@@ -69,7 +69,7 @@ export const verify = asyncHandler(async (req, res) => {
         sameSite: process.env.PRODUCTION === "true" ? "none" : "lax",
         priority: "high",
     });
-    res.redirect(process.env.FRONTEND_URL + "/?login=success");
+    res.redirect(process.env.FRONTEND_URL);
 });
 export const login = asyncHandler(async (req, res) => {
     const { error, value } = loginSchema.validate(req.secureBody);

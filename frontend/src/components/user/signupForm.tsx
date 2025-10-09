@@ -1,24 +1,12 @@
 "use client";
 import useSignup from "@/hooks/user/useSignup";
-import useAuth from "@/store/useAuth";
 import { z } from "zod";
 import { FaExclamationCircle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/lib/userValidates";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export default function SignupForm({ role }: { role: string }) {
-  const router = useRouter();
-  const isAuth = useAuth((state) => state.isAuth);
-
-  useEffect(() => {
-    if (isAuth) {
-      router.push("/");
-    }
-  }, [isAuth, router]);
-
   const { mutate, isPending } = useSignup();
   const {
     register,
