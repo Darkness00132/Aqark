@@ -59,4 +59,4 @@ Transaction.init({
     timestamps: true,
 });
 export default Transaction;
-//# sourceMappingURL=Transaction.model.js.map
+//# sourceMappingURL=transaction.model.js.map

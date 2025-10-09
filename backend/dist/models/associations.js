@@ -4,7 +4,7 @@ import Review from "./review.model.js";
 import AdLogs from "./adLogs.model.js";
 import Ad from "./ad.model.js";
 import CreditsPlan from "./creditsPlan.js";
-import Transaction from "./Transaction.model.js";
+import Transaction from "./transaction.model.js";
 //ad model
 Ad.belongsTo(User, { foreignKey: "userId", as: "user" });
 User.hasMany(Ad, { foreignKey: "userId", as: "ads" });
