@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { Response, Request, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import sequelize from "./db/sql.js";
@@ -99,58 +99,98 @@ app
   .use("/api/credits", creditsRouter)
   .use("/api/admin", adminRouter);
 
-app.use((err: unknown, _req: any, res: any, _next: any) => {
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Error:", err);
 
-  // If err is an Error object
+  // Default structure
+  let status = 500;
+  let message = "Something went wrong";
+  let details: any = null;
+
+  // --- Handle known error types ---
+
+  // 1. Native Error object
   if (err instanceof Error) {
-    // Handle JWT errors
-    if (err.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Invalid token" });
-    }
-    if (err.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Token has expired" });
-    }
+    switch (err.name) {
+      case "JsonWebTokenError":
+        status = 401;
+        message = "Invalid or malformed token";
+        break;
 
-    // Handle validation errors (if using Joi or similar)
-    if (err.name === "ValidationError") {
-      const errors = Object.values((err as any).errors || {}).map((e: any) => ({
-        field: e.path,
-        message: e.message,
-      }));
-      return res.status(400).json({ message: "Validation failed", errors });
-    }
+      case "TokenExpiredError":
+        status = 401;
+        message = "Token has expired";
+        break;
 
-    // Default Error response
-    return res
-      .status(500)
-      .json({ message: err.message || "Something went wrong" });
+      case "ValidationError": {
+        // Mongoose or Joi-style validation error
+        const errorObj = err as any;
+        if (errorObj.errors) {
+          details = Object.values(errorObj.errors).map((e: any) => ({
+            field: e.path,
+            message: e.message,
+          }));
+        } else if (errorObj.details) {
+          // Joi validation
+          details = errorObj.details.map((e: any) => ({
+            field: e.path?.join("."),
+            message: e.message,
+          }));
+        }
+        status = 400;
+        message = "Validation failed";
+        break;
+      }
+
+      default:
+        // Default Error fallback
+        message = err.message || message;
+        break;
+    }
   }
 
-  // If err is a plain object (like { code: 11000 } from DB)
-  if (err && typeof err === "object") {
+  // 2. Handle plain object errors (like from MongoDB / Sequelize)
+  else if (err && typeof err === "object") {
     const e = err as any;
 
-    if (e.code === 11000 || e.code === "E11000") {
-      const field = Object.keys(e.keyValue || {})[0];
-      const value = field ? e.keyValue?.[field] : undefined;
-      return res.status(409).json({
-        message: `Duplicate value for field '${field}': '${value}'`,
-        field,
-        value,
-      });
+    // Duplicate key (MongoDB or Sequelize unique constraint)
+    if (
+      e.code === 11000 ||
+      e.code === "E11000" ||
+      e.name === "SequelizeUniqueConstraintError"
+    ) {
+      const field =
+        Object.keys(e.keyValue || e.fields || {})[0] ||
+        (e.errors?.[0]?.path ?? "unknown");
+      const value = e.keyValue?.[field] || e.errors?.[0]?.value;
+      status = 409;
+      message = `Duplicate value for field '${field}'`;
+      details = { field, value };
     }
 
-    if (e.name === "CastError") {
-      return res
-        .status(400)
-        .json({ message: `Invalid value for '${e.path}': ${e.value}` });
+    // Invalid ID or bad cast
+    else if (e.name === "CastError") {
+      status = 400;
+      message = `Invalid value for '${e.path}'`;
+      details = { field: e.path, value: e.value };
+    }
+
+    // Sequelize validation errors
+    else if (e.name === "SequelizeValidationError") {
+      status = 400;
+      message = "Validation failed";
+      details = e.errors.map((x: any) => ({
+        field: x.path,
+        message: x.message,
+      }));
     }
   }
 
-  // Fallback for anything else (like null-prototype objects)
-  res.status(500).json({ message: "Something went wrong", error: err });
+  // --- Final unified response ---
+  res.status(status).json({
+    message,
+    ...(details && { details }),
+  });
 });
-
 // export default app;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

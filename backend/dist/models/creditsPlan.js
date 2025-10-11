@@ -21,14 +21,13 @@ CreditsPlan.init({
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+    discount: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
     },
     bonus: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
+        allowNull: true,
     },
 }, { sequelize, schema: "public", modelName: "credits_plans", timestamps: true });
 export default CreditsPlan;

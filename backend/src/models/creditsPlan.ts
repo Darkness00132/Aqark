@@ -4,11 +4,11 @@ import { nanoid } from "nanoid";
 
 interface CreditsPlanAttributes {
   id?: string;
-  userId?: string;
+  userId: string;
   credits: number;
   price: number;
-  name: string;
-  bonus: number;
+  discount?: number;
+  bonus?: number;
 }
 
 class CreditsPlan
@@ -16,11 +16,11 @@ class CreditsPlan
   implements CreditsPlanAttributes
 {
   declare id?: string;
-  declare userId?: string;
+  declare userId: string;
   declare credits: number;
   declare price: number;
-  declare name: string;
-  declare bonus: number;
+  declare discount?: number;
+  declare bonus?: number;
 }
 
 CreditsPlan.init(
@@ -42,14 +42,13 @@ CreditsPlan.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    discount: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     bonus: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
+      allowNull: true,
     },
   },
   { sequelize, schema: "public", modelName: "credits_plans", timestamps: true }
