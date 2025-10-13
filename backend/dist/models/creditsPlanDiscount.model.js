@@ -34,4 +34,4 @@ PlanDiscount.init({
     },
 }, { sequelize, schema: "public", modelName: "plan_discount", timestamps: true });
 export default PlanDiscount;
-//# sourceMappingURL=planDiscount.model.js.map
+//# sourceMappingURL=creditsPlanDiscount.model.js.map
