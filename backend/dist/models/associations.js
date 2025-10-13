@@ -3,8 +3,9 @@ import CreditsLog from "./creditsLog.model.js";
 import Review from "./review.model.js";
 import AdLogs from "./adLogs.model.js";
 import Ad from "./ad.model.js";
-import CreditsPlan from "./creditsPlan.js";
 import Transaction from "./transaction.model.js";
+import CreditsPlan from "./creditsPlan.model.js";
+import PlanDiscount from "./planDiscount.model.js";
 //ad model
 Ad.belongsTo(User, { foreignKey: "userId", as: "user" });
 User.hasMany(Ad, { foreignKey: "userId", as: "ads" });
@@ -32,5 +33,8 @@ CreditsLog.belongsTo(Transaction, {
     as: "transaction",
     foreignKey: "transactionId",
 });
-export { User, Ad, AdLogs, CreditsLog, Transaction, CreditsPlan, Review };
+//plan model
+CreditsPlan.hasMany(PlanDiscount, { foreignKey: "planId", as: "discounts" });
+PlanDiscount.belongsTo(CreditsPlan, { foreignKey: "planId", as: "plan" });
+export { User, Ad, AdLogs, CreditsLog, Transaction, CreditsPlan, PlanDiscount, Review, };
 //# sourceMappingURL=associations.js.map

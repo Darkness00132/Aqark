@@ -2,6 +2,7 @@ import { Router } from "express";
 import auth from "../middlewares/auth.js";
 import {
   createPlan,
+  createPlanDiscount,
   deletePlan,
   getPlans,
 } from "../controller/credits.controller.js";
@@ -13,8 +14,10 @@ router.use(auth);
 
 router.get("/plans", getPlans);
 
-router.post("/createPlan", admin, createPlan);
+router.post("/createPlan", auth, admin, createPlan);
 
-router.delete("/deletePlan/:id", admin, deletePlan);
+router.post("/createPlanDiscount", auth, admin, createPlanDiscount);
+
+router.delete("/deletePlan/:id", auth, admin, deletePlan);
 
 export default router;

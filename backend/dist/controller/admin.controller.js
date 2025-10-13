@@ -30,12 +30,12 @@ export const makeCreditsPlan = asyncHandler(async (req, res) => {
             .status(401)
             .json({ message: "you must be superAdmin or higher" });
     }
-    const { name, credits, price, bonus } = req.body;
-    if (!name || !credits || !price) {
+    const { credits, price, bonus } = req.body;
+    if (!credits || !price) {
         return res.status(400).json({ message: "Missing required fields" });
     }
     await CreditsPlan.create({
-        name,
+        userId: req.user.id,
         credits,
         price,
         bonus: bonus || 0,

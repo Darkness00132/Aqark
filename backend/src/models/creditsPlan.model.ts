@@ -1,34 +1,34 @@
 import sequelize from "../db/sql.js";
 import { DataTypes, Model } from "sequelize";
-import { nanoid } from "nanoid";
 
 interface CreditsPlanAttributes {
-  id?: string;
+  id?: number;
   userId: string;
   credits: number;
   price: number;
   discount?: number;
   bonus?: number;
+  isDeleted?: boolean;
 }
-
 class CreditsPlan
   extends Model<CreditsPlanAttributes>
   implements CreditsPlanAttributes
 {
-  declare id?: string;
+  declare id?: number;
   declare userId: string;
   declare credits: number;
   declare price: number;
   declare discount?: number;
   declare bonus?: number;
+  declare isDeleted?: boolean;
 }
 
 CreditsPlan.init(
   {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.SMALLINT,
       primaryKey: true,
-      defaultValue: () => nanoid(16),
+      autoIncrement: true,
     },
     userId: {
       type: DataTypes.STRING,
@@ -42,13 +42,13 @@ CreditsPlan.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    discount: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
     bonus: {
       type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   { sequelize, schema: "public", modelName: "credits_plans", timestamps: true }
