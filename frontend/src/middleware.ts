@@ -23,11 +23,6 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // ✅ If not logged in and tries to access protected page → redirect to /login
-  if (!token && !isPublic) {
-    return NextResponse.redirect(new URL("/user/login", req.url));
-  }
-
   return NextResponse.next();
 }
 
