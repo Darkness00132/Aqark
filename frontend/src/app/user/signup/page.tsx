@@ -61,7 +61,7 @@ export default async function Signup({
                   <div className="text-sm">
                     لديك حساب بالفعل؟{" "}
                     <Link
-                      href="/login"
+                      href="/user/login"
                       className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline"
                     >
                       تسجيل الدخول

@@ -62,7 +62,7 @@ export default async function Login({
                 <div className="text-sm">
                   لا تملك حساب بعد؟{" "}
                   <Link
-                    href="/signup"
+                    href="/user/signup"
                     className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline"
                   >
                     إنشاء حساب جديد

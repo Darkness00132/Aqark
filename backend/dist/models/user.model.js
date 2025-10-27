@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { verify } from "argon2";
+import { hash, verify } from "argon2";
 import { nanoid } from "nanoid";
 import sequelize from "../db/sql.js";
 import jwt from "jsonwebtoken";
@@ -148,13 +148,16 @@ User.beforeValidate((user) => {
         user.slug = `${slugName}-${nanoid(10)}`;
     }
 });
-User.beforeSave((user) => {
+User.beforeSave(async (user) => {
     if (user.changed("name")) {
         const slugName = slugify([user.name]);
         // keep old nanoid / id part (so url stays stable except for name)
         const oldSlug = user.slug?.split("-");
         const uniquePart = oldSlug?.[oldSlug.length - 1] || nanoid(10);
         user.slug = `${slugName}-${uniquePart}`;
+    }
+    if (user.changed("password")) {
+        user.password = await hash(user.password);
     }
 });
 export default User;

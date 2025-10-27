@@ -22,7 +22,7 @@ export default function useSignup() {
     },
     onSuccess: (data) => {
       toast.success(data.message || "تم إنشاء الحساب");
-      router.push("/login");
+      router.push("/user/login");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
@@ -31,26 +31,3 @@ export default function useSignup() {
     },
   });
 }
-
-// export default function useSignup() {
-//   const router = useRouter();
-//   return useMutation({
-//     mutationKey: ["signup"],
-//     mutationFn: async (data: User) => {
-//       const response = await axiosInstance.post("/users/signup", data);
-//       return response.data;
-//     },
-//     onSuccess: (data) => {
-//       toast.success(
-//         data?.message ||
-//           "تم إنشاء الحساب! تحقق من بريدك الإلكتروني لتفعيل الحساب"
-//       );
-//       router.push("/login");
-//     },
-//     onError: (error: AxiosError<{ message: string }>) => {
-//       toast.error(
-//         error?.response?.data?.message || "فشل انشاء الحساب يرجى حاولة مجددا"
-//       );
-//     },
-//   });
-// }

@@ -233,7 +233,7 @@ User.beforeValidate((user) => {
   }
 });
 
-User.beforeSave((user) => {
+User.beforeSave(async (user) => {
   if (user.changed("name")) {
     const slugName = slugify([user.name]);
 
@@ -242,6 +242,9 @@ User.beforeSave((user) => {
     const uniquePart = oldSlug?.[oldSlug.length - 1] || nanoid(10);
 
     user.slug = `${slugName}-${uniquePart}`;
+  }
+  if (user.changed("password")) {
+    user.password = await hash(user.password!);
   }
 });
 
