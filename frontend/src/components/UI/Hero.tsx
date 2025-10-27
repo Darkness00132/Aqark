@@ -16,8 +16,8 @@ export default function Hero() {
             </span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-base-content/80 max-w-4xl mx-auto leading-relaxed mb-8 sm:mb-12 px-2">
-            منصة العقارات الأولى في مصر - اعثر على العقار المثالي أو اعرض عقارك
-            بسهولة وأمان
+            اعثر على جميع العقارات وإعلاناتهم في مكان واحد بسهولة وسرعة. وفر
+            وقتك وتواصل مباشرة مع اصحاب العقارات.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-16 max-w-2xl mx-auto">
