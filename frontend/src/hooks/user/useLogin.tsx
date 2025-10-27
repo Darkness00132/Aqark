@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
+import useAuth from "@/store/useAuth";
 
 interface User {
   email: string;
@@ -12,6 +13,7 @@ interface User {
 
 export default function useLogin() {
   const router = useRouter();
+  const setLoggedIn = useAuth((state) => state.setLoggedIn);
 
   return useMutation({
     mutationKey: ["login"],
@@ -23,8 +25,9 @@ export default function useLogin() {
       return response.data;
     },
     onSuccess: (data) => {
+      setLoggedIn();
       toast.success(data?.message || "تم تسجيل دخول مرحبًا بك");
-      router.push("/?login=success");
+      router.push("/");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
