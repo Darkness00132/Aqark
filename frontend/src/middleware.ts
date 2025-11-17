@@ -5,10 +5,6 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("jwt-auth")?.value;
   const { pathname } = req.nextUrl;
 
-  // ✅ Public routes that don't require authentication
-  const publicPaths = ["/user/login", "/user/signup"];
-  const isPublic = publicPaths.some((path) => pathname.startsWith(path));
-
   // ✅ Allow Next.js internals and static files
   if (
     pathname.startsWith("/_next") ||
@@ -19,7 +15,7 @@ export function middleware(req: NextRequest) {
   }
 
   // ✅ If logged in and tries to access /login or /signup → redirect to home
-  if (token && isPublic) {
+  if (token) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
