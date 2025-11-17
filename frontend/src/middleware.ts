@@ -14,11 +14,16 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ✅ If logged in and tries to access /login or /signup → redirect to home
-  if (token) {
+  // ✅ Auth pages that logged-in users shouldn't access
+  const authPages = ["/login", "/signup", "/user/login", "/user/signup"];
+  const isAuthPage = authPages.some((page) => pathname.startsWith(page));
+
+  // ✅ If logged in and tries to access auth pages → redirect to home
+  if (token && isAuthPage) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
+  // ✅ Allow all other routes
   return NextResponse.next();
 }
 

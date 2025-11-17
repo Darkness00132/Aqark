@@ -9,7 +9,7 @@ import { CreditsLog } from "../models/associations.js";
 const router = Router();
 
 /* -------------------------------------------------------------------------- */
-/*                              Handle Successful Login                       */
+/*                        Handle Successful Login                              */
 /* -------------------------------------------------------------------------- */
 async function handleLogin(
   user: User,
@@ -67,11 +67,11 @@ passport.use(
     },
     async (req: Request, accessToken, refreshToken, profile, done) => {
       try {
+        // Parse state (role + mode)
         let parsedState: { role: Role; mode: string } = {
           role: "user",
           mode: "login",
         };
-
         if (typeof req.query.state === "string") {
           try {
             parsedState = JSON.parse(req.query.state);
@@ -81,24 +81,30 @@ passport.use(
         }
 
         const { role, mode } = parsedState;
+
+        // Find user by Google ID
         let user = await User.findOne({ where: { googleId: profile.id } });
 
-        /* --------------------------- الحالة ١: المستخدم غير موجود --------------------------- */
+        // ---------------------- User does not exist ----------------------
         if (!user) {
           const email = profile.emails?.[0]?.value;
           const existing = await User.findOne({ where: { email } });
 
           if (existing) {
+            // Link Google ID to existing account
             existing.googleId = profile.id;
             await existing.save();
             user = existing;
+          } else if (mode === "login" || mode === "adminLogin") {
+            // BLOCK login attempts for new users
+            return done(
+              new Error(
+                "هذا الحساب غير مسجل لدينا. برجاء إنشاء حساب جديد أولاً قبل تسجيل الدخول."
+              ),
+              false
+            );
           } else {
-            // منع تسجيل جديد في وضع تسجيل الدخول أو المشرف
-            if (mode === "login" || mode === "adminLogin") {
-              return done(new Error("لا تمتلك حساب"), false);
-            }
-
-            // إنشاء مستخدم جديد
+            // Only allow creation in signup mode
             user = await User.create({
               googleId: profile.id,
               name: profile.displayName,
@@ -125,7 +131,7 @@ passport.use(
           }
         }
 
-        /* ------------------------ الحالة ٢: التحقق من صلاحيات المشرف ------------------------ */
+        // ---------------------- Admin permission check ----------------------
         if (
           mode === "adminLogin" &&
           !["admin", "superAdmin", "owner"].includes(user.role)
@@ -133,6 +139,7 @@ passport.use(
           return done(new Error("ليس لديك صلاحية دخول إلى لوحة التحكم"), false);
         }
 
+        // ---------------------- Successful login ----------------------
         return done(null, { user, mode });
       } catch (err) {
         return done(err as Error, false);
@@ -145,7 +152,7 @@ passport.use(
 /*                                    Routes                                  */
 /* -------------------------------------------------------------------------- */
 
-// الخطوة ١: بدء تسجيل الدخول عبر Google
+// Step 1: Start Google login/signup
 router.get(
   "/auth/google",
   (req: Request, res: Response, next: NextFunction) => {
@@ -163,7 +170,7 @@ router.get(
   }
 );
 
-// الخطوة ٢: استقبال رد Google بعد تسجيل الدخول
+// Step 2: Google callback
 router.get(
   "/auth/google/callback",
   (req: Request, res: Response, next: NextFunction) => {
@@ -172,13 +179,12 @@ router.get(
       { session: false },
       async (err, data: { user: User; mode: string } | false) => {
         let parsedState: { mode: string } = { mode: "login" };
-
         try {
           if (typeof req.query.state === "string") {
             parsedState = JSON.parse(req.query.state);
           }
         } catch {
-          // تجاهل الأخطاء
+          // ignore
         }
 
         const isAdminMode = parsedState.mode === "adminLogin";
@@ -186,12 +192,12 @@ router.get(
           ? process.env.ADMIN_URL
           : process.env.FRONTEND_URL + "/user";
 
-        /* -------------------------- معالجة جميع حالات الفشل -------------------------- */
+        // ---------------------- Handle errors ----------------------
         if (err) {
           console.error("Google Auth Error:", err.message);
           return res.redirect(
             `${redirectBase}/login?status=failed&message=${encodeURIComponent(
-              err.message || "حدث خطأ أثناء تسجيل الدخول عبر Google"
+              err.message
             )}`
           );
         }
@@ -204,7 +210,7 @@ router.get(
           );
         }
 
-        /* -------------------------- تسجيل الدخول بنجاح -------------------------- */
+        // ---------------------- Success ----------------------
         await handleLogin(data.user, req, res, isAdminMode);
       }
     )(req, res, next);

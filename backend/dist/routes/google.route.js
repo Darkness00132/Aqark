@@ -7,7 +7,7 @@ import { getClientIP } from "../utils/getClientIp.js";
 import { CreditsLog } from "../models/associations.js";
 const router = Router();
 /* -------------------------------------------------------------------------- */
-/*                              Handle Successful Login                       */
+/*                        Handle Successful Login                              */
 /* -------------------------------------------------------------------------- */
 async function handleLogin(user, req, res, isAdminMode) {
     const ip = getClientIP(req);
@@ -47,6 +47,7 @@ passport.use(new GoogleStrategy({
     passReqToCallback: true,
 }, async (req, accessToken, refreshToken, profile, done) => {
     try {
+        // Parse state (role + mode)
         let parsedState = {
             role: "user",
             mode: "login",
@@ -60,22 +61,24 @@ passport.use(new GoogleStrategy({
             }
         }
         const { role, mode } = parsedState;
+        // Find user by Google ID
         let user = await User.findOne({ where: { googleId: profile.id } });
-        /* --------------------------- الحالة ١: المستخدم غير موجود --------------------------- */
+        // ---------------------- User does not exist ----------------------
         if (!user) {
             const email = profile.emails?.[0]?.value;
             const existing = await User.findOne({ where: { email } });
             if (existing) {
+                // Link Google ID to existing account
                 existing.googleId = profile.id;
                 await existing.save();
                 user = existing;
             }
+            else if (mode === "login" || mode === "adminLogin") {
+                // BLOCK login attempts for new users
+                return done(new Error("هذا الحساب غير مسجل لدينا. برجاء إنشاء حساب جديد أولاً قبل تسجيل الدخول."), false);
+            }
             else {
-                // منع تسجيل جديد في وضع تسجيل الدخول أو المشرف
-                if (mode === "login" || mode === "adminLogin") {
-                    return done(new Error("لا تمتلك حساب"), false);
-                }
-                // إنشاء مستخدم جديد
+                // Only allow creation in signup mode
                 user = await User.create({
                     googleId: profile.id,
                     name: profile.displayName,
@@ -100,11 +103,12 @@ passport.use(new GoogleStrategy({
                 });
             }
         }
-        /* ------------------------ الحالة ٢: التحقق من صلاحيات المشرف ------------------------ */
+        // ---------------------- Admin permission check ----------------------
         if (mode === "adminLogin" &&
             !["admin", "superAdmin", "owner"].includes(user.role)) {
             return done(new Error("ليس لديك صلاحية دخول إلى لوحة التحكم"), false);
         }
+        // ---------------------- Successful login ----------------------
         return done(null, { user, mode });
     }
     catch (err) {
@@ -114,7 +118,7 @@ passport.use(new GoogleStrategy({
 /* -------------------------------------------------------------------------- */
 /*                                    Routes                                  */
 /* -------------------------------------------------------------------------- */
-// الخطوة ١: بدء تسجيل الدخول عبر Google
+// Step 1: Start Google login/signup
 router.get("/auth/google", (req, res, next) => {
     const role = typeof req.query.role === "string" ? req.query.role : "user";
     const mode = typeof req.query.mode === "string" ? req.query.mode : "login";
@@ -124,7 +128,7 @@ router.get("/auth/google", (req, res, next) => {
         state,
     })(req, res, next);
 });
-// الخطوة ٢: استقبال رد Google بعد تسجيل الدخول
+// Step 2: Google callback
 router.get("/auth/google/callback", (req, res, next) => {
     passport.authenticate("google", { session: false }, async (err, data) => {
         let parsedState = { mode: "login" };
@@ -134,21 +138,21 @@ router.get("/auth/google/callback", (req, res, next) => {
             }
         }
         catch {
-            // تجاهل الأخطاء
+            // ignore
         }
         const isAdminMode = parsedState.mode === "adminLogin";
         const redirectBase = isAdminMode
             ? process.env.ADMIN_URL
             : process.env.FRONTEND_URL + "/user";
-        /* -------------------------- معالجة جميع حالات الفشل -------------------------- */
+        // ---------------------- Handle errors ----------------------
         if (err) {
             console.error("Google Auth Error:", err.message);
-            return res.redirect(`${redirectBase}/login?status=failed&message=${encodeURIComponent(err.message || "حدث خطأ أثناء تسجيل الدخول عبر Google")}`);
+            return res.redirect(`${redirectBase}/login?status=failed&message=${encodeURIComponent(err.message)}`);
         }
         if (!data || !data.user) {
             return res.redirect(`${redirectBase}/login?status=failed&message=${encodeURIComponent("تعذر العثور على حساب مرتبط بهذا البريد الإلكتروني")}`);
         }
-        /* -------------------------- تسجيل الدخول بنجاح -------------------------- */
+        // ---------------------- Success ----------------------
         await handleLogin(data.user, req, res, isAdminMode);
     })(req, res, next);
 });

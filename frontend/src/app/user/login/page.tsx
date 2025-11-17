@@ -3,7 +3,7 @@ import { FcGoogle } from "react-icons/fc";
 import LoginForm from "@/components/user/loginForm";
 import ForgetPasswordModal from "@/components/user/forgetPasswordModel";
 import Link from "next/link";
-import { toast } from "sonner";
+import ToastHandler from "@/components/user/ToastHandler";
 
 export const metadata: Metadata = {
   title: "تسجيل الدخول",
@@ -17,14 +17,10 @@ export default async function Login({
   searchParams: Promise<{ status?: string; message?: string }>;
 }) {
   const { status, message } = await searchParams;
-  if (status) {
-    toast.error("فشل تسجيل الدخول");
-  }
-  if (status && message) {
-    toast.error(message);
-  }
+
   return (
     <>
+      <ToastHandler status={status} message={message} />;
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="relative z-10 w-full max-w-sm sm:max-w-md">
           {/* Header */}

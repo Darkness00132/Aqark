@@ -44,7 +44,7 @@ Transaction.init(
       allowNull: false,
     },
     planId: {
-      type: DataTypes.STRING,
+      type: DataTypes.SMALLINT,
       allowNull: false,
     },
     paymentId: {
