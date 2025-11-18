@@ -11,7 +11,6 @@ import {
   MdDescription,
   MdPhone,
   MdImage,
-  MdPostAdd,
   MdWarning,
 } from "react-icons/md";
 
@@ -173,6 +172,9 @@ export default function AdForm() {
               <input
                 {...register("price", { valueAsNumber: true })}
                 type="number"
+                onWheel={(e: React.WheelEvent<HTMLInputElement>) =>
+                  e.currentTarget.blur()
+                }
                 placeholder="أدخل السعر"
                 className="input input-bordered w-full"
               />
@@ -199,6 +201,9 @@ export default function AdForm() {
                       v === "" || isNaN(v) ? undefined : parseInt(v),
                   })}
                   type="number"
+                  onWheel={(e: React.WheelEvent<HTMLInputElement>) =>
+                    e.currentTarget.blur()
+                  }
                   placeholder="أدخل عدد الغرف"
                   className="input input-bordered w-full"
                 />
@@ -222,6 +227,9 @@ export default function AdForm() {
                 {...register("space", { valueAsNumber: true })}
                 type="number"
                 placeholder="أدخل المساحة"
+                onWheel={(e: React.WheelEvent<HTMLInputElement>) =>
+                  e.currentTarget.blur()
+                }
                 className="input input-bordered w-full"
               />
               {errors.space && (

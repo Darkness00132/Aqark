@@ -53,12 +53,35 @@ export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
 
 export const getMyAds = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const ads = await Ad.findAll({
-      where: { userId: req.user.id },
+    const { value, error } = getAdsSchema.validate(req.secureQuery);
+    if (error) {
+      return res.status(400).json({ message: error.details });
+    }
+    const where = adsFilters(value);
+    const { page = 1, limit = 8, order } = value;
+    let orderChoice: Order;
+    switch (order) {
+      case "ASC":
+        orderChoice = [["createdAt", "ASC"]];
+        break;
+      case "lowPrice":
+        orderChoice = [["price", "ASC"]];
+        break;
+      case "highPrice":
+        orderChoice = [["price", "DESC"]];
+        break;
+      default:
+        orderChoice = [["createdAt", "DESC"]];
+    }
+    const offset = (page - 1) * limit;
+    const { count, rows } = await Ad.findAndCountAll({
+      where: { ...where, userId: req.user.id },
       include: [{ model: User, as: "user" }],
-      order: [["createdAt", "DESC"]],
+      limit,
+      offset,
+      order: orderChoice,
     });
-    res.status(200).json({ ads });
+    res.status(200).json({ totalPages: Math.ceil(count / limit), ads: rows });
   }
 );
 
@@ -105,26 +128,6 @@ export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json({ ad });
 });
-
-export const incrementWhatsappClicks = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { slug } = sanitizeXSS(req.params);
-
-    if (!slug) {
-      return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
-    }
-    const [rows, affectedRows] = await Ad.increment("whatsappClicksCount", {
-      by: 1,
-      where: { slug },
-    });
-
-    if (affectedRows === 0) {
-      return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
-    }
-
-    res.status(200).json();
-  }
-);
 
 export const createAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {

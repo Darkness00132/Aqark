@@ -12,7 +12,6 @@ import {
   MdPhone,
   MdImage,
   MdWarning,
-  MdEdit,
 } from "react-icons/md";
 
 import { AdEditSchema } from "@/lib/adValidates";
@@ -43,7 +42,11 @@ export default function AdEditForm({ ad }: { ad: Ad }) {
     formState: { errors, dirtyFields },
   } = useForm<EditForm>({
     resolver: zodResolver(AdEditSchema),
-    defaultValues: ad,
+    defaultValues: {
+      ...ad,
+      rooms: ad.rooms ?? undefined,
+      space: ad.space ?? undefined,
+    },
   });
 
   const selectedCity = watch("city");
@@ -174,6 +177,9 @@ export default function AdEditForm({ ad }: { ad: Ad }) {
               <input
                 {...register("price", { valueAsNumber: true })}
                 type="number"
+                onWheel={(e: React.WheelEvent<HTMLInputElement>) =>
+                  e.currentTarget.blur()
+                }
                 placeholder="أدخل السعر"
                 className="input input-bordered w-full"
               />
@@ -200,6 +206,9 @@ export default function AdEditForm({ ad }: { ad: Ad }) {
                       v === "" || isNaN(v) ? undefined : parseInt(v),
                   })}
                   type="number"
+                  onWheel={(e: React.WheelEvent<HTMLInputElement>) =>
+                    e.currentTarget.blur()
+                  }
                   placeholder="أدخل عدد الغرف"
                   className="input input-bordered w-full"
                 />
@@ -222,6 +231,9 @@ export default function AdEditForm({ ad }: { ad: Ad }) {
               <input
                 {...register("space", { valueAsNumber: true })}
                 type="number"
+                onWheel={(e: React.WheelEvent<HTMLInputElement>) =>
+                  e.currentTarget.blur()
+                }
                 placeholder="أدخل المساحة"
                 className="input input-bordered w-full"
               />

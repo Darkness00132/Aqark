@@ -29,7 +29,6 @@ interface AdAttributes {
   price: number;
   whatsappNumber: string;
   views?: number;
-  whatsappClicksCount?: number;
   costInCredits?: number;
   isDeleted?: boolean;
   slug?: string;
@@ -56,7 +55,6 @@ class Ad extends Model<AdAttributes> implements AdAttributes, AdMethods {
   declare price: number;
   declare whatsappNumber: string;
   declare views?: number;
-  declare whatsappClicksCount?: number;
   declare costInCredits?: number;
   declare isDeleted?: boolean;
   declare slug?: string;
@@ -117,11 +115,6 @@ Ad.init(
     price: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 0 } },
     whatsappNumber: { type: DataTypes.STRING, allowNull: false },
     views: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
-    whatsappClicksCount: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
-    },
     costInCredits: { type: DataTypes.INTEGER, defaultValue: 1 },
     isDeleted: { type: DataTypes.BOOLEAN, defaultValue: false },
     slug: { type: DataTypes.STRING, allowNull: false },
