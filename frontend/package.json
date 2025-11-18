@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -22,6 +22,7 @@
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.62.0",
     "react-icons": "^5.5.0",
+    "react-phone-number-input": "^3.4.13",
     "react-select": "^5.10.2",
     "react-slick": "^0.31.0",
     "relative-time-format": "^1.1.11",

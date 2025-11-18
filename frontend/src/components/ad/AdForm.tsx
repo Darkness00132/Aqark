@@ -2,11 +2,24 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  MdDriveFileRenameOutline,
+  MdLocationOn,
+  MdHome,
+  MdDescription,
+  MdPhone,
+  MdImage,
+  MdPostAdd,
+  MdWarning,
+} from "react-icons/md";
 
 import { createAdSchema } from "@/lib/adValidates";
 import { PROPERTY_TYPES } from "@/lib/data";
+
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 import useCreateAd from "@/hooks/ad/useCreateAd";
 import CitySelect from "@/components/ad/Select/CitySelect";
@@ -52,28 +65,39 @@ export default function AdForm() {
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+    <div className="max-w-4xl mx-auto p-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Title */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
+        <div className="form-control">
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <MdDriveFileRenameOutline className="text-primary text-xl" />
             عنوان الإعلان
-          </label>
+          </h3>
           <input
             {...register("title")}
             type="text"
             placeholder="مثال: شقة للبيع في الزمالك"
-            className="input input-bordered w-full rounded-xl"
+            className="input input-bordered input-lg w-full"
           />
           {errors.title && (
-            <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+            <label className="label">
+              <span className="label-text-alt text-error flex items-center gap-1">
+                <MdWarning />
+                {errors.title.message}
+              </span>
+            </label>
           )}
         </div>
 
+        <div className="divider"></div>
+
         {/* Location */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4 border-b pb-2">الموقع</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <MdLocationOn className="text-secondary text-2xl" />
+            الموقع
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CitySelect control={control} error={errors.city?.message} />
             <AreaSelect
               control={control}
@@ -81,22 +105,25 @@ export default function AdForm() {
               error={errors.area?.message}
             />
           </div>
-        </section>
+        </div>
+
+        <div className="divider"></div>
 
         {/* Property Details */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4 border-b pb-2">
+        <div>
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <MdHome className="text-accent text-2xl" />
             تفاصيل العقار
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Property Type */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                نوع العقار
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-semibold">نوع العقار</span>
               </label>
               <select
                 {...register("propertyType")}
-                className="select select-bordered w-full rounded-xl"
+                className="select select-bordered w-full"
               >
                 <option value="">اختر نوع العقار</option>
                 {PROPERTY_TYPES.map((type) => (
@@ -106,49 +133,64 @@ export default function AdForm() {
                 ))}
               </select>
               {errors.propertyType && (
-                <p className="text-red-500 text-sm">
-                  {errors.propertyType.message}
-                </p>
+                <label className="label">
+                  <span className="label-text-alt text-error flex items-center gap-1">
+                    <MdWarning />
+                    {errors.propertyType.message}
+                  </span>
+                </label>
               )}
             </div>
 
             {/* Ad Type */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                نوع الإعلان
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-semibold">نوع الإعلان</span>
               </label>
               <select
                 {...register("type")}
-                className="select select-bordered w-full rounded-xl"
+                className="select select-bordered w-full"
               >
                 <option value="">اختر نوع الإعلان</option>
                 <option value="تمليك">تمليك</option>
                 <option value="إيجار">إيجار</option>
               </select>
               {errors.type && (
-                <p className="text-red-500 text-sm">{errors.type.message}</p>
+                <label className="label">
+                  <span className="label-text-alt text-error flex items-center gap-1">
+                    <MdWarning />
+                    {errors.type.message}
+                  </span>
+                </label>
               )}
             </div>
 
             {/* Price */}
-            <div>
-              <label className="block text-sm font-medium mb-2">السعر</label>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-semibold">السعر (جنيه)</span>
+              </label>
               <input
                 {...register("price", { valueAsNumber: true })}
                 type="number"
-                placeholder="السعر (جنيه)"
-                className="input input-bordered w-full rounded-xl"
+                placeholder="أدخل السعر"
+                className="input input-bordered w-full"
               />
               {errors.price && (
-                <p className="text-red-500 text-sm">{errors.price.message}</p>
+                <label className="label">
+                  <span className="label-text-alt text-error flex items-center gap-1">
+                    <MdWarning />
+                    {errors.price.message}
+                  </span>
+                </label>
               )}
             </div>
 
             {/* Rooms */}
             {showRoomsInput && (
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  عدد الغرف
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-semibold">عدد الغرف</span>
                 </label>
                 <input
                   {...register("rooms", {
@@ -157,113 +199,169 @@ export default function AdForm() {
                       v === "" || isNaN(v) ? undefined : parseInt(v),
                   })}
                   type="number"
-                  placeholder="عدد الغرف"
-                  className="input input-bordered w-full rounded-xl"
+                  placeholder="أدخل عدد الغرف"
+                  className="input input-bordered w-full"
                 />
                 {errors.rooms && (
-                  <p className="text-red-500 text-sm">{errors.rooms.message}</p>
+                  <label className="label">
+                    <span className="label-text-alt text-error flex items-center gap-1">
+                      <MdWarning />
+                      {errors.rooms.message}
+                    </span>
+                  </label>
                 )}
               </div>
             )}
 
             {/* Space */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                المساحة (م²)
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-semibold">المساحة (م²)</span>
               </label>
               <input
                 {...register("space", { valueAsNumber: true })}
                 type="number"
-                placeholder="المساحة (م²)"
-                className="input input-bordered w-full rounded-xl"
+                placeholder="أدخل المساحة"
+                className="input input-bordered w-full"
               />
               {errors.space && (
-                <p className="text-red-500 text-sm">{errors.space.message}</p>
+                <label className="label">
+                  <span className="label-text-alt text-error flex items-center gap-1">
+                    <MdWarning />
+                    {errors.space.message}
+                  </span>
+                </label>
               )}
             </div>
           </div>
-        </section>
+        </div>
+
+        <div className="divider"></div>
 
         {/* Additional Details */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4 border-b pb-2">
+        <div>
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <MdDescription className="text-info text-2xl" />
             تفاصيل إضافية
           </h3>
-          <div className="grid grid-cols-1 gap-6">
-            {/* Address */}
-            <div>
-              <label className="block text-sm font-medium mb-2">العنوان</label>
-              <input
-                {...register("address")}
-                type="text"
-                placeholder="العنوان التفصيلي (مثال: بجوار الجامعة/قريب من المترو)"
-                className="input input-bordered w-full rounded-xl"
-              />
-              {errors.address && (
-                <p className="text-red-500 text-sm">{errors.address.message}</p>
-              )}
-            </div>
 
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium mb-2">الوصف</label>
-              <textarea
-                {...register("description")}
-                placeholder="أضف وصفاً للعقار (التشطيب، المميزات، حالة العقار...)"
-                className="textarea textarea-bordered w-full rounded-xl h-32"
-              />
-              {errors.description && (
-                <p className="text-red-500 text-sm">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
+          {/* Address */}
+          <div className="form-control mb-4">
+            <label className="label">
+              <span className="label-text font-semibold">العنوان التفصيلي</span>
+            </label>
+            <input
+              {...register("address")}
+              type="text"
+              placeholder="مثال: بجوار الجامعة، قريب من المترو"
+              className="input input-bordered w-full"
+            />
+            {errors.address && (
+              <label className="label">
+                <span className="label-text-alt text-error flex items-center gap-1">
+                  <MdWarning />
+                  {errors.address.message}
+                </span>
+              </label>
+            )}
           </div>
-        </section>
+
+          {/* Description */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text font-semibold">الوصف الكامل</span>
+            </label>
+            <textarea
+              {...register("description")}
+              placeholder="أضف وصفاً تفصيلياً للعقار: التشطيب، المميزات، حالة العقار، القرب من الخدمات..."
+              className="textarea textarea-bordered h-32 w-full"
+            />
+            {errors.description && (
+              <label className="label">
+                <span className="label-text-alt text-error flex items-center gap-1">
+                  <MdWarning />
+                  {errors.description.message}
+                </span>
+              </label>
+            )}
+          </div>
+        </div>
+
+        <div className="divider"></div>
 
         {/* Contact Info */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4 border-b pb-2">
+        <div>
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <MdPhone className="text-success text-2xl" />
             معلومات التواصل
           </h3>
-          <label className="block text-sm font-medium mb-2">رقم الواتساب</label>
-          <input
-            {...register("whatsappNumber")}
-            type="text"
-            placeholder="رقم الواتساب"
-            className="input input-bordered w-full rounded-xl"
-          />
-          {errors.whatsappNumber && (
-            <p className="text-red-500 text-sm">
-              {errors.whatsappNumber.message}
-            </p>
-          )}
-        </section>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text font-semibold">رقم الواتساب</span>
+            </label>
+            <Controller
+              name="whatsappNumber"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  {...field}
+                  placeholder="أدخل رقم به واتساب"
+                  defaultCountry="EG"
+                  international
+                  autoComplete="tel"
+                  countryCallingCodeEditable={false}
+                  className="input input-bordered w-full"
+                />
+              )}
+            />
+            {errors.whatsappNumber && (
+              <label className="label">
+                <span className="label-text-alt text-error flex items-center gap-1">
+                  <MdWarning />
+                  {errors.whatsappNumber.message}
+                </span>
+              </label>
+            )}
+          </div>
+        </div>
+
+        <div className="divider"></div>
 
         {/* Images Upload */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4 border-b pb-2">الصور</h3>
+        <div>
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <MdImage className="text-warning text-2xl" />
+            صور العقار
+          </h3>
           <ImageUpload images={images} setImages={setImages} />
-        </section>
+        </div>
 
+        {/* Credits Cost Alert */}
         {creditsCost !== null && (
-          <p className="mb-5 text-lg text-error font-extrabold">
-            سيتم خصم {creditsCost} من عملات من حسابك عند إنشاء الإعلان
-          </p>
+          <div className="alert alert-warning">
+            <MdWarning className="text-2xl" />
+            <span className="font-bold">
+              سيتم خصم {creditsCost} عملة من حسابك عند إنشاء الإعلان
+            </span>
+          </div>
         )}
 
-        {/* Submit */}
-        <div className="text-center">
-          <button
-            className={`btn btn-primary w-full md:w-1/2 rounded-xl ${
-              isPending && "btn-disabled"
-            }`}
-            disabled={isPending}
-          >
-            {isPending ? "جارٍ إنشاء الإعلان..." : "إنشاء الإعلان"}
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="btn btn-primary btn-lg w-full"
+          disabled={isPending}
+        >
+          {isPending ? (
+            <span>
+              <span className="loading loading-spinner"></span>
+              جارٍ إنشاء الإعلان...
+            </span>
+          ) : (
+            <span>نشر الإعلان</span>
+          )}
+        </button>
       </form>
-    </>
+    </div>
   );
 }

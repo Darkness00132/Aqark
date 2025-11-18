@@ -47,7 +47,13 @@ export const createAdSchema = z
 
     whatsappNumber: z
       .string()
-      .regex(/^01[0-2,5]{1}[0-9]{8}$/, "رقم الواتساب غير صحيح"),
+      .min(8, "الرقم قصير جدًا")
+      .max(15, "الرقم طويل جدًا")
+      .refine(
+        (val) => val.startsWith("+"),
+        "الرقم يجب أن يحتوي على كود الدولة (+XX)"
+      )
+      .refine((val) => /^\+\d+$/.test(val), "رقم غير صالح"),
   })
   .superRefine((data, ctx) => {
     const areas = CITIES_WITH_AREAS[data.city];
@@ -194,7 +200,13 @@ export const AdEditSchema = z
 
     whatsappNumber: z
       .string()
-      .regex(/^01[0-2,5]{1}[0-9]{8}$/, "رقم الواتساب غير صحيح")
+      .min(8, "الرقم قصير جدًا")
+      .max(15, "الرقم طويل جدًا")
+      .refine(
+        (val) => val.startsWith("+"),
+        "الرقم يجب أن يحتوي على كود الدولة (+XX)"
+      )
+      .refine((val) => /^\+\d+$/.test(val), "رقم غير صالح")
       .optional(),
   })
   .superRefine((data, ctx) => {

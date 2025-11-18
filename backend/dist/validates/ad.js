@@ -200,12 +200,12 @@ export const createAdSchema = Joi.object({
     }),
     whatsappNumber: Joi.string()
         .trim()
-        .pattern(/^01[0-2,5]{1}[0-9]{8}$/)
+        .pattern(/^\+\d{8,15}$/)
         .required()
         .messages({
         "string.base": "رقم الواتساب يجب أن يكون نصًا",
         "string.empty": "رقم الواتساب لا يمكن أن يكون فارغًا",
-        "string.pattern.base": "رقم الواتساب غير صحيح",
+        "string.pattern.base": "رقم الواتساب غير صحيح، استخدم الرقم الدولي مع كود الدولة (+2010xxxxxxx)",
         "any.required": "رقم الواتساب مطلوب",
     }),
     images: Joi.array()

@@ -16,7 +16,7 @@ import useProfile from "@/hooks/user/useProfile";
 
 export default function Header() {
   const { mutate, isPending } = useLogout();
-  const { data:user } = useProfile();
+  const { data: user } = useProfile();
   const isAuth = useAuth((state) => state.isAuth);
 
   return (
@@ -94,14 +94,16 @@ export default function Header() {
                 className="menu menu-sm dropdown-content bg-base-100 rounded-2xl z-[9999] mt-3 w-56 p-2 shadow-2xl border border-base-300"
               >
                 {/* USER INFO */}
-                <li>
-                  <span className="flex items-center gap-3 p-2 rounded-xl">
-                    <FaCoins className="text-base text-amber-500" />
-                    <span className="text-sm">
-                      العملات: <strong>{user?.credits}</strong>
+                {user?.role !== "user" && (
+                  <li>
+                    <span className="flex items-center gap-3 p-2 rounded-xl">
+                      <FaCoins className="text-base text-amber-500" />
+                      <span className="text-sm">
+                        العملات: <strong>{user?.credits}</strong>
+                      </span>
                     </span>
-                  </span>
-                </li>
+                  </li>
+                )}
 
                 <div className="divider my-1"></div>
 
@@ -121,7 +123,7 @@ export default function Header() {
                   </Link>
                 </li>
 
-                {user?.role === "landlord" && (
+                {user?.role !== "user" && (
                   <>
                     <li>
                       <Link

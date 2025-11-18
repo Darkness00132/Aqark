@@ -26,8 +26,13 @@ CreditsLog.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
 //adLogs model
 AdLogs.belongsTo(User, { as: "user", foreignKey: "userId" });
 AdLogs.belongsTo(Ad, { as: "ad", foreignKey: "adId" });
-Ad.hasMany(AdLogs, { foreignKey: "adId", onDelete: "CASCADE" });
-Ad.hasMany(CreditsLog, { as: "creditLogs", foreignKey: "adId" });
+Ad.hasMany(AdLogs, { foreignKey: "adId", onDelete: "CASCADE", hooks: true });
+Ad.hasMany(CreditsLog, {
+  as: "creditLogs",
+  foreignKey: "adId",
+  onDelete: "CASCADE",
+  hooks: true,
+});
 
 //credits plan model
 CreditsPlan.belongsTo(User, { as: "user", foreignKey: "userId" });
