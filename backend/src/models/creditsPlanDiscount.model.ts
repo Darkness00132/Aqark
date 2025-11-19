@@ -48,12 +48,8 @@ PlanDiscount.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    isDeleted: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
   },
-  { sequelize, schema: "public", modelName: "plan_discount", timestamps: true }
+  { sequelize, schema: "public", modelName: "planDiscount", timestamps: true }
 );
 
 export default PlanDiscount;

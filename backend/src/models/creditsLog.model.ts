@@ -45,7 +45,7 @@ CreditsLog.init(
   {
     sequelize,
     modelName: "CreditsLog",
-    tableName: "credits_logs",
+    tableName: "creditsLogs",
     timestamps: true,
     indexes: [{ fields: ["userId"] }],
   }

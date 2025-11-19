@@ -37,7 +37,7 @@ Transaction.init({
         type: DataTypes.ENUM("purchase", "refund"),
         allowNull: false,
     },
-    credits: {
+    totalCredits: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
@@ -45,11 +45,23 @@ Transaction.init({
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    finalPrice: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+    },
+    discount: {
+        type: DataTypes.SMALLINT,
+        allowNull: true,
+    },
     description: {
         type: DataTypes.STRING,
     },
     paymentStatus: {
         type: DataTypes.ENUM("pending", "completed", "failed"),
+        allowNull: false,
+    },
+    netRevenue: {
+        type: DataTypes.FLOAT,
         allowNull: false,
     },
 }, {

@@ -15,6 +15,7 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
+    mode: "onBlur",
   });
 
   function onSubmit(data: z.infer<typeof loginSchema>) {

@@ -95,20 +95,21 @@ export default function Header() {
               >
                 {/* USER INFO */}
                 {user?.role !== "user" && (
-                  <li>
-                    <Link
-                      href="/credits"
-                      className="flex items-center gap-3 p-2 rounded-xl"
-                    >
-                      <FaCoins className="text-base text-amber-500" />
-                      <span className="text-sm">
-                        العملات: <strong>{user?.credits}</strong>
-                      </span>
-                    </Link>
-                  </li>
+                  <>
+                    <li>
+                      <Link
+                        href="/credits"
+                        className="flex items-center gap-3 p-2 rounded-xl"
+                      >
+                        <FaCoins className="text-base text-amber-500" />
+                        <span className="text-sm">
+                          العملات: <strong>{user?.credits}</strong>
+                        </span>
+                      </Link>
+                    </li>
+                    <div className="divider my-1"></div>
+                  </>
                 )}
-
-                <div className="divider my-1"></div>
 
                 {/* NAVIGATION SECTION */}
                 <li>

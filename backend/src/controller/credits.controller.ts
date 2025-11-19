@@ -3,30 +3,20 @@ import {
   createCreditsPlanSchema,
   createPlanDiscountSchema,
 } from "../validates/credits.js";
+import { getAuthToken, createOrder, getpaymentToken } from "../utils/paymob.js";
 import { Response } from "express";
-import { CreditsPlan, PlanDiscount } from "../models/associations.js";
+import {
+  CreditsPlan,
+  PlanDiscount,
+  Transaction,
+} from "../models/associations.js";
 import { Op } from "sequelize";
 import asyncHandler from "../utils/asyncHnadler.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
 
 export const getPlans = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const now = new Date();
-
     const plans = await CreditsPlan.findAll({
-      where: { isDeleted: false },
-      include: [
-        {
-          model: PlanDiscount,
-          as: "discounts",
-          where: {
-            startsAt: { [Op.lte]: now },
-            endsAt: { [Op.gte]: now },
-            isDeleted: false,
-          },
-          required: false, // allow plans with no active discounts
-        },
-      ],
       order: [["id", "ASC"]],
     });
 
@@ -43,6 +33,71 @@ export const createPlan = asyncHandler(
 
     await CreditsPlan.create({ ...plan, userId: req.user.id });
     return res.status(201).json({ message: "Plan created successfully" });
+  }
+);
+
+export const createPayment = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const { planId } = req.secureBody;
+    const plan = await CreditsPlan.findByPk(planId);
+    if (!plan) return res.status(404).json({ message: "Plan not found" });
+    const discount = await PlanDiscount.findOne({
+      where: {
+        planId: plan.id,
+        startsAt: { [Op.lte]: new Date() },
+        endsAt: { [Op.gte]: new Date() },
+      },
+    });
+    const credits = plan.credits + (plan.bonus || 0);
+    const price = plan.price;
+    const finalPrice = discount
+      ? price - (price * discount.percentage) / 100
+      : price;
+
+    const authToken = await getAuthToken();
+    const orderId = await createOrder(authToken, finalPrice, planId);
+
+    const billingData = {
+      first_name: req.user.name.split(" ")[0] || req.user.name,
+      last_name: req.user.name.split(" ")[1] || "NA",
+      email: req.user.email,
+      phone_number: "NA",
+      apartment: "NA",
+      floor: "NA",
+      street: "NA",
+      building: "NA",
+      city: "NA",
+      country: "EG",
+      state: "NA",
+    };
+
+    const paymentToken = await getpaymentToken(
+      authToken,
+      orderId,
+      finalPrice,
+      billingData
+    );
+
+    const gatewayfee = 3 + finalPrice * 0.0275;
+    const netRevenue = finalPrice - gatewayfee;
+    await Transaction.create({
+      userId: req.user.id,
+      planId: planId,
+      paymentId: orderId,
+      type: "purchase",
+      totalCredits: credits,
+      price,
+      finalPrice,
+      discount: discount?.percentage || 0,
+      paymentStatus: "pending",
+      paymentMethod: "paymob",
+      gatewayfee,
+      netRevenue,
+    });
+
+    return res.status(200).json({
+      paymentUrl: `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentToken}`,
+    });
   }
 );
 
@@ -103,14 +158,5 @@ export const deletePlan = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { id } = sanitizeXSS(req.params);
     if (!id) return res.status(400).json({ message: "Missing id" });
-
-    const plan = await CreditsPlan.findByPk(id);
-    if (!plan) {
-      return res.status(404).json({ message: "Plan not found" });
-    }
-
-    await plan.update({ isDeleted: true });
-
-    return res.status(200).json({ message: "Plan deleted successfully" });
   }
 );

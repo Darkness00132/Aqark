@@ -107,30 +107,6 @@ export default function CreatePlanForm() {
             <p className="text-error text-xs mt-1">{errors.bonus.message}</p>
           )}
         </div>
-
-        {/* Discount */}
-        <div>
-          <label className="text-sm font-semibold mb-1 flex items-center gap-2">
-            <FaPercent className="text-warning" />
-            Discount (%)
-            <span className="text-xs text-gray-500 font-normal">
-              (Optional)
-            </span>
-          </label>
-          <input
-            type="number"
-            {...register("discount", {
-              setValueAs: (v) => (v === "" ? undefined : Number(v)),
-            })}
-            className={`input input-bordered w-full ${
-              errors.discount ? "input-error" : ""
-            }`}
-            placeholder="Enter discount (0–100)"
-          />
-          {errors.discount && (
-            <p className="text-error text-xs mt-1">{errors.discount.message}</p>
-          )}
-        </div>
       </div>
 
       {/* Footer */}

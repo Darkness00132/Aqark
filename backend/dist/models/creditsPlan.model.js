@@ -24,10 +24,6 @@ CreditsPlan.init({
         type: DataTypes.INTEGER,
         allowNull: true,
     },
-    isDeleted: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-    },
-}, { sequelize, schema: "public", modelName: "credits_plans", timestamps: true });
+}, { sequelize, schema: "public", modelName: "creditsPlans", timestamps: true });
 export default CreditsPlan;
 //# sourceMappingURL=creditsPlan.model.js.map

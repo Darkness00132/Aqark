@@ -9,12 +9,15 @@ interface TransactionAttributes {
   paymentId: string;
   cardLast4?: string;
   type: "purchase" | "refund";
-  credits: number;
+  totalCredits: number;
   price: number;
+  finalPrice: number;
+  discount?: number;
   description?: string;
   paymentStatus: "pending" | "completed" | "failed";
   paymentMethod: string;
   gatewayfee: number;
+  netRevenue: number;
 }
 
 class Transaction extends Model<TransactionAttributes> {
@@ -26,10 +29,13 @@ class Transaction extends Model<TransactionAttributes> {
   declare paymentStatus: "pending" | "completed" | "failed";
   declare paymentMethod: string;
   declare type: "purchase" | "refund";
-  declare credits: number;
+  declare totalCredits: number;
   declare price: number;
+  declare finalPrice: number;
+  declare discount?: number;
   declare description?: string;
   declare gatewayfee: number;
+  declare netRevenue: number;
 }
 
 Transaction.init(
@@ -67,7 +73,7 @@ Transaction.init(
       type: DataTypes.ENUM("purchase", "refund"),
       allowNull: false,
     },
-    credits: {
+    totalCredits: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -75,11 +81,23 @@ Transaction.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    finalPrice: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    discount: {
+      type: DataTypes.SMALLINT,
+      allowNull: true,
+    },
     description: {
       type: DataTypes.STRING,
     },
     paymentStatus: {
       type: DataTypes.ENUM("pending", "completed", "failed"),
+      allowNull: false,
+    },
+    netRevenue: {
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
   },

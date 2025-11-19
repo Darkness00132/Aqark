@@ -14,6 +14,7 @@ export default function SignupForm({ role }: { role: string }) {
     formState: { errors },
   } = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
+    mode: "onBlur",
   });
 
   function onSubmit(data: z.infer<typeof signupSchema>) {

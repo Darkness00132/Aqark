@@ -3,6 +3,7 @@ import auth from "../middlewares/auth.js";
 import {
   createPlan,
   createPlanDiscount,
+  createPayment,
   deletePlan,
   getPlans,
 } from "../controller/credits.controller.js";
@@ -10,9 +11,9 @@ import admin from "../middlewares/admin.js";
 
 const router = Router();
 
-router.use(auth);
-
 router.get("/plans", getPlans);
+
+router.post("/createPayment", auth, createPayment);
 
 router.post("/createPlan", auth, admin, createPlan);
 

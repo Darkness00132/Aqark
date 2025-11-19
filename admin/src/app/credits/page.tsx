@@ -9,7 +9,6 @@ export interface Plan {
   credits: number;
   price: number;
   bonus?: number;
-  discount?: number;
 }
 
 export default function Credits() {

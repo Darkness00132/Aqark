@@ -1,30 +1,33 @@
 import { FaClock, FaCheck, FaFire } from "react-icons/fa";
 import formatDateFromNow from "@/lib/formatDateFromNow";
 import Link from "next/link";
+import PayButton from "@/components/credits/PayButton";
 
-const plans = [
-  { id: 1, credits: 20, price: 150, bonus: 0 },
-  { id: 2, credits: 50, price: 350, bonus: 10 },
-  { id: 3, credits: 100, price: 650, bonus: 20 },
-  { id: 4, credits: 250, price: 1500, bonus: 60 },
-];
+interface Plan {
+  id: number;
+  credits: number;
+  bonus: number;
+  price: number;
+}
 
 const discounts = [
   {
-    planId: 2,
+    planId: 1,
     percentage: 15,
     startsAt: "2025-02-01T00:00:00Z",
-    endsAt: "2026-02-10T00:00:00Z",
-  },
-  {
-    planId: 3,
-    percentage: 20,
-    startsAt: "2025-02-03T00:00:00Z",
-    endsAt: "2026-02-06T00:00:00Z",
+    endsAt: "2025-12-10T00:00:00Z",
   },
 ];
 
-export default function Credits() {
+export default async function Credits() {
+  const plans: Plan[] | undefined = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/credits/plans`,
+    {
+      cache: "no-store",
+    }
+  )
+    .then((res) => res.json())
+    .then((data) => data.plans);
   const now = new Date();
 
   const getActiveDiscount = (planId: number) =>
@@ -54,7 +57,7 @@ export default function Credits() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 sm:gap-7">
-        {plans.map((plan) => {
+        {plans?.map((plan) => {
           const discount = getActiveDiscount(plan.id);
           const finalPrice = calculatePrice(plan.price, discount);
           const totalCredits = plan.credits + plan.bonus;
@@ -82,7 +85,7 @@ export default function Credits() {
                 )}
 
                 <h2 className="card-title text-3xl font-bold justify-center mb-2 mt-4">
-                  {plan.credits} رصيد
+                  {plan.credits} كريدت
                 </h2>
 
                 {/* Bonus Badge */}
@@ -138,16 +141,7 @@ export default function Credits() {
                   </div>
                 </div>
 
-                <Link
-                  href={`/credits/checkout?planId=${plan.id}`}
-                  className={`btn btn-lg w-full ${
-                    discount
-                      ? "btn-warning text-warning-content font-bold"
-                      : "btn-primary"
-                  }`}
-                >
-                  {discount ? "🔥 اشترِ الآن وفّر!" : "اشترِ الآن"}
-                </Link>
+                <PayButton key={plan.id} discount={discount} planId={plan.id} />
               </div>
             </div>
           );

@@ -8,7 +8,6 @@ interface CreditsPlanAttributes {
   price: number;
   discount?: number;
   bonus?: number;
-  isDeleted?: boolean;
 }
 class CreditsPlan
   extends Model<CreditsPlanAttributes>
@@ -20,7 +19,6 @@ class CreditsPlan
   declare price: number;
   declare discount?: number;
   declare bonus?: number;
-  declare isDeleted?: boolean;
 }
 
 CreditsPlan.init(
@@ -46,12 +44,8 @@ CreditsPlan.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    isDeleted: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
   },
-  { sequelize, schema: "public", modelName: "credits_plans", timestamps: true }
+  { sequelize, schema: "public", modelName: "creditsPlans", timestamps: true }
 );
 
 export default CreditsPlan;
