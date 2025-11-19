@@ -111,25 +111,36 @@ export const paymentProcessed = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const data = req.body;
 
+    // ✅ Add detailed logging
+    console.log("=== WEBHOOK RECEIVED ===");
+    console.log("Full request body:", JSON.stringify(data, null, 2));
+    console.log("HMAC from request:", data.hmac);
+
     if (!data || !data.hmac) {
-      console.log("Missing HMAC in request!");
+      console.log("❌ Missing HMAC in request!");
       return res.status(400).json({ message: "Invalid request" });
     }
 
     // Verify HMAC
     if (!verifyPaymobHMAC(data)) {
-      console.log("Invalid HMAC signature!");
+      console.log("❌ Invalid HMAC signature!");
       return res.status(400).json({ message: "Invalid signature" });
     }
 
-    console.log("Received Paymob callback:", data);
+    console.log("✅ HMAC verified successfully");
 
     // Extract transaction details
     const merchantOrderId = data.obj?.order?.merchant_order_id;
     const paymobTransactionId = data.obj?.id;
-    const isSuccess =
-      data.obj?.success === true || data.obj?.success === "true";
+    const isSuccess = data.obj?.success;
     const amountCents = data.obj?.amount_cents;
+
+    // ✅ Log extracted data
+    console.log("Extracted data:");
+    console.log("- merchantOrderId:", merchantOrderId);
+    console.log("- paymobTransactionId:", paymobTransactionId);
+    console.log("- isSuccess:", isSuccess, "Type:", typeof isSuccess);
+    console.log("- amountCents:", amountCents);
 
     // Find transaction by your merchant order ID
     const transaction = await Transaction.findOne({
@@ -137,42 +148,89 @@ export const paymentProcessed = asyncHandler(
     });
 
     if (!transaction) {
-      console.log("Transaction not found:", merchantOrderId);
+      console.log("❌ Transaction not found:", merchantOrderId);
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    // Handle success/failure
-    if (isSuccess) {
+    console.log("✅ Transaction found:", {
+      id: transaction.id,
+      currentStatus: transaction.paymentStatus,
+      expectedAmount: transaction.finalPrice,
+    });
+
+    // ✅ Handle success/failure - FIX THE BOOLEAN CHECK
+    if (isSuccess === true || isSuccess === "true") {
+      console.log("💳 Processing successful payment...");
+
       // Verify amount matches (Paymob sends in cents)
       const expectedAmountCents = Math.round(transaction.finalPrice * 100);
+      console.log("Amount verification:", {
+        expected: expectedAmountCents,
+        received: amountCents,
+        match: amountCents === expectedAmountCents,
+      });
+
       if (amountCents !== expectedAmountCents) {
-        console.log("Amount mismatch!", {
+        console.log("❌ Amount mismatch!", {
           expected: expectedAmountCents,
           received: amountCents,
         });
         return res.status(400).json({ message: "Amount mismatch" });
       }
 
-      if (transaction.paymentStatus !== "completed") {
-        transaction.paymentStatus = "completed";
-        transaction.paymentId = paymobTransactionId;
-        await transaction.save();
+      // ✅ Check if already completed (idempotency)
+      if (transaction.paymentStatus === "completed") {
+        console.log("⚠️ Transaction already completed, skipping...");
+        return res
+          .status(200)
+          .json({ received: true, message: "Already processed" });
+      }
 
-        // Add credits to user
-        const user = await User.findByPk(transaction.userId);
-        if (user) {
-          user.credits += transaction.totalCredits;
-          await user.save();
-        }
+      // Update transaction
+      console.log("Updating transaction to completed...");
+      transaction.paymentStatus = "completed";
+      transaction.paymentId = paymobTransactionId;
+      await transaction.save();
+      console.log("✅ Transaction updated successfully");
+
+      // Add credits to user
+      const user = await User.findByPk(transaction.userId);
+      if (user) {
+        console.log("Adding credits to user:", {
+          userId: user.id,
+          currentCredits: user.credits,
+          creditsToAdd: transaction.totalCredits,
+        });
+
+        user.credits += transaction.totalCredits;
+        await user.save();
+
+        console.log(
+          "✅ Credits added successfully. New balance:",
+          user.credits
+        );
+      } else {
+        console.log("❌ User not found:", transaction.userId);
       }
+    } else if (isSuccess === false || isSuccess === "false") {
+      console.log("❌ Processing failed payment...");
+
+      if (transaction.paymentStatus === "failed") {
+        console.log("⚠️ Transaction already marked as failed, skipping...");
+        return res
+          .status(200)
+          .json({ received: true, message: "Already processed" });
+      }
+
+      transaction.paymentStatus = "failed";
+      transaction.paymentId = paymobTransactionId;
+      await transaction.save();
+      console.log("✅ Transaction marked as failed");
     } else {
-      if (transaction.paymentStatus !== "failed") {
-        transaction.paymentStatus = "failed";
-        transaction.paymentId = paymobTransactionId;
-        await transaction.save();
-      }
+      console.log("⚠️ Unexpected success value:", isSuccess);
     }
 
+    console.log("=== WEBHOOK PROCESSING COMPLETE ===\n");
     res.status(200).json({ received: true });
   }
 );
