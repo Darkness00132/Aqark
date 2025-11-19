@@ -67,13 +67,6 @@ export function verifyPaymobHMAC(data: any): boolean {
     return false;
   }
 
-  // Paymob HMAC calculation: concatenate specific fields in order
-  // The exact order depends on your Paymob configuration, but typically:
-  // amount_cents + created_at + currency + error_occured + has_parent_transaction +
-  // id + integration_id + is_3d_secure + is_auth + is_capture + is_refunded +
-  // is_standalone_payment + is_voided + order.id + owner + pending +
-  // source_data.pan + source_data.sub_type + source_data.type + success
-
   const obj = data.obj;
 
   const concatenatedString = [
@@ -104,9 +97,17 @@ export function verifyPaymobHMAC(data: any): boolean {
     .update(concatenatedString)
     .digest("hex");
 
-  // Use timing-safe comparison
-  return crypto.timingSafeEqual(
-    Buffer.from(calculatedHmac),
-    Buffer.from(receivedHmac)
-  );
+  // Use timing-safe comparison with equal-length buffers
+  try {
+    if (calculatedHmac.length !== receivedHmac.length) {
+      return false;
+    }
+    return crypto.timingSafeEqual(
+      Buffer.from(calculatedHmac),
+      Buffer.from(receivedHmac)
+    );
+  } catch (error) {
+    console.error("HMAC comparison error:", error);
+    return false;
+  }
 }

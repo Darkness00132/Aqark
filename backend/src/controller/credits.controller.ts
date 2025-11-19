@@ -109,7 +109,6 @@ export const createPayment = asyncHandler(
 
 export const paymentProcessed = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    // Paymob sends data in req.body, with an 'hmac' field
     const data = req.body;
 
     if (!data || !data.hmac) {
@@ -126,16 +125,15 @@ export const paymentProcessed = asyncHandler(
     console.log("Received Paymob callback:", data);
 
     // Extract transaction details
-    // Paymob typically sends: obj.order.merchant_order_id or obj.id
     const merchantOrderId = data.obj?.order?.merchant_order_id;
-    const transactionId = data.obj?.id;
+    const paymobTransactionId = data.obj?.id;
     const isSuccess =
       data.obj?.success === true || data.obj?.success === "true";
     const amountCents = data.obj?.amount_cents;
 
     // Find transaction by your merchant order ID
     const transaction = await Transaction.findOne({
-      where: { id: merchantOrderId }, // or however you store it
+      where: { id: merchantOrderId },
     });
 
     if (!transaction) {
@@ -157,7 +155,7 @@ export const paymentProcessed = asyncHandler(
 
       if (transaction.paymentStatus !== "completed") {
         transaction.paymentStatus = "completed";
-        transaction.id = transactionId; // Store Paymob's transaction ID
+        transaction.paymentId = paymobTransactionId;
         await transaction.save();
 
         // Add credits to user
@@ -170,7 +168,7 @@ export const paymentProcessed = asyncHandler(
     } else {
       if (transaction.paymentStatus !== "failed") {
         transaction.paymentStatus = "failed";
-        transaction.id = transactionId;
+        transaction.paymentId = paymobTransactionId;
         await transaction.save();
       }
     }
