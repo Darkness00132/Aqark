@@ -60,14 +60,53 @@ export async function getpaymentToken(
   return data.token;
 }
 
-export function verifySignature(req: AuthRequest) {
-  // Example: assume Paymob sends signature in header `Paymob-Signature`
-  const signature = req.headers["paymob-signature"];
-  const payload = JSON.stringify(req.secureBody);
-  const hmac = crypto
-    .createHmac("sha256", process.env.PAYMOB_HMAC_SECRET!)
-    .update(payload)
+export function verifyPaymobHMAC(data: any): boolean {
+  const receivedHmac = data.hmac;
+
+  if (!receivedHmac) {
+    return false;
+  }
+
+  // Paymob HMAC calculation: concatenate specific fields in order
+  // The exact order depends on your Paymob configuration, but typically:
+  // amount_cents + created_at + currency + error_occured + has_parent_transaction +
+  // id + integration_id + is_3d_secure + is_auth + is_capture + is_refunded +
+  // is_standalone_payment + is_voided + order.id + owner + pending +
+  // source_data.pan + source_data.sub_type + source_data.type + success
+
+  const obj = data.obj;
+
+  const concatenatedString = [
+    obj.amount_cents || "",
+    obj.created_at || "",
+    obj.currency || "",
+    obj.error_occured || "",
+    obj.has_parent_transaction || "",
+    obj.id || "",
+    obj.integration_id || "",
+    obj.is_3d_secure || "",
+    obj.is_auth || "",
+    obj.is_capture || "",
+    obj.is_refunded || "",
+    obj.is_standalone_payment || "",
+    obj.is_voided || "",
+    obj.order?.id || "",
+    obj.owner || "",
+    obj.pending || "",
+    obj.source_data?.pan || "",
+    obj.source_data?.sub_type || "",
+    obj.source_data?.type || "",
+    obj.success || "",
+  ].join("");
+
+  const calculatedHmac = crypto
+    .createHmac("sha512", process.env.PAYMOB_HMAC_SECRET!)
+    .update(concatenatedString)
     .digest("hex");
 
-  return hmac === signature;
+  // Use timing-safe comparison
+  return crypto.timingSafeEqual(
+    Buffer.from(calculatedHmac),
+    Buffer.from(receivedHmac)
+  );
 }

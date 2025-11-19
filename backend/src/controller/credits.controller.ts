@@ -7,7 +7,7 @@ import {
   getAuthToken,
   createOrder,
   getpaymentToken,
-  verifySignature,
+  verifyPaymobHMAC,
 } from "../utils/paymob.js";
 import { Response } from "express";
 import {
@@ -109,33 +109,68 @@ export const createPayment = asyncHandler(
 
 export const paymentProcessed = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    if (!verifySignature(req)) {
-      console.log("Invalid signature!");
+    // Paymob sends data in req.body, with an 'hmac' field
+    const data = req.body;
+
+    if (!data || !data.hmac) {
+      console.log("Missing HMAC in request!");
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    // Verify HMAC
+    if (!verifyPaymobHMAC(data)) {
+      console.log("Invalid HMAC signature!");
       return res.status(400).json({ message: "Invalid signature" });
     }
 
-    const event = req.secureBody;
-    console.log("Received Paymob event:", event);
+    console.log("Received Paymob callback:", data);
 
-    const paymentId = event.data.order.id;
+    // Extract transaction details
+    // Paymob typically sends: obj.order.merchant_order_id or obj.id
+    const merchantOrderId = data.obj?.order?.merchant_order_id;
+    const transactionId = data.obj?.id;
+    const isSuccess =
+      data.obj?.success === true || data.obj?.success === "true";
+    const amountCents = data.obj?.amount_cents;
+
+    // Find transaction by your merchant order ID
     const transaction = await Transaction.findOne({
-      where: { paymentId },
+      where: { id: merchantOrderId }, // or however you store it
     });
-    // Handle different event types:
-    if (event.type === "transaction_success") {
-      if (transaction && transaction.paymentStatus !== "completed") {
+
+    if (!transaction) {
+      console.log("Transaction not found:", merchantOrderId);
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    // Handle success/failure
+    if (isSuccess) {
+      // Verify amount matches (Paymob sends in cents)
+      const expectedAmountCents = Math.round(transaction.finalPrice * 100);
+      if (amountCents !== expectedAmountCents) {
+        console.log("Amount mismatch!", {
+          expected: expectedAmountCents,
+          received: amountCents,
+        });
+        return res.status(400).json({ message: "Amount mismatch" });
+      }
+
+      if (transaction.paymentStatus !== "completed") {
         transaction.paymentStatus = "completed";
+        transaction.id = transactionId; // Store Paymob's transaction ID
         await transaction.save();
+
+        // Add credits to user
         const user = await User.findByPk(transaction.userId);
         if (user) {
           user.credits += transaction.totalCredits;
           await user.save();
         }
       }
-    } else if (event.type === "transaction_failed") {
-      // Handle failure
-      if (transaction) {
+    } else {
+      if (transaction.paymentStatus !== "failed") {
         transaction.paymentStatus = "failed";
+        transaction.id = transactionId;
         await transaction.save();
       }
     }

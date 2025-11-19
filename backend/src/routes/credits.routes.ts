@@ -1,4 +1,5 @@
 import { Router } from "express";
+import express from "express";
 import auth from "../middlewares/auth.js";
 import {
   createPlan,
@@ -22,6 +23,14 @@ router.delete("/deletePlan/:id", auth, admin, deletePlan);
 
 router.post("/createPayment", auth, createPayment);
 
-router.post("/webhook/processed", paymentProcessed);
+router.post(
+  "/webhook/processed",
+  express.json({
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf.toString("utf8");
+    },
+  }),
+  paymentProcessed
+);
 
 export default router;
