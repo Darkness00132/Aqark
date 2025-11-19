@@ -70,7 +70,7 @@ export const createPayment = asyncHandler(async (req, res) => {
         paymentUrl: `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentToken}`,
     });
 });
-export const paymentResponse = asyncHandler(async (req, res) => {
+export const paymentProcessed = asyncHandler(async (req, res) => {
     if (!verifySignature(req)) {
         console.log("Invalid signature!");
         return res.status(400).json({ message: "Invalid signature" });

@@ -107,7 +107,7 @@ export const createPayment = asyncHandler(
   }
 );
 
-export const paymentResponse = asyncHandler(
+export const paymentProcessed = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     if (!verifySignature(req)) {
       console.log("Invalid signature!");

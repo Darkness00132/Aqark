@@ -6,7 +6,7 @@ import {
   deletePlan,
   getPlans,
   createPayment,
-  paymentResponse,
+  paymentProcessed,
 } from "../controller/credits.controller.js";
 import admin from "../middlewares/admin.js";
 
@@ -22,11 +22,6 @@ router.delete("/deletePlan/:id", auth, admin, deletePlan);
 
 router.post("/createPayment", auth, createPayment);
 
-router.post("/webhook/response", paymentResponse);
-
-router.post("/webhook/processed", (req, res) => {
-  console.log("Processed event:", req.body);
-  res.status(200).send("OK");
-});
+router.post("/webhook/processed", paymentProcessed);
 
 export default router;
