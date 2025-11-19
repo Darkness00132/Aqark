@@ -3,12 +3,18 @@ import {
   createCreditsPlanSchema,
   createPlanDiscountSchema,
 } from "../validates/credits.js";
-import { getAuthToken, createOrder, getpaymentToken } from "../utils/paymob.js";
+import {
+  getAuthToken,
+  createOrder,
+  getpaymentToken,
+  verifySignature,
+} from "../utils/paymob.js";
 import { Response } from "express";
 import {
   CreditsPlan,
   PlanDiscount,
   Transaction,
+  User,
 } from "../models/associations.js";
 import { Op } from "sequelize";
 import asyncHandler from "../utils/asyncHnadler.js";
@@ -98,6 +104,43 @@ export const createPayment = asyncHandler(
     return res.status(200).json({
       paymentUrl: `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentToken}`,
     });
+  }
+);
+
+export const paymentResponse = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    if (!verifySignature(req)) {
+      console.log("Invalid signature!");
+      return res.status(400).json({ message: "Invalid signature" });
+    }
+
+    const event = req.secureBody;
+    console.log("Received Paymob event:", event);
+
+    const paymentId = event.data.order.id;
+    const transaction = await Transaction.findOne({
+      where: { paymentId },
+    });
+    // Handle different event types:
+    if (event.type === "transaction_success") {
+      if (transaction && transaction.paymentStatus !== "completed") {
+        transaction.paymentStatus = "completed";
+        await transaction.save();
+        const user = await User.findByPk(transaction.userId);
+        if (user) {
+          user.credits += transaction.totalCredits;
+          await user.save();
+        }
+      }
+    } else if (event.type === "transaction_failed") {
+      // Handle failure
+      if (transaction) {
+        transaction.paymentStatus = "failed";
+        await transaction.save();
+      }
+    }
+
+    res.status(200).json({ received: true });
   }
 );
 

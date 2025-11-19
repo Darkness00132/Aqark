@@ -71,7 +71,7 @@ class User
   declare resetPasswordTokenExpire?: Date | null;
   declare avgRating?: number;
   declare totalReviews?: number;
-  declare credits?: number;
+  declare credits: number;
 
   public async matchPassword(enteredPassword: string) {
     if (!this.password) return false;
@@ -96,7 +96,7 @@ class User
     role: "user" | "landlord" | "admin" | "superAdmin" | "owner";
     avgRating?: number;
     totalReviews?: number;
-    credits?: number;
+    credits: number;
   } {
     return {
       slug: this.slug,

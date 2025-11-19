@@ -1,3 +1,4 @@
+import crypto from "crypto";
 const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY;
 const PAYMOB_BASE_URL = process.env.PAYMOB_BASE_URL;
 const PAYMOB_INTEGRATION_ID = process.env.PAYMOB_INTEGRATION_ID;
@@ -44,5 +45,15 @@ export async function getpaymentToken(authToken, orderId, amount, billingData) {
     });
     const data = await res.json();
     return data.token;
+}
+export function verifySignature(req) {
+    // Example: assume Paymob sends signature in header `Paymob-Signature`
+    const signature = req.headers["paymob-signature"];
+    const payload = JSON.stringify(req.secureBody);
+    const hmac = crypto
+        .createHmac("sha256", process.env.PAYMOB_HMAC_SECRET)
+        .update(payload)
+        .digest("hex");
+    return hmac === signature;
 }
 //# sourceMappingURL=paymob.js.map
