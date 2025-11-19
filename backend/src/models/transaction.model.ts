@@ -7,6 +7,7 @@ interface TransactionAttributes {
   userId: string;
   planId: string;
   paymentId: string;
+  paymobTransactionId?: string;
   cardLast4?: string;
   type: "purchase" | "refund";
   totalCredits: number;
@@ -15,7 +16,7 @@ interface TransactionAttributes {
   discount?: number;
   description?: string;
   paymentStatus: "pending" | "completed" | "failed";
-  paymentMethod: string;
+  paymentMethod?: string;
   gatewayfee: number;
   netRevenue: number;
 }
@@ -27,7 +28,8 @@ class Transaction extends Model<TransactionAttributes> {
   declare paymentId: string;
   declare cardLast4?: string;
   declare paymentStatus: "pending" | "completed" | "failed";
-  declare paymentMethod: string;
+  declare paymentMethod?: string;
+  declare paymobTransactionId?: string;
   declare type: "purchase" | "refund";
   declare totalCredits: number;
   declare price: number;
@@ -56,6 +58,10 @@ Transaction.init(
     paymentId: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    paymobTransactionId: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     cardLast4: {
       type: DataTypes.STRING,

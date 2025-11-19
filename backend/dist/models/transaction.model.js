@@ -21,6 +21,10 @@ Transaction.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
+    paymobTransactionId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     cardLast4: {
         type: DataTypes.STRING,
         allowNull: true,

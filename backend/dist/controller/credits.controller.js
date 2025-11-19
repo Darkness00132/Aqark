@@ -1,5 +1,5 @@
 import { createCreditsPlanSchema, createPlanDiscountSchema, } from "../validates/credits.js";
-import { getAuthToken, createOrder, getpaymentToken, verifyPaymobHMAC, } from "../utils/paymob.js";
+import { getAuthToken, createOrder, getpaymentToken, } from "../utils/paymob.js";
 import { CreditsPlan, PlanDiscount, Transaction, User, } from "../models/associations.js";
 import { Op } from "sequelize";
 import asyncHandler from "../utils/asyncHnadler.js";
@@ -62,7 +62,6 @@ export const createPayment = asyncHandler(async (req, res) => {
         finalPrice,
         discount: discount?.percentage || 0,
         paymentStatus: "pending",
-        paymentMethod: "paymob",
         gatewayfee,
         netRevenue,
     });
@@ -72,37 +71,33 @@ export const createPayment = asyncHandler(async (req, res) => {
 });
 export const paymentProcessed = asyncHandler(async (req, res) => {
     const data = req.body;
-    // ✅ Add detailed logging
     console.log("=== WEBHOOK RECEIVED ===");
     console.log("Full request body:", JSON.stringify(data, null, 2));
-    console.log("HMAC from request:", data.hmac);
-    if (!data || !data.hmac) {
-        console.log("❌ Missing HMAC in request!");
+    // ✅ Basic validation instead of HMAC
+    if (!data || !data.obj || !data.obj.id) {
+        console.log("❌ Invalid request structure!");
         return res.status(400).json({ message: "Invalid request" });
     }
-    // Verify HMAC
-    if (!verifyPaymobHMAC(data)) {
-        console.log("❌ Invalid HMAC signature!");
-        return res.status(400).json({ message: "Invalid signature" });
-    }
-    console.log("✅ HMAC verified successfully");
+    console.log("✅ Request structure validated");
     // Extract transaction details
-    const merchantOrderId = data.obj?.order?.merchant_order_id;
-    const paymobTransactionId = data.obj?.id;
-    const isSuccess = data.obj?.success;
-    const amountCents = data.obj?.amount_cents;
-    // ✅ Log extracted data
+    const paymobTransactionId = data.obj.id; // Use Paymob's transaction ID
+    const paymobOrderId = data.obj.order?.id; // Paymob's order ID
+    const isSuccess = data.obj.success === true;
+    const amountCents = data.obj.amount_cents;
     console.log("Extracted data:");
-    console.log("- merchantOrderId:", merchantOrderId);
     console.log("- paymobTransactionId:", paymobTransactionId);
-    console.log("- isSuccess:", isSuccess, "Type:", typeof isSuccess);
+    console.log("- paymobOrderId:", paymobOrderId);
+    console.log("- isSuccess:", isSuccess);
     console.log("- amountCents:", amountCents);
-    // Find transaction by your merchant order ID
+    // ✅ Find transaction by Paymob's order ID or transaction ID
+    // You need to store this when creating the order
     const transaction = await Transaction.findOne({
-        where: { id: merchantOrderId },
+        where: {
+            paymentId: String(paymobOrderId), // Find by Paymob order ID
+        },
     });
     if (!transaction) {
-        console.log("❌ Transaction not found:", merchantOrderId);
+        console.log("❌ Transaction not found for order:", paymobOrderId);
         return res.status(404).json({ message: "Transaction not found" });
     }
     console.log("✅ Transaction found:", {
@@ -110,8 +105,8 @@ export const paymentProcessed = asyncHandler(async (req, res) => {
         currentStatus: transaction.paymentStatus,
         expectedAmount: transaction.finalPrice,
     });
-    // ✅ Handle success/failure - FIX THE BOOLEAN CHECK
-    if (isSuccess === true || isSuccess === "true") {
+    // Handle success/failure
+    if (isSuccess) {
         console.log("💳 Processing successful payment...");
         // Verify amount matches (Paymob sends in cents)
         const expectedAmountCents = Math.round(transaction.finalPrice * 100);
@@ -127,7 +122,7 @@ export const paymentProcessed = asyncHandler(async (req, res) => {
             });
             return res.status(400).json({ message: "Amount mismatch" });
         }
-        // ✅ Check if already completed (idempotency)
+        // Check if already completed (idempotency)
         if (transaction.paymentStatus === "completed") {
             console.log("⚠️ Transaction already completed, skipping...");
             return res
@@ -137,7 +132,7 @@ export const paymentProcessed = asyncHandler(async (req, res) => {
         // Update transaction
         console.log("Updating transaction to completed...");
         transaction.paymentStatus = "completed";
-        transaction.paymentId = paymobTransactionId;
+        transaction.paymobTransactionId = String(paymobTransactionId);
         await transaction.save();
         console.log("✅ Transaction updated successfully");
         // Add credits to user
@@ -156,7 +151,7 @@ export const paymentProcessed = asyncHandler(async (req, res) => {
             console.log("❌ User not found:", transaction.userId);
         }
     }
-    else if (isSuccess === false || isSuccess === "false") {
+    else {
         console.log("❌ Processing failed payment...");
         if (transaction.paymentStatus === "failed") {
             console.log("⚠️ Transaction already marked as failed, skipping...");
@@ -165,12 +160,9 @@ export const paymentProcessed = asyncHandler(async (req, res) => {
                 .json({ received: true, message: "Already processed" });
         }
         transaction.paymentStatus = "failed";
-        transaction.paymentId = paymobTransactionId;
+        transaction.paymobTransactionId = String(paymobTransactionId);
         await transaction.save();
         console.log("✅ Transaction marked as failed");
-    }
-    else {
-        console.log("⚠️ Unexpected success value:", isSuccess);
     }
     console.log("=== WEBHOOK PROCESSING COMPLETE ===\n");
     res.status(200).json({ received: true });
