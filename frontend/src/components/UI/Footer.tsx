@@ -47,13 +47,13 @@ export default function Footer() {
             </h4>
             <nav className="flex flex-col gap-2">
               <Link
-                href="/privacy-policy"
+                href="/privacyPolicy"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 سياسة الخصوصية
               </Link>
               <Link
-                href="/terms-of-service"
+                href="/termsOfService"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 الشروط والأحكام

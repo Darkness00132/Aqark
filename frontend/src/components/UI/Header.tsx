@@ -96,12 +96,15 @@ export default function Header() {
                 {/* USER INFO */}
                 {user?.role !== "user" && (
                   <li>
-                    <span className="flex items-center gap-3 p-2 rounded-xl">
+                    <Link
+                      href="/credits"
+                      className="flex items-center gap-3 p-2 rounded-xl"
+                    >
                       <FaCoins className="text-base text-amber-500" />
                       <span className="text-sm">
                         العملات: <strong>{user?.credits}</strong>
                       </span>
-                    </span>
+                    </Link>
                   </li>
                 )}
 
