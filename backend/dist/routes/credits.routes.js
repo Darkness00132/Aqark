@@ -9,5 +9,9 @@ router.post("/createPlanDiscount", auth, admin, createPlanDiscount);
 router.delete("/deletePlan/:id", auth, admin, deletePlan);
 router.post("/createPayment", auth, createPayment);
 router.post("/webhook/response", paymentResponse);
+router.post("/webhook/processed", (req, res) => {
+    console.log("Processed event:", req.body);
+    res.status(200).send("OK");
+});
 export default router;
 //# sourceMappingURL=credits.routes.js.map
