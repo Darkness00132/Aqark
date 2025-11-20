@@ -6,6 +6,7 @@ import {
 import { getAuthToken, createOrder, getpaymentToken } from "../utils/paymob.js";
 import { Response } from "express";
 import {
+  CreditsLog,
   CreditsPlan,
   PlanDiscount,
   Transaction,
@@ -141,46 +142,33 @@ export const paymentProcessed = asyncHandler(
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    console.log("✅ Transaction found:", {
-      id: transaction.id,
-      currentStatus: transaction.paymentStatus,
-      expectedAmount: transaction.finalPrice,
-    });
-
     // Handle success/failure
     if (isSuccess) {
       console.log("💳 Processing successful payment...");
 
       // Verify amount matches (Paymob sends in cents)
       const expectedAmountCents = Math.round(transaction.finalPrice * 100);
-      console.log("Amount verification:", {
-        expected: expectedAmountCents,
-        received: amountCents,
-        match: amountCents === expectedAmountCents,
-      });
-
       if (amountCents !== expectedAmountCents) {
-        console.log("❌ Amount mismatch!", {
-          expected: expectedAmountCents,
-          received: amountCents,
-        });
         return res.status(400).json({ message: "Amount mismatch" });
       }
 
       // Check if already completed (idempotency)
       if (transaction.paymentStatus === "completed") {
-        console.log("⚠️ Transaction already completed, skipping...");
         return res
           .status(200)
           .json({ received: true, message: "Already processed" });
       }
 
       // Update transaction
-      console.log("Updating transaction to completed...");
       transaction.paymentStatus = "completed";
       transaction.paymobTransactionId = String(paymobTransactionId);
       await transaction.save();
-      console.log("✅ Transaction updated successfully");
+      await CreditsLog.create({
+        userId: transaction.userId,
+        credits: transaction.totalCredits,
+        type: "purchase",
+        description: `Purchased ${transaction.totalCredits} credits`,
+      });
 
       // Add credits to user
       const user = await User.findByPk(transaction.userId);
@@ -217,7 +205,6 @@ export const paymentProcessed = asyncHandler(
       console.log("✅ Transaction marked as failed");
     }
 
-    console.log("=== WEBHOOK PROCESSING COMPLETE ===\n");
     res.status(200).json({ received: true });
   }
 );
