@@ -104,7 +104,7 @@ export const createPayment = asyncHandler(
 
 export const paymentProcessed = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const data = req.body; // ✅ Changed from req.secureBody
+    const data = req.body;
 
     // ✅ Basic validation
     if (!data || !data.obj || !data.obj.id) {
@@ -134,7 +134,7 @@ export const paymentProcessed = asyncHandler(
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    // ✅ Check if user exists in the include
+    // Check if user exists in the include
     if (!(transaction as any).user) {
       console.error("❌ User not found for transaction:", transaction.userId);
       return res.status(404).json({ message: "User not found" });
@@ -181,7 +181,7 @@ export const paymentProcessed = asyncHandler(
 
       await transaction.save();
 
-      // ✅ Update user credits
+      // Update user credits
       (transaction as any).user.credits += transaction.totalCredits;
       await (transaction as any).user.save();
 
