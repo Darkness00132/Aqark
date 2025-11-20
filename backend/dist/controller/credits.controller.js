@@ -1,6 +1,6 @@
 import { createCreditsPlanSchema, createPlanDiscountSchema, } from "../validates/credits.js";
 import { getAuthToken, createOrder, getpaymentToken } from "../utils/paymob.js";
-import { CreditsPlan, PlanDiscount, Transaction, User, } from "../models/associations.js";
+import { CreditsLog, CreditsPlan, PlanDiscount, Transaction, User, } from "../models/associations.js";
 import { Op } from "sequelize";
 import asyncHandler from "../utils/asyncHnadler.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
@@ -71,100 +71,93 @@ export const createPayment = asyncHandler(async (req, res) => {
 });
 export const paymentProcessed = asyncHandler(async (req, res) => {
     const data = req.body;
-    console.log("=== WEBHOOK RECEIVED ===");
-    console.log("Full request body:", JSON.stringify(data, null, 2));
-    // ✅ Basic validation instead of HMAC
-    if (!data || !data.obj || !data.obj.id) {
-        console.log("❌ Invalid request structure!");
-        return res.status(400).json({ message: "Invalid request" });
-    }
-    console.log("✅ Request structure validated");
     // Extract transaction details
-    const paymobTransactionId = data.obj.id; // Use Paymob's transaction ID
-    const paymobOrderId = data.obj.order?.id; // Paymob's order ID
+    const paymobTransactionId = data.obj.id;
+    const paymobOrderId = data.obj.order.id;
     const isSuccess = data.obj.success === true;
-    const amountCents = data.obj.amount_cents;
-    console.log("Extracted data:");
-    console.log("- paymobTransactionId:", paymobTransactionId);
-    console.log("- paymobOrderId:", paymobOrderId);
-    console.log("- isSuccess:", isSuccess);
-    console.log("- amountCents:", amountCents);
-    // ✅ Find transaction by Paymob's order ID or transaction ID
-    // You need to store this when creating the order
+    // ✅ Debug: Log the source_data
+    console.log("source_data:", JSON.stringify(data.obj.source_data, null, 2));
+    // Extract payment details
+    const cardLast4 = data.obj.source_data?.pan;
+    const paymentType = data.obj.source_data?.type;
+    const cardSubType = data.obj.source_data?.sub_type;
+    // ✅ Debug: Log extracted values
+    console.log("Extracted payment details:", {
+        cardLast4,
+        paymentType,
+        cardSubType,
+    });
+    // Find transaction with user
     const transaction = await Transaction.findOne({
-        where: {
-            paymentId: String(paymobOrderId), // Find by Paymob order ID
-        },
+        where: { paymentId: String(paymobOrderId) },
+        include: [{ model: User, as: "user" }],
     });
     if (!transaction) {
-        console.log("❌ Transaction not found for order:", paymobOrderId);
         return res.status(404).json({ message: "Transaction not found" });
     }
-    console.log("✅ Transaction found:", {
-        id: transaction.id,
-        currentStatus: transaction.paymentStatus,
-        expectedAmount: transaction.finalPrice,
-    });
-    // Handle success/failure
+    // Handle success
     if (isSuccess) {
-        console.log("💳 Processing successful payment...");
-        // Verify amount matches (Paymob sends in cents)
-        const expectedAmountCents = Math.round(transaction.finalPrice * 100);
-        console.log("Amount verification:", {
-            expected: expectedAmountCents,
-            received: amountCents,
-            match: amountCents === expectedAmountCents,
-        });
-        if (amountCents !== expectedAmountCents) {
-            console.log("❌ Amount mismatch!", {
-                expected: expectedAmountCents,
-                received: amountCents,
-            });
-            return res.status(400).json({ message: "Amount mismatch" });
-        }
-        // Check if already completed (idempotency)
         if (transaction.paymentStatus === "completed") {
-            console.log("⚠️ Transaction already completed, skipping...");
-            return res
-                .status(200)
-                .json({ received: true, message: "Already processed" });
+            return res.status(200).json({ received: true });
         }
+        // Build payment method string
+        let paymentMethod = paymentType || "unknown";
+        if (paymentType === "card" && cardSubType) {
+            paymentMethod = cardSubType;
+        }
+        // ✅ Debug: Log what we're about to save
+        console.log("Values to save:", {
+            paymentMethod,
+            cardLast4,
+            description: `Payment via ${paymentMethod}${cardLast4 ? ` ending in ${cardLast4}` : ""}. Paymob Transaction ID: ${paymobTransactionId}`,
+        });
         // Update transaction
-        console.log("Updating transaction to completed...");
         transaction.paymentStatus = "completed";
         transaction.paymobTransactionId = String(paymobTransactionId);
+        transaction.cardLast4 = cardLast4 || null;
+        transaction.paymentMethod = paymentMethod;
+        transaction.description = `Payment via ${paymentMethod}${cardLast4 ? ` ending in ${cardLast4}` : ""}. Paymob Transaction ID: ${paymobTransactionId}`;
+        // ✅ Debug: Check values before save
+        console.log("Transaction before save:", {
+            cardLast4: transaction.cardLast4,
+            paymentMethod: transaction.paymentMethod,
+            description: transaction.description,
+        });
         await transaction.save();
-        console.log("✅ Transaction updated successfully");
-        // Add credits to user
-        const user = await User.findByPk(transaction.userId);
-        if (user) {
-            console.log("Adding credits to user:", {
-                userId: user.id,
-                currentCredits: user.credits,
-                creditsToAdd: transaction.totalCredits,
-            });
-            user.credits += transaction.totalCredits;
-            await user.save();
-            console.log("✅ Credits added successfully. New balance:", user.credits);
-        }
-        else {
-            console.log("❌ User not found:", transaction.userId);
-        }
+        // ✅ Debug: Check after save
+        await transaction.reload();
+        console.log("Transaction after reload:", {
+            cardLast4: transaction.cardLast4,
+            paymentMethod: transaction.paymentMethod,
+            description: transaction.description,
+        });
+        // Update user credits
+        transaction.user.credits += transaction.totalCredits;
+        await transaction.user.save();
+        // Create credit log
+        await CreditsLog.create({
+            userId: transaction.userId,
+            credits: transaction.totalCredits,
+            type: "purchase",
+            description: `Purchased ${transaction.totalCredits} credits via ${paymentMethod}${cardLast4 ? ` (****${cardLast4})` : ""}`,
+        });
     }
     else {
-        console.log("❌ Processing failed payment...");
         if (transaction.paymentStatus === "failed") {
-            console.log("⚠️ Transaction already marked as failed, skipping...");
-            return res
-                .status(200)
-                .json({ received: true, message: "Already processed" });
+            return res.status(200).json({ received: true });
         }
+        let paymentMethod = paymentType || "unknown";
+        if (paymentType === "card" && cardSubType) {
+            paymentMethod = cardSubType;
+        }
+        const failureReason = data.obj.data?.message || "Payment declined";
         transaction.paymentStatus = "failed";
         transaction.paymobTransactionId = String(paymobTransactionId);
+        transaction.cardLast4 = cardLast4 || null;
+        transaction.paymentMethod = paymentMethod;
+        transaction.description = `Payment failed: ${failureReason}. Paymob Transaction ID: ${paymobTransactionId}`;
         await transaction.save();
-        console.log("✅ Transaction marked as failed");
     }
-    console.log("=== WEBHOOK PROCESSING COMPLETE ===\n");
     res.status(200).json({ received: true });
 });
 export const updateCreditsPlan = asyncHandler(async (req, res) => {

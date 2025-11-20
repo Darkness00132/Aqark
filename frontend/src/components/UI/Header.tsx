@@ -103,7 +103,7 @@ export default function Header() {
                       >
                         <FaCoins className="text-base text-amber-500" />
                         <span className="text-sm">
-                          العملات: <strong>{user?.credits}</strong>
+                          العملات: <strong>{user?.credits || 0}</strong>
                         </span>
                       </Link>
                     </li>
