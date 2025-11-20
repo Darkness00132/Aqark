@@ -106,14 +106,9 @@ export const paymentProcessed = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const data = req.body;
 
-    // ✅ Basic validation
-    if (!data || !data.obj || !data.obj.id) {
-      return res.status(400).json({ message: "Invalid request" });
-    }
-
     // Extract transaction details
     const paymobTransactionId = data.obj.id;
-    const paymobOrderId = data.obj.order?.id;
+    const paymobOrderId = data.obj.order.id;
     const isSuccess = data.obj.success === true;
     const amountCents = data.obj.amount_cents;
 
@@ -124,9 +119,7 @@ export const paymentProcessed = asyncHandler(
 
     // Find transaction with user
     const transaction = await Transaction.findOne({
-      where: {
-        paymentId: String(paymobOrderId),
-      },
+      where: { paymentId: String(paymobOrderId) },
       include: [{ model: User, as: "user" }],
     });
 
@@ -134,24 +127,11 @@ export const paymentProcessed = asyncHandler(
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    // Check if user exists in the include
-    if (!(transaction as any).user) {
-      console.error("❌ User not found for transaction:", transaction.userId);
-      return res.status(404).json({ message: "User not found" });
-    }
-
     // Handle success
     if (isSuccess) {
-      const expectedAmountCents = Math.round(transaction.finalPrice * 100);
-      if (amountCents !== expectedAmountCents) {
-        return res.status(400).json({ message: "Amount mismatch" });
-      }
-
       // Check if already completed (idempotency)
       if (transaction.paymentStatus === "completed") {
-        return res
-          .status(200)
-          .json({ received: true, message: "Already processed" });
+        return res.status(200).json({ received: true });
       }
 
       // Build payment method string
@@ -160,24 +140,14 @@ export const paymentProcessed = asyncHandler(
         paymentMethod = cardSubType;
       }
 
-      // Build description
-      const description = `Payment via ${paymentMethod}${
-        cardLast4 ? ` ending in ${cardLast4}` : ""
-      }. Paymob Transaction ID: ${paymobTransactionId}`;
-
-      // Update transaction with all details
+      // Update transaction
       transaction.paymentStatus = "completed";
       transaction.paymobTransactionId = String(paymobTransactionId);
-
-      if (cardLast4) {
-        transaction.cardLast4 = cardLast4;
-      }
-      if (paymentMethod) {
-        transaction.paymentMethod = paymentMethod;
-      }
-      if (description) {
-        transaction.description = description;
-      }
+      transaction.cardLast4 = cardLast4 || null;
+      transaction.paymentMethod = paymentMethod;
+      transaction.description = `Payment via ${paymentMethod}${
+        cardLast4 ? ` ending in ${cardLast4}` : ""
+      }. Paymob Transaction ID: ${paymobTransactionId}`;
 
       await transaction.save();
 
@@ -197,30 +167,21 @@ export const paymentProcessed = asyncHandler(
     } else {
       // Handle failure
       if (transaction.paymentStatus === "failed") {
-        return res
-          .status(200)
-          .json({ received: true, message: "Already processed" });
+        return res.status(200).json({ received: true });
       }
 
-      // Build failure description
-      const failureReason = data.obj.data?.message || "Payment declined";
-      const description = `Payment failed: ${failureReason}. Paymob Transaction ID: ${paymobTransactionId}`;
-
-      transaction.paymentStatus = "failed";
-      transaction.paymobTransactionId = String(paymobTransactionId);
-      transaction.description = description;
-
-      // Store payment method even on failure for tracking
       let paymentMethod = paymentType || "unknown";
       if (paymentType === "card" && cardSubType) {
         paymentMethod = cardSubType;
       }
-      if (paymentMethod) {
-        transaction.paymentMethod = paymentMethod;
-      }
-      if (cardLast4) {
-        transaction.cardLast4 = cardLast4;
-      }
+
+      const failureReason = data.obj.data?.message || "Payment declined";
+
+      transaction.paymentStatus = "failed";
+      transaction.paymobTransactionId = String(paymobTransactionId);
+      transaction.cardLast4 = cardLast4 || null;
+      transaction.paymentMethod = paymentMethod;
+      transaction.description = `Payment failed: ${failureReason}. Paymob Transaction ID: ${paymobTransactionId}`;
 
       await transaction.save();
     }
