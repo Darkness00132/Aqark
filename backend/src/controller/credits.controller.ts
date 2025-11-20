@@ -106,27 +106,14 @@ export const paymentProcessed = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const data = req.body;
 
-    // Extract transaction details
     const paymobTransactionId = data.obj.id;
     const paymobOrderId = data.obj.order.id;
     const isSuccess = data.obj.success === true;
 
-    // ✅ Debug: Log the source_data
-    console.log("source_data:", JSON.stringify(data.obj.source_data, null, 2));
-
-    // Extract payment details
     const cardLast4 = data.obj.source_data?.pan;
     const paymentType = data.obj.source_data?.type;
     const cardSubType = data.obj.source_data?.sub_type;
 
-    // ✅ Debug: Log extracted values
-    console.log("Extracted payment details:", {
-      cardLast4,
-      paymentType,
-      cardSubType,
-    });
-
-    // Find transaction with user
     const transaction = await Transaction.findOne({
       where: { paymentId: String(paymobOrderId) },
       include: [{ model: User, as: "user" }],
@@ -136,52 +123,23 @@ export const paymentProcessed = asyncHandler(
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    // Handle success
     if (isSuccess) {
       if (transaction.paymentStatus === "completed") {
         return res.status(200).json({ received: true });
       }
 
-      // Build payment method string
       let paymentMethod = paymentType || "unknown";
       if (paymentType === "card" && cardSubType) {
         paymentMethod = cardSubType;
       }
-
-      // ✅ Debug: Log what we're about to save
-      console.log("Values to save:", {
-        paymentMethod,
-        cardLast4,
-        description: `Payment via ${paymentMethod}${
-          cardLast4 ? ` ending in ${cardLast4}` : ""
-        }. Paymob Transaction ID: ${paymobTransactionId}`,
-      });
 
       // Update transaction
       transaction.paymentStatus = "completed";
       transaction.paymobTransactionId = String(paymobTransactionId);
       transaction.cardLast4 = cardLast4 || null;
       transaction.paymentMethod = paymentMethod;
-      transaction.description = `Payment via ${paymentMethod}${
-        cardLast4 ? ` ending in ${cardLast4}` : ""
-      }. Paymob Transaction ID: ${paymobTransactionId}`;
-
-      // ✅ Debug: Check values before save
-      console.log("Transaction before save:", {
-        cardLast4: transaction.cardLast4,
-        paymentMethod: transaction.paymentMethod,
-        description: transaction.description,
-      });
 
       await transaction.save();
-
-      // ✅ Debug: Check after save
-      await transaction.reload();
-      console.log("Transaction after reload:", {
-        cardLast4: transaction.cardLast4,
-        paymentMethod: transaction.paymentMethod,
-        description: transaction.description,
-      });
 
       // Update user credits
       (transaction as any).user.credits += transaction.totalCredits;
@@ -212,7 +170,7 @@ export const paymentProcessed = asyncHandler(
       transaction.paymobTransactionId = String(paymobTransactionId);
       transaction.cardLast4 = cardLast4 || null;
       transaction.paymentMethod = paymentMethod;
-      transaction.description = `Payment failed: ${failureReason}. Paymob Transaction ID: ${paymobTransactionId}`;
+      transaction.failureReason = failureReason;
 
       await transaction.save();
     }

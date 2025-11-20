@@ -57,8 +57,9 @@ Transaction.init({
         type: DataTypes.SMALLINT,
         allowNull: true,
     },
-    description: {
+    failureReason: {
         type: DataTypes.STRING,
+        allowNull: true,
     },
     paymentStatus: {
         type: DataTypes.ENUM("pending", "completed", "failed"),

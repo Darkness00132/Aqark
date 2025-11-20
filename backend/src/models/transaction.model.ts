@@ -14,7 +14,7 @@ interface TransactionAttributes {
   price: number;
   finalPrice: number;
   discount?: number;
-  description?: string;
+  failureReason?: string;
   paymentStatus: "pending" | "completed" | "failed";
   paymentMethod?: string;
   gatewayfee: number;
@@ -35,7 +35,7 @@ class Transaction extends Model<TransactionAttributes> {
   declare price: number;
   declare finalPrice: number;
   declare discount?: number;
-  declare description?: string;
+  declare failureReason?: string;
   declare gatewayfee: number;
   declare netRevenue: number;
 }
@@ -95,8 +95,9 @@ Transaction.init(
       type: DataTypes.SMALLINT,
       allowNull: true,
     },
-    description: {
+    failureReason: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     paymentStatus: {
       type: DataTypes.ENUM("pending", "completed", "failed"),
