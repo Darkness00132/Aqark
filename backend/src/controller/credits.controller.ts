@@ -3,12 +3,7 @@ import {
   createCreditsPlanSchema,
   createPlanDiscountSchema,
 } from "../validates/credits.js";
-import {
-  getAuthToken,
-  createOrder,
-  getpaymentToken,
-  verifyPaymobHMAC,
-} from "../utils/paymob.js";
+import { getAuthToken, createOrder, getpaymentToken } from "../utils/paymob.js";
 import { Response } from "express";
 import {
   CreditsPlan,

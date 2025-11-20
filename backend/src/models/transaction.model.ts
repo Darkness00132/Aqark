@@ -69,7 +69,7 @@ Transaction.init(
     },
     paymentMethod: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     gatewayfee: {
       type: DataTypes.FLOAT,

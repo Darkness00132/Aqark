@@ -1,5 +1,5 @@
 import { createCreditsPlanSchema, createPlanDiscountSchema, } from "../validates/credits.js";
-import { getAuthToken, createOrder, getpaymentToken, } from "../utils/paymob.js";
+import { getAuthToken, createOrder, getpaymentToken } from "../utils/paymob.js";
 import { CreditsPlan, PlanDiscount, Transaction, User, } from "../models/associations.js";
 import { Op } from "sequelize";
 import asyncHandler from "../utils/asyncHnadler.js";
