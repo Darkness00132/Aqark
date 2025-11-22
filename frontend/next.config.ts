@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    reactCompiler: true,
+  },
   images: {
     remotePatterns: [
       {
@@ -19,16 +22,6 @@ const nextConfig: NextConfig = {
         hostname: "i.pravatar.cc",
       },
     ],
-  },
-  async redirects() {
-    return [
-      {
-        source: "/(.*)",
-        has: [{ type: "host", value: "www.aqark.vercel.app" }],
-        destination: "https://aqark.vercel.app/:1",
-        permanent: true,
-      },
-    ];
   },
   modularizeImports: {
     "react-icons": {

@@ -1,6 +1,5 @@
 import { FaClock, FaCheck, FaFire } from "react-icons/fa";
 import formatDateFromNow from "@/lib/formatDateFromNow";
-import Link from "next/link";
 import PayButton from "@/components/credits/PayButton";
 
 interface Plan {
@@ -10,14 +9,14 @@ interface Plan {
   price: number;
 }
 
-const discounts = [
-  {
-    planId: 1,
-    percentage: 15,
-    startsAt: "2025-02-01T00:00:00Z",
-    endsAt: "2025-12-10T00:00:00Z",
-  },
-];
+interface Discount {
+  planId: number;
+  percentage: number;
+  startsAt: string;
+  endsAt: string;
+}
+
+const discounts: Discount[] = [];
 
 export default async function Credits() {
   const plans: Plan[] | undefined = await fetch(
@@ -33,7 +32,7 @@ export default async function Credits() {
   const getActiveDiscount = (planId: number) =>
     discounts.find(
       (d) =>
-        d.planId === planId &&
+        d?.planId === planId &&
         new Date(d.startsAt) <= now &&
         new Date(d.endsAt) >= now
     );

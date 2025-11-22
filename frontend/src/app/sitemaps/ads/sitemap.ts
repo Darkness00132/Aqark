@@ -1,6 +1,8 @@
 import { MetadataRoute } from "next";
 
-const baseUrl = "https://www.aqark.vercel.app";
+const baseUrl = "https://aqark.vercel.app";
+
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const res = await fetch(
