@@ -1,27 +1,34 @@
+// src/controllers/ad.controller.ts
 import { Request, Response } from "express";
+import { AuthRequest } from "../middlewares/auth.js";
 import {
   createAdSchema,
-  getAdsSchema,
   updateAdSchema,
+  getAdsSchema,
 } from "../validates/ad.js";
-import { AuthRequest } from "../middlewares/auth.js";
-import { s3Client, Bucket } from "./upload.controller.js";
 import asyncHandler from "../utils/asyncHnadler.js";
 import { User, Ad, AdLogs, CreditsLog } from "../models/associations.js";
-import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import {
+  handleAdImagesUpload,
+  handleAdImagesUpdate,
+  deleteAdImages,
+} from "../utils/upload.js";
 import adsFilters from "../utils/adsFilter.js";
 import { Order } from "sequelize";
 import sequelize from "../db/sql.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
 import adCostInCredits from "../utils/adCostInCredits.js";
 
+// ========== GET ALL ADS ==========
 export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
   const { value, error } = getAdsSchema.validate(req.secureQuery);
   if (error) {
     return res.status(400).json({ message: error.details });
   }
+
   const where = adsFilters(value);
   const { page = 1, limit = 8, order } = value;
+
   let orderChoice: Order;
   switch (order) {
     case "ASC":
@@ -36,6 +43,7 @@ export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
     default:
       orderChoice = [["createdAt", "DESC"]];
   }
+
   const offset = (page - 1) * limit;
   const { count, rows } = await Ad.findAndCountAll({
     where,
@@ -51,14 +59,17 @@ export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+// ========== GET MY ADS ==========
 export const getMyAds = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { value, error } = getAdsSchema.validate(req.secureQuery);
     if (error) {
       return res.status(400).json({ message: error.details });
     }
+
     const where = adsFilters(value);
     const { page = 1, limit = 8, order } = value;
+
     let orderChoice: Order;
     switch (order) {
       case "ASC":
@@ -73,6 +84,7 @@ export const getMyAds = asyncHandler(
       default:
         orderChoice = [["createdAt", "DESC"]];
     }
+
     const offset = (page - 1) * limit;
     const { count, rows } = await Ad.findAndCountAll({
       where: { ...where, userId: req.user.id },
@@ -81,10 +93,15 @@ export const getMyAds = asyncHandler(
       offset,
       order: orderChoice,
     });
-    res.status(200).json({ totalPages: Math.ceil(count / limit), ads: rows });
+
+    res.status(200).json({
+      totalPages: Math.ceil(count / limit),
+      ads: rows,
+    });
   }
 );
 
+// ========== GET SITEMAP ADS ==========
 export const getSitemapAds = asyncHandler(
   async (req: Request, res: Response) => {
     const part = parseInt(req.query?.part as string) || 1;
@@ -100,41 +117,53 @@ export const getSitemapAds = asyncHandler(
   }
 );
 
+// ========== GET MY AD BY ID ==========
 export const getMyAd = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = sanitizeXSS(req.params);
+
   if (!id) {
     return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
   }
+
   const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
   if (!ad) {
     return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
   }
+
   res.status(200).json({ ad });
 });
 
+// ========== GET AD BY SLUG (PUBLIC) ==========
 export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
   const { slug } = sanitizeXSS(req.params);
+
   if (!slug) {
     return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
   }
+
   const ad = await Ad.findOne({
     where: { slug },
     include: [{ model: User, as: "user" }],
   });
+
   if (!ad) {
     return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
   }
+
   ad.increment("views", { by: 1 });
 
   res.status(200).json({ ad });
 });
 
+// ========== CREATE AD (WITH IMAGES) ==========
 export const createAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
+    req.secureBody = sanitizeXSS(req.body);
     const { error, value } = createAdSchema.validate(req.secureBody);
     if (error) {
-      return res.status(400).json({ message: error.details[0] });
+      return res.status(400).json({ message: error.details[0]?.message });
     }
+
     const costInCredits = adCostInCredits({
       type: value.type,
       price: value.price,
@@ -146,12 +175,19 @@ export const createAd = asyncHandler(
         .json({ message: "رصيدك الحالى لا يكفى لعمل اعلان" });
     }
 
-    await sequelize.transaction(async (t) => {
+    // Upload images if provided
+    const files = req.files as Express.Multer.File[] | undefined;
+    const uploadedImages =
+      files && files.length > 0 ? await handleAdImagesUpload(files, 5) : [];
+
+    // Create ad in transaction
+    const result = await sequelize.transaction(async (t) => {
       const ad = await Ad.create(
         {
           ...value,
           userId: req.user.id,
           costInCredits,
+          images: uploadedImages,
         },
         { transaction: t }
       );
@@ -179,26 +215,52 @@ export const createAd = asyncHandler(
         },
         { transaction: t }
       );
+
+      return ad;
     });
+
+    // If transaction fails, rollback S3 uploads (asyncHandler catches errors)
+    if (!result && uploadedImages.length > 0) {
+      await deleteAdImages(uploadedImages);
+    }
 
     res.status(201).json({ message: "تم انشاء اعلان بنجاح" });
   }
 );
 
+// ========== UPDATE AD (WITH IMAGES) ==========
 export const updateAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { id } = sanitizeXSS(req.params);
+
     const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
     if (!ad) {
       return res
         .status(404)
         .json({ message: "الإعلان غير موجود أو لا تملك صلاحية التعديل عليه" });
     }
+    req.secureBody = sanitizeXSS(req.body);
     const { error, value } = updateAdSchema.validate(req.secureBody);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
-    await ad.update(value);
+
+    // Handle image updates if provided
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    if (files || !value.deletedImages || value.deletedImages.length > 0) {
+      const updatedImages = await handleAdImagesUpdate(
+        ad.images || [],
+        files,
+        value.deletedImages || []
+      );
+
+      // Update ad with new images
+      await ad.update({ ...value, images: updatedImages });
+    } else {
+      // Update ad without touching images
+      await ad.update(value);
+    }
 
     await AdLogs.create({
       userId: req.user.id,
@@ -207,30 +269,28 @@ export const updateAd = asyncHandler(
       description: `Updated ad with title: ${ad.title}`,
     });
 
-    return res.status(200).json({ message: "تم تحديث الإعلان بنجاح" });
+    res.status(200).json({ message: "تم تحديث الإعلان بنجاح" });
   }
 );
 
+// ========== DELETE AD (WITH IMAGES) ==========
 export const deleteAd = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { id } = sanitizeXSS(req.params);
+
     const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
     if (!ad) {
       return res
         .status(404)
         .json({ message: "الإعلان غير موجود أو لا تملك صلاحية الحذف عليه" });
     }
-    //delete images from S3
-    const keys = ad.images?.map((img) => img.key) || [];
-    if (keys.length > 0) {
-      await s3Client.send(
-        new DeleteObjectsCommand({
-          Bucket,
-          Delete: { Objects: keys.map((Key) => ({ Key })) },
-        })
-      );
+
+    // Delete images from S3
+    if (ad.images && ad.images.length > 0) {
+      await deleteAdImages(ad.images);
     }
 
+    // Soft delete
     ad.images = [];
     ad.isDeleted = true;
     await ad.save();
@@ -242,6 +302,6 @@ export const deleteAd = asyncHandler(
       description: `Deleted ad with title: ${ad.title}`,
     });
 
-    return res.status(200).json({ message: "تم حذف الإعلان بنجاح" });
+    res.status(200).json({ message: "تم حذف الإعلان بنجاح" });
   }
 );

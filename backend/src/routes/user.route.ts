@@ -1,35 +1,89 @@
 import { Router } from "express";
 import auth from "../middlewares/auth.js";
-import limitReq from "../middlewares/limitReq.js";
+import rateLimit from "../middlewares/limitReq.js";
+import { blockIfLoggedIn } from "../middlewares/blockIfLoggedIn.js";
 import {
   signup,
   login,
   getMyProfile,
   getProfile,
   verify,
+  resendVerification,
   forgetPassword,
   resetPassword,
+  resendResetPassword,
   updateProfile,
   logout,
 } from "../controller/user.controller.js";
+import { upload } from "../middlewares/upload.js";
 
 const router = Router();
 
-router.post("/signup", limitReq, signup);
+router.post(
+  "/signup",
+  rateLimit(5, 900, "محاولات التسجيل كثيرة جدًا. يرجى المحاولة لاحقًا."),
+  signup
+);
 
-router.post("/login", limitReq, login);
+router.post(
+  "/login",
+  rateLimit(5, 300, "محاولات تسجيل الدخول كثيرة جدًا. يرجى المحاولة لاحقًا."),
+  blockIfLoggedIn,
+  login
+);
 
 router.get("/profile/me", auth, getMyProfile);
 
 router.get("/profile/:slug", getProfile);
 
-router.get("/verifyEmail", limitReq, verify);
+router.get(
+  "/verifyEmail",
+  rateLimit(10, 300, "محاولات التحقق كثيرة جدًا. يرجى المحاولة لاحقًا."),
+  verify
+);
 
-router.post("/forgetPassword", limitReq, forgetPassword);
+router.post(
+  "/resendVerification",
+  rateLimit(3, 900, "طلبات إعادة التحقق كثيرة جدًا. يرجى المحاولة لاحقًا."),
+  resendVerification
+);
 
-router.post("/resetPassword", limitReq, resetPassword);
+router.post(
+  "/forgetPassword",
+  rateLimit(
+    3,
+    900,
+    "طلبات إعادة تعيين كلمة المرور كثيرة جدًا. يرجى المحاولة لاحقًا."
+  ),
+  forgetPassword
+);
 
-router.put("/profile", auth, updateProfile);
+router.post(
+  "/resetPassword",
+  rateLimit(
+    10,
+    300,
+    "محاولات إعادة تعيين كلمة المرور كثيرة جدًا. يرجى المحاولة لاحقًا."
+  ),
+  resetPassword
+);
+
+router.post(
+  "/resendResetPassword",
+  rateLimit(
+    3,
+    900,
+    "طلبات إعادة تعيين كلمة المرور كثيرة جدًا. يرجى المحاولة لاحقًا."
+  ),
+  resendResetPassword
+);
+
+router.put(
+  "/profile",
+  auth,
+  upload({ type: "avatar" }).single("avatar"),
+  updateProfile
+);
 
 router.delete("/logout", auth, logout);
 

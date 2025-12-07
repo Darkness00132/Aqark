@@ -1,167 +1,85 @@
-import { nanoid } from "nanoid";
-import { S3Client, PutObjectCommand, DeleteObjectCommand, DeleteObjectsCommand, } from "@aws-sdk/client-s3";
-import { Ad } from "../models/associations.js";
 import asyncHandler from "../utils/asyncHnadler.js";
-import sharp from "sharp";
-import pMap from "p-map";
-import sanitizeXSS from "../utils/sanitizeXSS.js";
-export const s3Client = new S3Client({
-    credentials: {
-        accessKeyId: process.env.AWS_KEY,
-        secretAccessKey: process.env.AWS_SECRET,
-    },
-    region: process.env.AWS_REGION,
-});
-export const Bucket = process.env.S3_BUCKET;
+import { s3Service } from "../services/s3.service.js";
+import { imageService } from "../services/image.service.js";
 export const uploadAvatar = asyncHandler(async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "يرجى ارسال الصورة" });
     }
-    const buffer = await sharp(req.file.buffer)
-        .resize({
-        width: 300,
-        height: 300,
-        fit: "contain",
-        withoutEnlargement: true,
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-        .webp({ quality: 80, effort: 6 })
-        .toBuffer();
-    const key = `avatars/${nanoid(12)}.webp`;
-    await s3Client.send(new PutObjectCommand({
-        Bucket,
-        Key: key,
-        Body: buffer,
-        ContentType: "image/webp",
-    }));
-    if (req.user.avatarKey) {
-        try {
-            await s3Client.send(new DeleteObjectCommand({
-                Bucket,
-                Key: req.user.avatarKey,
-            }));
-        }
-        catch (err) {
-            console.error("Failed to delete old avatar:", err);
-        }
+    // Validate file type and size
+    const validation = imageService.validateFiles([req.file], "avatar");
+    if (!validation.valid) {
+        return res.status(400).json({ message: validation.error });
     }
-    req.user.avatar = `https://${Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-    req.user.avatarKey = key;
-    await req.user.save();
-    res.status(200).json({ message: "تم تحديث الصورة بنجاح" });
+    try {
+        const processedBuffer = await imageService.processAvatar(req.file.buffer);
+        // Upload to S3
+        const { url, key } = await s3Service.uploadOne(processedBuffer, "avatars");
+        // Delete old avatar if exists
+        if (req.user.avatarKey) {
+            await s3Service.deleteOne(req.user.avatarKey);
+        }
+        req.user.avatar = url;
+        req.user.avatarKey = key;
+        await req.user.save();
+        res.status(200).json({
+            message: "تم تحديث الصورة بنجاح",
+            avatar: url,
+        });
+    }
+    catch (error) {
+        console.error("Avatar upload error:", error);
+        return res
+            .status(500)
+            .json({ message: error.message || "فشل رفع الصورة" });
+    }
 });
+/**
+ * Upload images for a new ad (called during ad creation)
+ * Returns array of {url, key} to be stored with the ad
+ */
 export const uploadAdImages = asyncHandler(async (req, res) => {
-    if (!req.files || (req.files && req.files.length === 0)) {
+    if (!req.files || req.files.length === 0) {
         return res.status(400).json({ message: "يرجى ارسال الصور" });
     }
     const files = req.files;
-    const bufferimages = await pMap(files, async (file) => {
-        const processedBuffer = await sharp(file.buffer)
-            .resize({
-            width: 1280,
-            withoutEnlargement: true,
-        })
-            .webp({ quality: 80, effort: 4 })
-            .toBuffer();
-        return {
-            buffer: processedBuffer,
-            key: `adImages/${nanoid(12)}.webp`,
-        };
-    }, { concurrency: 5 });
-    const uploadedImages = await pMap(bufferimages, async ({ buffer, key }) => {
-        await s3Client.send(new PutObjectCommand({
-            Bucket,
-            Key: key,
-            Body: buffer,
-            ContentType: "image/webp",
-        }));
-        return {
-            url: `https://${Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
-            key,
-        };
-    }, { concurrency: 10 });
-    return res.status(200).json({ images: uploadedImages });
-});
-export const updateAdImages = asyncHandler(async (req, res) => {
-    console.log("trigger photos");
-    const { id } = sanitizeXSS(req.params);
-    const { deletedImages = [] } = sanitizeXSS(req.body);
-    const files = req.files;
-    if (!id) {
-        return res.status(400).json({ message: "معرف الإعلان مفقود" });
+    // Validate files (max 5 images)
+    const validation = imageService.validateFiles(files, "ad", 5);
+    if (!validation.valid) {
+        return res.status(400).json({ message: validation.error });
     }
-    const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
-    if (!ad) {
-        return res
-            .status(404)
-            .json({ message: "الإعلان غير موجود أو لا تملك صلاحية عليه" });
-    }
-    // Check total images count after adding new and removing deleted
-    const newCount = ad.images.length + (files?.length || 0) - deletedImages.length;
-    if (newCount > 5) {
-        return res
-            .status(400)
-            .json({ message: "لا يمكن إضافة أكثر من 5 صور للإعلان الواحد" });
-    }
-    let finalImages = ad.images;
-    // Delete images from S3 and remove them from DB
-    if (deletedImages.length > 0) {
-        await pMap(deletedImages, async (key) => {
-            await s3Client.send(new DeleteObjectCommand({ Bucket, Key: key }));
-        }, { concurrency: 5 });
-        finalImages = finalImages.filter(({ key }) => !deletedImages.includes(key));
-    }
-    // Upload new images to S3
-    if (files && files.length > 0) {
-        const bufferImages = await pMap(files, async (file) => {
-            const processedBuffer = await sharp(file.buffer)
-                .resize({ width: 1280, withoutEnlargement: true })
-                .webp({ quality: 80, effort: 4 })
-                .toBuffer();
-            return {
-                buffer: processedBuffer,
-                key: `adImages/${nanoid(12)}.webp`,
-            };
-        }, { concurrency: 5 });
-        const uploadedImages = await pMap(bufferImages, async ({ buffer, key }) => {
-            await s3Client.send(new PutObjectCommand({
-                Bucket,
-                Key: key,
-                Body: buffer,
-                ContentType: "image/webp",
-            }));
-            return {
-                url: `https://${Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
-                key,
-            };
-        }, { concurrency: 10 });
-        finalImages = [...uploadedImages, ...finalImages];
-    }
-    // Update DB with the final images list
-    await ad.update({ images: finalImages });
-    res.status(200).json({ message: "تم تحديث صور الإعلان بنجاح" });
-});
-export const deleteAdImages = asyncHandler(async (req, res) => {
-    const { keys, adId } = req.secureBody;
-    const ad = await Ad.findOne({
-        where: { id: adId, userId: req.user.id },
-    });
-    if (!ad) {
-        return res.status(404).json({
-            message: "الإعلان غير موجود أو لا تملك صلاحية التعديل عليه",
+    try {
+        // Process images concurrently
+        const processedBuffers = await imageService.processAdImages(files);
+        // Upload to S3
+        const uploadedImages = await s3Service.uploadMany(processedBuffers, "adImages");
+        res.status(200).json({
+            message: "تم رفع الصور بنجاح",
+            images: uploadedImages,
         });
     }
-    if (!keys || !Array.isArray(keys) || keys.length === 0)
-        return res.status(400).json({ message: "No keys provided" });
-    if (keys.length > 0) {
-        await s3Client.send(new DeleteObjectsCommand({
-            Bucket,
-            Delete: { Objects: keys.map((Key) => ({ Key })) },
-        }));
+    catch (error) {
+        console.error("Ad images upload error:", error);
+        return res
+            .status(500)
+            .json({ message: error.message || "فشل رفع الصور" });
     }
-    // Update DB: remove deleted images
-    ad.images = ad.images?.filter((img) => !keys.includes(img.key));
-    await ad.save();
-    res.status(200).json({ message: "تم حذف" });
+});
+export const deleteAdImages = asyncHandler(async (req, res) => {
+    const { keys } = req.secureBody;
+    // Validate input
+    if (!keys || !Array.isArray(keys) || keys.length === 0) {
+        return res.status(400).json({ message: "لم يتم توفير المفاتيح" });
+    }
+    try {
+        // Delete from S3
+        await s3Service.deleteMany(keys);
+        res.status(200).json({ message: "تم حذف الصور بنجاح" });
+    }
+    catch (error) {
+        console.error("Delete images error:", error);
+        return res
+            .status(500)
+            .json({ message: error.message || "فشل حذف الصور" });
+    }
 });
 //# sourceMappingURL=upload.controller.js.map

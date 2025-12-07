@@ -21,29 +21,37 @@ export default function useEditAd() {
       deletedImages,
       images,
     }: EditAdVariables) => {
-      if (deletedImages.length > 0 || images.length > 0) {
-        const formData = new FormData();
-        formData.append("deletedImages", JSON.stringify(deletedImages));
+      const formData = new FormData();
 
+      formData.append("deletedImages", JSON.stringify(deletedImages));
+
+      if (images.length > 0) {
         images.forEach((file) => {
           formData.append("images", file);
-        });
-
-        await axiosInstance.put(`/upload/adImages/${id}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
         });
       }
 
       if (Object.keys(data).length > 0) {
-        await axiosInstance.put("/ads/" + id, data);
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            formData.append(key, String(value));
+          }
+        });
       }
+
+      for (const pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
+
+      await axiosInstance.put(`/ads/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
     },
     onSuccess: async () => {
       toast.success("تم تعديل الإعلان");
       router.push("/ads/my-ads");
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      console.log("Edit Ad Error:  ", error?.response?.data?.message);
       toast.error(
         error?.response?.data?.message || "حدث مشكلة ما يرجى محاولة مجددا"
       );

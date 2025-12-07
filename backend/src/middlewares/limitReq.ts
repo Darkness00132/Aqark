@@ -1,22 +1,26 @@
 import { RateLimiterMemory, RateLimiterRes } from "rate-limiter-flexible";
 import asyncHandler from "../utils/asyncHnadler.js";
+import { Request, Response, NextFunction } from "express";
 
-const rateLimiter = new RateLimiterMemory({
-  points: 5, // 5 requests
-  duration: 5 * 60, // 5 minutes
-});
+export default function rateLimit(
+  points: number,
+  duration: number,
+  message: string
+) {
+  const limiter = new RateLimiterMemory({ points, duration });
 
-const limitReq = asyncHandler(async (req, res, next) => {
-  try {
-    await rateLimiter.consume(req.ip || req.socket.remoteAddress || "unknown");
-    next();
-  } catch (err) {
-    const rejRes = err as RateLimiterRes;
-    const retrySecs = Math.ceil(rejRes.msBeforeNext / 1000);
-    res.status(429).json({
-      message: `وصلت لعدد أقصى لمحاولة تسجيل دخول. حاول مرة أخرى بعد ${retrySecs} ثانية.`,
-    });
-  }
-});
-
-export default limitReq;
+  return asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        await limiter.consume(req.ip || "unknown");
+        next();
+      } catch (error) {
+        const err = error as RateLimiterRes;
+        const retrySecs = Math.ceil(err.msBeforeNext / 1000);
+        return res.status(429).json({
+          message: `${message} Try again in ${retrySecs} seconds.`,
+        });
+      }
+    }
+  );
+}

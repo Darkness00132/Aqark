@@ -7,7 +7,6 @@ import { RateLimiterMemory, RateLimiterRes } from "rate-limiter-flexible";
 import helmet from "helmet";
 import googleRouter from "./routes/google.route.js";
 import userRouter from "./routes/user.route.js";
-import uploadRouter from "./routes/upload.route.js";
 import reviewsRouter from "./routes/review.route.js";
 import adsRouter from "./routes/ads.route.js";
 import creditsRouter from "./routes/credits.routes.js";
@@ -91,8 +90,7 @@ try {
 // Routes
 app
   .use("/api/users", userRouter)
-  .use(googleRouter)
-  .use("/api/upload", uploadRouter)
+  .use("/api", googleRouter)
   .use("/api/reviews", reviewsRouter)
   .use("/api/ads", adsRouter)
   .use("/api/data-analysis", dataAnlysisRouter)

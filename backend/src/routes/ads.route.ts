@@ -10,6 +10,7 @@ import {
   getMyAd,
   getSitemapAds,
 } from "../controller/ads.controller.js";
+import { upload } from "../middlewares/upload.js";
 
 const router = Router();
 
@@ -23,9 +24,14 @@ router.get("/me/:id", auth, getMyAd);
 
 router.get("/:slug", getAdBySlug);
 
-router.post("/create", auth, createAd);
+router.post(
+  "/create",
+  auth,
+  upload({ type: "ad" }).array("images", 5),
+  createAd
+);
 
-router.put("/:id", auth, updateAd);
+router.put("/:id", auth, upload({ type: "ad" }).array("images", 5), updateAd);
 
 router.delete("/:id", auth, deleteAd);
 

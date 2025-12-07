@@ -10,7 +10,7 @@ export default function useUploadAvatar() {
   return useMutation({
     mutationKey: ["update avatar"],
     mutationFn: async (formData: FormData) => {
-      const response = await axiosInstance.put("/upload/avatar", formData, {
+      const response = await axiosInstance.put("/users/profile", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

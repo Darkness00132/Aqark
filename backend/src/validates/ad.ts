@@ -43,6 +43,7 @@ interface updateAd {
   type?: string;
   description?: string;
   whatsappNumber?: string;
+  deletedImages?: string[];
 }
 
 export const getAdsSchema = Joi.object<getAds>({
@@ -261,22 +262,6 @@ export const createAdSchema = Joi.object<createAd>({
         "رقم الواتساب غير صحيح، استخدم الرقم الدولي مع كود الدولة (+2010xxxxxxx)",
       "any.required": "رقم الواتساب مطلوب",
     }),
-  images: Joi.array()
-    .items(
-      Joi.object({
-        url: Joi.string().trim().uri().required(),
-        key: Joi.string().trim().required(),
-      })
-    )
-    .min(1)
-    .max(5)
-    .required()
-    .messages({
-      "any.required": "حقل الصور مطلوب",
-      "array.base": "الصور يجب أن تكون في شكل مصفوفة",
-      "array.min": "يجب رفع صورة واحدة على الأقل",
-      "array.max": "لا يمكن رفع أكثر من 5 صور",
-    }),
 });
 
 export const updateAdSchema = Joi.object<updateAd>({
@@ -357,5 +342,16 @@ export const updateAdSchema = Joi.object<updateAd>({
       "string.base": "رقم الواتساب يجب أن يكون نصًا",
       "string.empty": "رقم الواتساب لا يمكن أن يكون فارغًا",
       "string.pattern.base": "رقم الواتساب غير صحيح",
+    }),
+  deletedImages: Joi.array()
+    .items(
+      Joi.object().keys({
+        url: Joi.string().required(),
+        key: Joi.string().required(),
+      })
+    )
+    .messages({
+      "array.base": "الصور المحذوفة يجب أن تكون مصفوفة",
+      "object.base": "كل صورة محذوفة يجب أن تكون كائنًا يحتوي على url و key",
     }),
 });

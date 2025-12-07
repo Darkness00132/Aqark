@@ -28,7 +28,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         dir="rtl"
         richColors
         position="top-left"
-        duration={3000}
+        duration={5000}
         toastOptions={{
           classNames: {
             toast: "text-lg",

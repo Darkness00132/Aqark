@@ -1,12 +1,12 @@
-import { createAdSchema, getAdsSchema, updateAdSchema, } from "../validates/ad.js";
-import { s3Client, Bucket } from "./upload.controller.js";
+import { createAdSchema, updateAdSchema, getAdsSchema, } from "../validates/ad.js";
 import asyncHandler from "../utils/asyncHnadler.js";
 import { User, Ad, AdLogs, CreditsLog } from "../models/associations.js";
-import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { handleAdImagesUpload, handleAdImagesUpdate, deleteAdImages, } from "../utils/upload.js";
 import adsFilters from "../utils/adsFilter.js";
 import sequelize from "../db/sql.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
 import adCostInCredits from "../utils/adCostInCredits.js";
+// ========== GET ALL ADS ==========
 export const getAllAds = asyncHandler(async (req, res) => {
     const { value, error } = getAdsSchema.validate(req.secureQuery);
     if (error) {
@@ -41,6 +41,7 @@ export const getAllAds = asyncHandler(async (req, res) => {
         ads: rows,
     });
 });
+// ========== GET MY ADS ==========
 export const getMyAds = asyncHandler(async (req, res) => {
     const { value, error } = getAdsSchema.validate(req.secureQuery);
     if (error) {
@@ -70,8 +71,12 @@ export const getMyAds = asyncHandler(async (req, res) => {
         offset,
         order: orderChoice,
     });
-    res.status(200).json({ totalPages: Math.ceil(count / limit), ads: rows });
+    res.status(200).json({
+        totalPages: Math.ceil(count / limit),
+        ads: rows,
+    });
 });
+// ========== GET SITEMAP ADS ==========
 export const getSitemapAds = asyncHandler(async (req, res) => {
     const part = parseInt(req.query?.part) || 1;
     const limit = 50000;
@@ -82,6 +87,7 @@ export const getSitemapAds = asyncHandler(async (req, res) => {
     });
     res.status(200).json({ ads: rows, total: count });
 });
+// ========== GET MY AD BY ID ==========
 export const getMyAd = asyncHandler(async (req, res) => {
     const { id } = sanitizeXSS(req.params);
     if (!id) {
@@ -93,6 +99,7 @@ export const getMyAd = asyncHandler(async (req, res) => {
     }
     res.status(200).json({ ad });
 });
+// ========== GET AD BY SLUG (PUBLIC) ==========
 export const getAdBySlug = asyncHandler(async (req, res) => {
     const { slug } = sanitizeXSS(req.params);
     if (!slug) {
@@ -108,10 +115,12 @@ export const getAdBySlug = asyncHandler(async (req, res) => {
     ad.increment("views", { by: 1 });
     res.status(200).json({ ad });
 });
+// ========== CREATE AD (WITH IMAGES) ==========
 export const createAd = asyncHandler(async (req, res) => {
+    req.secureBody = sanitizeXSS(req.body);
     const { error, value } = createAdSchema.validate(req.secureBody);
     if (error) {
-        return res.status(400).json({ message: error.details[0] });
+        return res.status(400).json({ message: error.details[0]?.message });
     }
     const costInCredits = adCostInCredits({
         type: value.type,
@@ -122,11 +131,16 @@ export const createAd = asyncHandler(async (req, res) => {
             .status(400)
             .json({ message: "رصيدك الحالى لا يكفى لعمل اعلان" });
     }
-    await sequelize.transaction(async (t) => {
+    // Upload images if provided
+    const files = req.files;
+    const uploadedImages = files && files.length > 0 ? await handleAdImagesUpload(files, 5) : [];
+    // Create ad in transaction
+    const result = await sequelize.transaction(async (t) => {
         const ad = await Ad.create({
             ...value,
             userId: req.user.id,
             costInCredits,
+            images: uploadedImages,
         }, { transaction: t });
         req.user.credits -= costInCredits;
         await req.user.save({ transaction: t });
@@ -143,9 +157,15 @@ export const createAd = asyncHandler(async (req, res) => {
             type: "spend",
             credits: costInCredits,
         }, { transaction: t });
+        return ad;
     });
+    // If transaction fails, rollback S3 uploads (asyncHandler catches errors)
+    if (!result && uploadedImages.length > 0) {
+        await deleteAdImages(uploadedImages);
+    }
     res.status(201).json({ message: "تم انشاء اعلان بنجاح" });
 });
+// ========== UPDATE AD (WITH IMAGES) ==========
 export const updateAd = asyncHandler(async (req, res) => {
     const { id } = sanitizeXSS(req.params);
     const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
@@ -154,19 +174,31 @@ export const updateAd = asyncHandler(async (req, res) => {
             .status(404)
             .json({ message: "الإعلان غير موجود أو لا تملك صلاحية التعديل عليه" });
     }
+    req.secureBody = sanitizeXSS(req.body);
     const { error, value } = updateAdSchema.validate(req.secureBody);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
-    await ad.update(value);
+    // Handle image updates if provided
+    const files = req.files;
+    if (files || !value.deletedImages || value.deletedImages.length > 0) {
+        const updatedImages = await handleAdImagesUpdate(ad.images || [], files, value.deletedImages || []);
+        // Update ad with new images
+        await ad.update({ ...value, images: updatedImages });
+    }
+    else {
+        // Update ad without touching images
+        await ad.update(value);
+    }
     await AdLogs.create({
         userId: req.user.id,
         adId: ad.id,
         action: "update",
         description: `Updated ad with title: ${ad.title}`,
     });
-    return res.status(200).json({ message: "تم تحديث الإعلان بنجاح" });
+    res.status(200).json({ message: "تم تحديث الإعلان بنجاح" });
 });
+// ========== DELETE AD (WITH IMAGES) ==========
 export const deleteAd = asyncHandler(async (req, res) => {
     const { id } = sanitizeXSS(req.params);
     const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
@@ -175,14 +207,11 @@ export const deleteAd = asyncHandler(async (req, res) => {
             .status(404)
             .json({ message: "الإعلان غير موجود أو لا تملك صلاحية الحذف عليه" });
     }
-    //delete images from S3
-    const keys = ad.images?.map((img) => img.key) || [];
-    if (keys.length > 0) {
-        await s3Client.send(new DeleteObjectsCommand({
-            Bucket,
-            Delete: { Objects: keys.map((Key) => ({ Key })) },
-        }));
+    // Delete images from S3
+    if (ad.images && ad.images.length > 0) {
+        await deleteAdImages(ad.images);
     }
+    // Soft delete
     ad.images = [];
     ad.isDeleted = true;
     await ad.save();
@@ -192,6 +221,6 @@ export const deleteAd = asyncHandler(async (req, res) => {
         action: "delete",
         description: `Deleted ad with title: ${ad.title}`,
     });
-    return res.status(200).json({ message: "تم حذف الإعلان بنجاح" });
+    res.status(200).json({ message: "تم حذف الإعلان بنجاح" });
 });
 //# sourceMappingURL=ads.controller.js.map

@@ -23,21 +23,24 @@ export default function useCreateAd() {
 
       const formData = new FormData();
       images.forEach((img) => formData.append("images", img));
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          formData.append(key, String(value));
+        }
+      });
 
-      const response = await axiosInstance.post("/upload/adImages", formData, {
+      const response = await axiosInstance.post("/ads/create", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const adPayload = { ...data, images: response.data.images };
-      const response2 = await axiosInstance.post("/ads/create", adPayload);
 
-      return response2.data;
+      return response.data;
     },
     onSuccess: () => {
       toast.success("تم نشر الاعلان");
       router.push(`/ads/my-ads`);
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      console.log(error?.response?.data);
+      console.log(error?.response?.data?.message);
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
