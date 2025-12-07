@@ -16,7 +16,7 @@
     "browser-image-compression": "^2.0.2",
     "daisyui": "^5.5.5",
     "dayjs": "^1.11.18",
-    "next": "^15.1.4",
+    "next": "^16.0.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.3.8",
