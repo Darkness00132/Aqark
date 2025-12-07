@@ -125,7 +125,7 @@ export default async function UserProfile({
       </div>
 
       {/* Reviews Section */}
-      {reviews.length > 0 && (
+      {reviews?.length > 0 && (
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <h2 className="card-title text-3xl font-bold mb-6 flex items-center justify-between">
