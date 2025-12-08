@@ -4,7 +4,7 @@
 @plugin "daisyui" {
   themes: mytheme;
   logs: false;
-  styled: true;
+  styled: false;
   base: true;
   utils: true;
   prefix: "";
