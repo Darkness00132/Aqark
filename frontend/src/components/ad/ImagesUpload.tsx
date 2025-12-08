@@ -6,19 +6,19 @@ import Image from "next/image";
 import { FiUpload, FiX } from "react-icons/fi";
 import { useCallback, useState } from "react";
 
-type DefaultImage = { url: string; key?: string };
+type DefaultImage = { url: string; key: string };
 
 type ImageUploadProps = {
   images: File[];
   setImages: React.Dispatch<React.SetStateAction<File[]>>;
   defaultImages?: DefaultImage[];
-  deletedImages?: DefaultImage[];
+  setDeletedImages?: React.Dispatch<React.SetStateAction<DefaultImage[]>>;
 };
 
 export default function ImageUpload({
   setImages,
   defaultImages = [],
-  deletedImages,
+  setDeletedImages,
 }: ImageUploadProps) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [localDefaults, setLocalDefaults] =
@@ -56,8 +56,8 @@ export default function ImageUpload({
   });
 
   const removeImage = (type: "default" | "new", index: number) => {
-    if (type === "default" && deletedImages) {
-      deletedImages.push(localDefaults[index]);
+    if (type === "default" && setDeletedImages) {
+      setDeletedImages((prev) => [...prev, localDefaults[index]]);
       setLocalDefaults((prev) => prev.filter((_, i) => i !== index));
     } else {
       setImages((prev) => prev.filter((_, i) => i !== index));

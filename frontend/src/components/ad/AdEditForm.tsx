@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
+import { set, z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -30,7 +30,9 @@ const ROOM_BASED_PROPERTIES = ["شقة", "فيلا", "منزل"];
 
 export default function AdEditForm({ ad }: { ad: Ad }) {
   const [images, setImages] = useState<File[]>([]);
-  const deletedImages: Array<{ url: string; key: string }> = [];
+  const [deletedImages, setDeletedImages] = useState<
+    Array<{ url: string; key: string }>
+  >([]);
 
   type EditForm = z.infer<typeof AdEditSchema>;
 
@@ -350,7 +352,7 @@ export default function AdEditForm({ ad }: { ad: Ad }) {
             images={images}
             setImages={setImages}
             defaultImages={ad.images}
-            deletedImages={deletedImages}
+            setDeletedImages={setDeletedImages}
           />
         </div>
 

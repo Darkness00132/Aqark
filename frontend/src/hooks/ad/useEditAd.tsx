@@ -1,5 +1,5 @@
 import axiosInstance from "@/axiosInstance/axiosInstance";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ type EditAdVariables = {
 };
 
 export default function useEditAd() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   return useMutation({
     mutationKey: ["edit-ad"],
@@ -39,17 +40,14 @@ export default function useEditAd() {
         });
       }
 
-      for (const pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
-
       await axiosInstance.put(`/ads/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },
     onSuccess: async () => {
-      toast.success("تم تعديل الإعلان");
+      queryClient.invalidateQueries({ queryKey: ["ads", "mine"] });
       router.push("/ads/my-ads");
+      toast.success("تم تعديل الإعلان");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(

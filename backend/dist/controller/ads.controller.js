@@ -6,6 +6,7 @@ import adsFilters from "../utils/adsFilter.js";
 import sequelize from "../db/sql.js";
 import sanitizeXSS from "../utils/sanitizeXSS.js";
 import adCostInCredits from "../utils/adCostInCredits.js";
+import validateAdImageUpdate from "../validates/validateAdImageUpdate.js";
 // ========== GET ALL ADS ==========
 export const getAllAds = asyncHandler(async (req, res) => {
     const { value, error } = getAdsSchema.validate(req.secureQuery);
@@ -175,23 +176,22 @@ export const updateAd = asyncHandler(async (req, res) => {
             .json({ message: "الإعلان غير موجود أو لا تملك صلاحية التعديل عليه" });
     }
     req.secureBody = sanitizeXSS(req.body);
+    //ensure deletedImages is array
+    req.secureBody.deletedImages = JSON.parse(req.secureBody.deletedImages || "[]");
     const { error, value } = updateAdSchema.validate(req.secureBody);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
-    //ensure deletedImages is an array not string
-    if (typeof value.deletedImages === "string") {
-        try {
-            value.deletedImages = JSON.parse(value.deletedImages);
-        }
-        catch (e) {
-            value.deletedImages = [];
-        }
-    }
     // Handle image updates if provided
     const files = req.files;
-    if (files || !value.deletedImages || value.deletedImages.length > 0) {
-        const updatedImages = await handleAdImagesUpdate(ad.images || [], files, value.deletedImages || []);
+    const deletedImages = value.deletedImages;
+    if (files || !deletedImages || deletedImages.length > 0) {
+        const validationError = validateAdImageUpdate(ad.images, deletedImages, files);
+        if (validationError) {
+            return res.status(400).json({ message: validationError });
+        }
+        const keysToDelete = deletedImages?.map(({ key }) => key);
+        const updatedImages = await handleAdImagesUpdate(ad.images || [], files, keysToDelete || []);
         // Update ad with new images
         await ad.update({ ...value, images: updatedImages });
     }
