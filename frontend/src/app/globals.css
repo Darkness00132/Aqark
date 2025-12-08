@@ -1,9 +1,11 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
 @plugin "daisyui" {
-  themes: light --default, mytheme;
-  logs: true;
+  themes: mytheme;
+  logs: false;
 }
+
 @plugin "daisyui/theme" {
   name: "mytheme";
   default: true;

@@ -1,6 +1,22 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizeCss: true,
+  },
+  webpack: (config) => {
+    config.optimization.splitChunks = {
+      cacheGroups: {
+        styles: {
+          name: "styles",
+          test: /\.css$/,
+          chunks: "all",
+          enforce: true,
+        },
+      },
+    };
+    return config;
+  },
   turbopack: { root: process.cwd() },
   images: {
     remotePatterns: [
