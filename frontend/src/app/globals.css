@@ -8,6 +8,8 @@
   base: true;
   utils: true;
   prefix: "";
+  darktheme: "dark";
+  ltr: false;
 }
 
 @plugin "daisyui/theme" {
