@@ -158,17 +158,12 @@ export const getProfile = asyncHandler(async (req, res) => {
     await user.update({ avgRating, totalReviews });
     // Reload to get fresh data
     await user.reload();
-    // Return only public-safe fields using toJSON()
-    res.status(200).json({
-        user: {
-            slug: user.slug,
-            name: user.name,
-            avatar: user.avatar,
-            role: user.role,
-            avgRating: user.avgRating,
-            totalReviews: user.totalReviews,
-        },
+    const reviews = await Review.findAll({
+        where: { reviewedUserId: user.id },
+        include: [{ model: User, as: "reviewer", attributes: ["name", "avatar"] }],
+        order: [["createdAt", "DESC"]],
     });
+    res.status(200).json({ user, reviews });
 });
 export const forgetPassword = asyncHandler(async (req, res) => {
     const { error, value } = forgetPasswordSchema.validate(req.secureBody);

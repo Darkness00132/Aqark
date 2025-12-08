@@ -87,7 +87,7 @@ export default async function UserProfile({
             </span>
           </div>
 
-          <div className="badge badge-lg badge-ghost">
+          <div className="badge badge-lg badge-soft badge-secondary p-5 rounded-3xl">
             <FaUserCircle className="ml-2" />
             {user.totalReviews} تقييمات
           </div>
@@ -130,13 +130,13 @@ export default async function UserProfile({
           <div className="card-body">
             <h2 className="card-title text-3xl font-bold mb-6 flex items-center justify-between">
               <span>التقييمات</span>
-              <div className="badge badge-primary badge-lg">
+              <div className="badge badge-primary badge-lg rounded-3xl p-3">
                 {reviews.length}
               </div>
             </h2>
 
             <div className="space-y-4">
-              {reviews.map(
+              {reviews?.map(
                 ({ id, reviewer, createdAt, rating, comment }: Review) => (
                   <Link
                     href={`/user/${reviewer.slug}`}

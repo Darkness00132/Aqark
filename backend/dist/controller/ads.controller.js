@@ -13,7 +13,7 @@ export const getAllAds = asyncHandler(async (req, res) => {
     if (error) {
         return res.status(400).json({ message: error.details });
     }
-    const where = adsFilters(value);
+    const where = { ...adsFilters(value), isDeleted: false };
     const { page = 1, limit = 8, order } = value;
     let orderChoice;
     switch (order) {

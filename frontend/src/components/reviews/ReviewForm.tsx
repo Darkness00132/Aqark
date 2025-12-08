@@ -8,6 +8,7 @@ import {
   FaEdit,
   FaLock,
   FaUserCheck,
+  FaInfoCircle,
 } from "react-icons/fa";
 import useAuth from "@/store/useAuth";
 import { toast } from "sonner";
@@ -37,7 +38,7 @@ export default function ReviewForm({ slug }: { slug: string }) {
   // Show message for unauthorized users
   if (!user) {
     return (
-      <div className="card bg-gradient-to-br from-base-200 to-base-300 shadow-xl border border-base-300">
+      <div className="card shadow-xl border border-base-300">
         <div className="card-body items-center text-center py-12">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <FaLock className="text-4xl text-primary" />
@@ -169,21 +170,9 @@ export default function ReviewForm({ slug }: { slug: string }) {
         </button>
 
         {/* Info Alert */}
-        <div className="alert bg-info/10 border border-info/30">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            className="stroke-info shrink-0 w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="text-sm text-info-content/90">
+        <div className="alert bg-info/70">
+          <FaInfoCircle className="text-info-content" size={18} />
+          <span className="text-info-content">
             تقييمك سيظهر للجميع ويساهم في بناء مجتمع موثوق وشفاف
           </span>
         </div>

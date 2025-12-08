@@ -15,17 +15,41 @@
   default: true;
   color-scheme: "light";
 
-  --color-primary: #059669;
+  /* Primary - Softer emerald green */
+  --color-primary: #10b981;
   --color-primary-content: #ffffff;
-  --color-secondary: #2563eb;
+
+  /* Secondary - Gentler blue */
+  --color-secondary: #3b82f6;
   --color-secondary-content: #ffffff;
-  --color-accent: #0d9488;
+
+  /* Accent - Warmer teal */
+  --color-accent: #14b8a6;
   --color-accent-content: #ffffff;
 
-  --color-neutral: #1f2937;
+  /* Neutral - Lighter, less harsh */
+  --color-neutral: #374151;
   --color-neutral-content: #f9fafb;
-  --color-base-100: #f8fafc;
-  --color-base-200: #e2e8f0;
-  --color-base-300: #cbd5e1;
-  --color-base-content: #1e293b;
+
+  /* Base colors - Softer, more harmonious */
+  --color-base-100: #fafbfc;
+  --color-base-200: #f1f5f9;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #334155;
+
+  /* Info - Calm blue */
+  --color-info: #3b82f6;
+  --color-info-content: #ffffff;
+
+  /* Success - Harmonious green */
+  --color-success: #22c55e;
+  --color-success-content: #ffffff;
+
+  /* Warning - Balanced amber */
+  --color-warning: #f59e0b;
+  --color-warning-content: #ffffff;
+
+  /* Error - Careful red */
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
 }
