@@ -84,7 +84,10 @@ export default function RootLayout({
           <main className="min-h-screen pb-15">{children}</main>
           <Footer />
         </Provider>
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+        <GoogleAnalytics
+          gaId={process.env.NEXT_PUBLIC_GA_ID!}
+          dataLayerName="dataLayer"
+        />
         <GAListener />
       </body>
     </html>
