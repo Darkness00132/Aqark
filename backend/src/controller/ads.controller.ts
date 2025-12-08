@@ -245,6 +245,15 @@ export const updateAd = asyncHandler(
       return res.status(400).json({ message: error.details[0].message });
     }
 
+    //ensure deletedImages is an array not string
+    if (typeof value.deletedImages === "string") {
+      try {
+        value.deletedImages = JSON.parse(value.deletedImages);
+      } catch (e) {
+        value.deletedImages = [];
+      }
+    }
+
     // Handle image updates if provided
     const files = req.files as Express.Multer.File[] | undefined;
 

@@ -282,14 +282,6 @@ export const updateAdSchema = Joi.object({
         "string.empty": "رقم الواتساب لا يمكن أن يكون فارغًا",
         "string.pattern.base": "رقم الواتساب غير صحيح",
     }),
-    deletedImages: Joi.array()
-        .items(Joi.object().keys({
-        url: Joi.string().required(),
-        key: Joi.string().required(),
-    }))
-        .messages({
-        "array.base": "الصور المحذوفة يجب أن تكون مصفوفة",
-        "object.base": "كل صورة محذوفة يجب أن تكون كائنًا يحتوي على url و key",
-    }),
+    deletedImages: Joi.string(),
 });
 //# sourceMappingURL=ad.js.map
