@@ -71,6 +71,13 @@ export default function RootLayout({
       className={geistCairo.className}
       dir="rtl"
     >
+      <head>
+        <link
+          rel="preload"
+          href="/_next/static/css/app/layout.css"
+          as="style"
+        />
+      </head>
       <body className="antialiased bg-gradient-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen">
         <Provider>
           <Header />
