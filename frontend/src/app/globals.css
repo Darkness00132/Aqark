@@ -4,6 +4,10 @@
 @plugin "daisyui" {
   themes: mytheme;
   logs: false;
+  styled: true;
+  base: true;
+  utils: true;
+  prefix: "";
 }
 
 @plugin "daisyui/theme" {
