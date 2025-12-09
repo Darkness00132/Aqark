@@ -17,17 +17,6 @@ export const getReviews = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ reviews });
 });
 
-export const getMyReviews = asyncHandler(
-  async (req: AuthRequest, res: Response) => {
-    const userId = req.user.id;
-    const reviews = await Review.findAll({
-      where: { reviewerId: userId },
-      include: [{ model: User, as: "reviewedUser" }],
-    });
-    res.status(200).json({ reviews });
-  }
-);
-
 export const createReview = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { slug } = sanitizeXSS(req.params);

@@ -2,7 +2,6 @@ import { Router } from "express";
 import auth from "../middlewares/auth.js";
 import {
   getReviews,
-  getMyReviews,
   createReview,
   updateReview,
   deleteReview,
@@ -11,8 +10,6 @@ import {
 const router = Router();
 
 router.get("/:slug", getReviews);
-
-router.get("/me", auth, getMyReviews);
 
 router.post("/:slug", auth, createReview);
 
