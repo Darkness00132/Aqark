@@ -3,6 +3,7 @@ import { useState } from "react";
 import AdCard from "./AdCard";
 import useGetAds from "@/hooks/ad/useGetAds";
 import Pagination from "./Pagination";
+import AdCardsLoading from "./AdCardSkeleton";
 
 export default function AdsView({ mine = false }: { mine?: boolean }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -10,11 +11,7 @@ export default function AdsView({ mine = false }: { mine?: boolean }) {
   const { data, isFetching } = useGetAds(mine, currentPage);
 
   if (isFetching) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <span className="loading loading-dots w-20"></span>
-      </div>
-    );
+    return <AdCardsLoading />;
   }
 
   if (!data || data.ads.length === 0) {
