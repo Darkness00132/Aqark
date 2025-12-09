@@ -11,8 +11,8 @@ export default function AdsView({ mine = false }: { mine?: boolean }) {
 
   if (isFetching) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex h-screen items-center justify-center">
+        <span className="loading loading-dots w-20"></span>
       </div>
     );
   }

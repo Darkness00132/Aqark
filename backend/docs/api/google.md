@@ -1,207 +1,65 @@
-# Google OAuth API
+# Google OAuth & API Overview
 
-**Base URL:** `/auth/google`
+## Google OAuth (`/api/auth`)
 
----
+### Endpoints
 
-## Endpoints
+- **`GET /auth/google`** - Initiates OAuth flow
+  - Params: `mode` (login/signup), `role` (user/admin)
+- **`GET /auth/google/callback`** - Handles Google redirect
 
-### 1. Initiate Google OAuth
+### Flow
 
-`GET /auth/google`
+1. User redirected to Google consent screen
+2. Google redirects back with auth code
+3. **Login:** Links Google ID if needed → Sets JWT cookie
+4. **Signup:** Creates user + 100 credits bonus → Sets JWT cookie
 
-**Query Parameters:**
+### Features
 
-- `mode` (optional): `"login"` (default) or `"signup"`
-- `role` (optional): `"user"` (default) or `"landlord"`
-
-**Examples:**
-
-```
-/auth/google?mode=signup&role=landlord
-/auth/google?mode=login
-```
-
-**Response:** Redirects to Google OAuth consent screen
+- Automatic account linking (prevents duplicates)
+- No email verification needed (Google-verified)
+- IP tracking for security
+- State parameter for CSRF protection
 
 ---
 
-### 2. Google Callback
+## API Overview
 
-`GET /auth/google/callback`
+### Routes
 
-**Internal Endpoint** - Handled by Google OAuth flow
+| Route           | Base Path      |
+| --------------- | -------------- |
+| User Management | `/api/users`   |
+| Google OAuth    | `/api/auth`    |
+| Reviews         | `/api/reviews` |
+| Ads             | `/api/ads`     |
+| Credits         | `/api/credits` |
+| Admin           | `/api/admin`   |
 
-**Success:** Redirects to `FRONTEND_URL` with JWT cookie set
+### Global Security
 
-**Error:** Redirects to `FRONTEND_URL/user/login?status=failed&message={error}`
+- **Rate Limit:** 60 requests/minute per IP
+- **CORS:** Only frontend/admin URLs allowed
+- **XSS Sanitization:** All inputs auto-sanitized
+- **Helmet Headers:** Security headers on all responses
+- **JWT Cookie:** HttpOnly, 7-day expiry
 
----
+### Error Responses
 
-## Authentication Flow
-
-### Signup Flow
-
-```
-1. User clicks "Sign up with Google"
-   → Frontend: /auth/google?mode=signup&role=landlord
-
-2. Google OAuth consent screen appears
-
-3. User approves → Google redirects to /auth/google/callback
-
-4. Backend:
-   - Checks if user exists (by Google ID or email)
-   - If exists: Links Google ID if not linked → Login
-   - If not exists:
-     • Creates new account (verified by default)
-     • Awards 100 credits
-     • Creates credits log entry
-     • Sends welcome email
-
-5. Sets JWT cookie → Redirects to frontend
-
-6. User is logged in
-```
-
-### Login Flow
-
-```
-1. User clicks "Login with Google"
-   → Frontend: /auth/google?mode=login
-
-2. Google OAuth consent screen appears
-
-3. User approves → Google redirects to /auth/google/callback
-
-4. Backend:
-   - Checks if user exists (by Google ID or email)
-   - If exists: Links Google ID if not linked → Login
-   - If NOT exists: Redirects with error
-     "هذا الحساب غير مسجل. يرجى إنشاء حساب جديد أولاً."
-
-5. If successful:
-   - Updates IP tracking
-   - Sets JWT cookie
-   - Redirects to frontend
-
-6. User is logged in
-```
-
----
-
-## How It Works
-
-### Account Matching
-
-1. **First:** Search by `googleId`
-2. **If not found:** Search by `email`
-3. **If found:** Link Google ID to existing account
-4. **If not found:**
-   - `mode=login` → Error (must signup first)
-   - `mode=signup` → Create new account
-
-### Account Creation (Signup Mode)
-
-```typescript
+```json
 {
-  googleId: "google-user-id",
-  name: "من Google",
-  email: "user@gmail.com",
-  avatar: "https://google-photo-url",
-  role: "user" | "landlord",
-  isVerified: true,          // Auto-verified
-  credits: 100,              // Signup bonus
-  ips: [{ip, userAgent, lastLogin}]
+  "message": "Error description"
 }
 ```
 
-### Credits Award
+**Common Status Codes:**
 
-- **Amount:** 100 credits
-- **Type:** `gift`
-- **Description:** "Signup verification bonus"
-- **Transaction:** Atomic (user + credits log created together)
-
----
-
-## Response Handling
-
-### Success
-
-- Sets `jwt-auth` cookie (HTTPOnly, 7 days)
-- Redirects to `FRONTEND_URL`
-
-### Error Scenarios
-
-| Error                               | Redirect URL                                                            |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| Email not found in Google profile   | `/user/login?status=failed&message=لم يتم العثور على البريد الإلكتروني` |
-| Invalid state data                  | `/user/login?status=failed&message=بيانات الحالة غير صالحة`             |
-| Account not registered (login mode) | `/user/login?status=failed&message=هذا الحساب غير مسجل...`              |
-| Authentication failed               | `/user/login?status=failed&message=فشل تسجيل الدخول`                    |
-
----
-
-## Frontend Integration
-
-### Signup Button
-
-```html
-<a href="/auth/google?mode=signup&role=landlord"> Sign up with Google </a>
-```
-
-### Login Button
-
-```html
-<a href="/auth/google?mode=login"> Login with Google </a>
-```
-
-### Handle Redirect
-
-```javascript
-// Check URL params after redirect
-const params = new URLSearchParams(window.location.search);
-const status = params.get("status");
-const message = params.get("message");
-
-if (status === "failed") {
-  alert(decodeURIComponent(message));
-}
-```
-
----
-
-## Security Features
-
-- ✅ Transaction for account creation + credits
-- ✅ Auto-verification (Google accounts are trusted)
-- ✅ IP tracking (max 10 entries)
-- ✅ JWT with HTTPOnly cookies
-- ✅ Links Google ID to existing accounts
-- ✅ Prevents duplicate accounts
-- ✅ Non-blocking welcome email
-
----
-
-## Environment Variables
-
-```env
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-API_URL=https://api.yourapp.com
-FRONTEND_URL=https://yourapp.com
-PRODUCTION=true
-JWT_SECRET=your-jwt-secret
-```
-
----
-
-## Notes
-
-- Google accounts are **automatically verified**
-- Credits awarded **only on first signup** (not on subsequent logins)
-- If user signs up with email first, they can link Google later
-- Welcome email sent asynchronously (non-blocking)
-- IP tracking updates on every login
-- Supports both user and landlord roles
+- `200/201` - Success
+- `400` - Validation error
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not found
+- `409` - Duplicate
+- `429` - Rate limit
+- `500` - Server error

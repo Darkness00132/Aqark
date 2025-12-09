@@ -1,29 +1,37 @@
-# User Authentication API
+# User API Documentation
 
-**Base URL:** `/api/user`
+## Base URL
 
-**Global Rate Limit:** 60 requests/minute per IP
+```
+/api/user
+```
+
+## Security
+
+JWT authentication via `jwt-auth` cookie. XSS sanitization applied to all inputs. Rate limiting on sensitive endpoints.
 
 ---
 
 ## Endpoints
 
-### 1. Sign Up
+### `POST /signup`
 
-`POST /api/user/signup` • Rate: 5/15min
+Create new user account.
+
+**Rate Limit:** 5 requests / 15 minutes
 
 **Body:**
 
 ```json
 {
-  "name": "أحمد محمد",
-  "email": "ahmed@example.com",
-  "password": "SecurePass123!",
-  "role": "user" // "user" | "landlord"
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "SecurePass123",
+  "role": "user"
 }
 ```
 
-**Response (201):**
+**Response:**
 
 ```json
 {
@@ -31,33 +39,55 @@
 }
 ```
 
-Creates account → Sends verification email (10 min expiry)
+**Flow:**
+
+1. Creates user with `credits: 0`
+2. Generates verification token (expires in 10 minutes)
+3. Sends verification email asynchronously
+4. Tracks user IP and user agent
 
 ---
 
-### 2. Verify Email
+### `GET /verifyEmail?verificationToken={token}`
 
-`GET /api/user/verifyEmail?verificationToken={token}` • Rate: 10/5min
+Verify user email and activate account.
 
-**Response:** Redirects to frontend with auth cookie set
+**Rate Limit:** 10 requests / 5 minutes
 
-Verifies email → Awards 100 credits → Logs user in → Sends welcome email
+**Query Params:** `verificationToken`
+
+**Response:** Redirects to frontend
+
+**On Success:**
+
+- Sets `isVerified: true`
+- Awards **100 signup bonus credits**
+- Creates credit log entry (type: "gift")
+- Sends welcome email
+- Sets auth cookie and redirects to frontend
+
+**Errors:**
+
+- Token expired → `404`
+- Already verified → Redirects to `/?login=already`
 
 ---
 
-### 3. Resend Verification
+### `POST /resendVerification`
 
-`POST /api/user/resendVerification` • Rate: 3/15min
+Resend verification email.
+
+**Rate Limit:** 3 requests / 15 minutes
 
 **Body:**
 
 ```json
 {
-  "email": "ahmed@example.com"
+  "email": "john@example.com"
 }
 ```
 
-**Response (200):**
+**Response:**
 
 ```json
 {
@@ -65,22 +95,31 @@ Verifies email → Awards 100 credits → Logs user in → Sends welcome email
 }
 ```
 
+**Errors:**
+
+- Already verified → `400`
+- Email not found → `404`
+
 ---
 
-### 4. Login
+### `POST /login`
 
-`POST /api/user/login` • Rate: 5/5min • Blocked if logged in
+Authenticate user and create session.
+
+**Rate Limit:** 5 requests / 5 minutes
+
+**Blocked if:** Already logged in
 
 **Body:**
 
 ```json
 {
-  "email": "ahmed@example.com",
-  "password": "SecurePass123!"
+  "email": "john@example.com",
+  "enteredPassword": "SecurePass123"
 }
 ```
 
-**Response (200):**
+**Response:**
 
 ```json
 {
@@ -88,68 +127,98 @@ Verifies email → Awards 100 credits → Logs user in → Sends welcome email
 }
 ```
 
-**Errors:** `400` (wrong password) • `403` (not verified) • `404` (not found)
+**Flow:**
+
+1. Validates credentials
+2. Checks email verification status
+3. Updates/tracks IP and user agent
+4. Sets `jwt-auth` cookie (7 days)
+
+**Errors:**
+
+- Not verified → `403`
+- Wrong password → `400`
+- Email not found → `404`
 
 ---
 
-### 5. Get My Profile
+### `GET /profile/me` 🔒
 
-`GET /api/user/profile/me` • Auth required
+Get authenticated user's profile.
 
-**Response (200):**
+**Response:**
 
 ```json
 {
   "user": {
-    "slug": "ahmed-mohamed-abc123",
-    "name": "أحمد محمد",
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "slug": "john-doe",
     "avatar": "https://...",
+    "credits": 100,
     "role": "user",
     "avgRating": 4.5,
     "totalReviews": 10,
-    "credits": 100
+    "isVerified": true
   }
 }
 ```
 
 ---
 
-### 6. Get Public Profile
+### `GET /profile/:slug`
 
-`GET /api/user/profile/:slug`
+Get any user's public profile with reviews.
 
-**Response (200):**
+**Params:** `slug` - User slug
+
+**Response:**
 
 ```json
 {
   "user": {
-    "slug": "ahmed-mohamed-abc123",
-    "name": "أحمد محمد",
+    "id": 1,
+    "name": "John Doe",
+    "slug": "john-doe",
     "avatar": "https://...",
-    "role": "landlord",
-    "avgRating": 4.7,
-    "totalReviews": 23
-  }
+    "avgRating": 4.5,
+    "totalReviews": 10
+  },
+  "reviews": [
+    {
+      "id": 1,
+      "rating": 5,
+      "comment": "Great service!",
+      "reviewer": {
+        "name": "Jane Smith",
+        "avatar": "https://..."
+      },
+      "createdAt": "2024-12-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
-Returns public data only (no email, tokens, ips)
+**Note:** Recalculates and updates user's rating on each request
 
 ---
 
-### 7. Forgot Password
+### `POST /forgetPassword`
 
-`POST /api/user/forgetPassword` • Rate: 3/15min
+Request password reset.
+
+**Rate Limit:** 3 requests / 15 minutes
 
 **Body:**
 
 ```json
 {
-  "email": "ahmed@example.com"
+  "email": "john@example.com"
 }
 ```
 
-**Response (200):**
+**Response:**
 
 ```json
 {
@@ -157,24 +226,29 @@ Returns public data only (no email, tokens, ips)
 }
 ```
 
-Generates reset token (10 min expiry) → Sends email
+**Flow:**
+
+1. Generates reset token (expires in 10 minutes)
+2. Sends reset password email
 
 ---
 
-### 8. Reset Password
+### `POST /resetPassword`
 
-`POST /api/user/resetPassword` • Rate: 10/5min
+Reset password using token.
+
+**Rate Limit:** 10 requests / 5 minutes
 
 **Body:**
 
 ```json
 {
   "resetPasswordToken": "abc123...",
-  "password": "NewSecurePass456!"
+  "password": "NewSecurePass123"
 }
 ```
 
-**Response (200):**
+**Response:**
 
 ```json
 {
@@ -182,21 +256,30 @@ Generates reset token (10 min expiry) → Sends email
 }
 ```
 
+**Flow:**
+
+1. Validates token and expiry
+2. Updates password (hashed)
+3. Clears reset token
+4. Sends password changed email
+
 ---
 
-### 9. Resend Reset Password
+### `POST /resendResetPassword`
 
-`POST /api/user/resendResetPassword` • Rate: 3/15min
+Resend password reset email.
+
+**Rate Limit:** 3 requests / 15 minutes
 
 **Body:**
 
 ```json
 {
-  "email": "ahmed@example.com"
+  "email": "john@example.com"
 }
 ```
 
-**Response (200):**
+**Response:**
 
 ```json
 {
@@ -206,42 +289,53 @@ Generates reset token (10 min expiry) → Sends email
 
 ---
 
-### 10. Update Profile
+### `PUT /profile` 🔒
 
-`PUT /api/user/profile` • Auth required
+Update user profile (name, password, avatar).
 
-**Body (name):**
+**Content-Type:** `multipart/form-data`
+
+**Body (FormData):**
+
+```
+name: "John Smith" (optional)
+password: "CurrentPass123" (required if changing password)
+newPassword: "NewPass123" (optional)
+avatar: File (optional, image file)
+```
+
+**Response:**
 
 ```json
 {
-  "name": "أحمد علي"
+  "message": "تم تحديث ملفك الشخصى بنجاح",
+  "user": {
+    "id": 1,
+    "name": "John Smith",
+    "avatar": "https://...",
+    "avatarKey": "avatars/..."
+  }
 }
 ```
 
-**Body (password):**
+**Validation:**
 
-```json
-{
-  "password": "OldPass123!",
-  "newPassword": "NewPass456!"
-}
-```
+- To change password: must provide current password
+- Avatar upload handled via cloud storage
+- Old avatar deleted if new one uploaded
 
-**Response (200):**
+**Errors:**
 
-```json
-{
-  "message": "تم تحديث ملفك الشخصى بنجاح"
-}
-```
+- No data to update → `400`
+- Wrong current password → `400`
 
 ---
 
-### 11. Logout
+### `DELETE /logout` 🔒
 
-`DELETE /api/user/logout` • Auth required
+Logout user and invalidate session.
 
-**Response (200):**
+**Response:**
 
 ```json
 {
@@ -249,105 +343,93 @@ Generates reset token (10 min expiry) → Sends email
 }
 ```
 
-Removes current session → Clears cookie
+**Flow:**
+
+1. Removes current token from user's token list
+2. Clears `jwt-auth` cookie
 
 ---
 
-## Authentication
+## Authentication Flow
 
-**Cookie:** `jwt-auth`
+### Registration → Verification
 
-- HTTPOnly: Yes
-- Expiry: 7 days
-- Secure: Production only
+1. `POST /signup` → User created (unverified, 0 credits)
+2. User receives email with verification link
+3. `GET /verifyEmail?token=...` → Account verified + 100 credits awarded
+4. User auto-logged in and redirected
 
----
+### Login
 
-## User Model
+1. `POST /login` → Validates credentials
+2. Sets `jwt-auth` cookie (HttpOnly, 7 days)
+3. Tracks IP/user agent for security
 
-```typescript
-{
-  id: string
-  slug: string                  // auto-generated
-  name: string                  // 3-50 chars
-  email: string                 // unique
-  password: string              // Argon2 hashed
-  isVerified: boolean
-  role: "user" | "landlord" | "admin" | ...
-  avatar?: string
-  avgRating: number
-  totalReviews: number
-  credits: number               // 100 on signup
-  ips: [{ip, userAgent, lastLogin}]  // max 10
-  tokens: [{token, createdAt}]       // max 10
-  verificationToken?: string    // 10 min expiry
-  resetPasswordToken?: string   // 10 min expiry
-  createdAt, updatedAt: Date
-}
-```
+### Password Reset
+
+1. `POST /forgetPassword` → Sends reset email
+2. User clicks link in email
+3. `POST /resetPassword` → Updates password
 
 ---
 
-## Credits System
+## Rate Limiting
 
-**Signup Bonus:** 100 credits awarded on email verification
-
-**Credits Log:**
-
-```typescript
-{
-  userId: string;
-  type: "gift" | "purchase" | "spent";
-  description: string;
-  credits: number;
-  createdAt: Date;
-}
-```
+| Endpoint               | Limit | Window |
+| ---------------------- | ----- | ------ |
+| `/signup`              | 5     | 15 min |
+| `/login`               | 5     | 5 min  |
+| `/verifyEmail`         | 10    | 5 min  |
+| `/resendVerification`  | 3     | 15 min |
+| `/forgetPassword`      | 3     | 15 min |
+| `/resetPassword`       | 10    | 5 min  |
+| `/resendResetPassword` | 3     | 15 min |
 
 ---
 
-## Error Responses
+## Security Features
+
+- **Password hashing** via bcrypt
+- **JWT tokens** in HttpOnly cookies
+- **Token rotation** on login
+- **IP tracking** for suspicious activity
+- **Email verification** required for login
+- **Token expiry** (10 minutes for email tokens)
+- **Rate limiting** on sensitive endpoints
+- **XSS sanitization** on all inputs
+
+---
+
+## Cookie Settings
+
+**Name:** `jwt-auth`
+
+- **HttpOnly:** true
+- **Secure:** true (production only)
+- **SameSite:** none (production) / lax (development)
+- **Max-Age:** 7 days
+- **Priority:** high
+
+---
+
+## Common Responses
+
+**Success:**
 
 ```json
-{
-  "message": "وصف الخطأ بالعربية"
-}
+{ "message": "عملية ناجحة" }
 ```
 
-**Codes:** `400` (validation) • `401` (unauthorized) • `403` (forbidden) • `404` (not found) • `429` (rate limit)
+**Error:**
 
----
-
-## Flows
-
-**Signup:**
-
-```
-User signs up → Verification email (10 min) → User verifies
-→ Awards 100 credits → Logs user in → Welcome email
+```json
+{ "message": "رسالة الخطأ" }
 ```
 
-**Password Reset:**
+**Status Codes:**
 
-```
-User requests reset → Email sent (10 min) → User submits new password
-→ Password updated → Confirmation email
-```
-
-**Public Profile:**
-
-```
-Request /profile/:slug → Calculates ratings from reviews
-→ Updates user record → Returns public data
-```
-
----
-
-## Environment Variables
-
-```env
-JWT_SECRET=your-secret-key
-FRONTEND_URL=https://yourfrontend.com
-PRODUCTION=true
-DATABASE_URL=postgresql://...
-```
+- `200/201` - Success
+- `400` - Validation error / Bad request
+- `401` - Unauthorized
+- `403` - Forbidden / Not verified
+- `404` - Not found

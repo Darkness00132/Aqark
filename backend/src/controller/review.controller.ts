@@ -19,7 +19,7 @@ export const getReviews = asyncHandler(async (req: Request, res: Response) => {
 
 export const getMyReviews = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const userId = req.user!.id;
+    const userId = req.user.id;
     const reviews = await Review.findAll({
       where: { reviewerId: userId },
       include: [{ model: User, as: "reviewedUser" }],
@@ -66,7 +66,7 @@ export const createReview = asyncHandler(
 export const updateReview = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { reviewId } = sanitizeXSS(req.params);
-    const { rating, comment } = req.body;
+    const { rating, comment } = req.secureBody;
     const review = await Review.findByPk(reviewId);
     if (!review) {
       return res.status(404).json({ message: "لم يتم العثور على المراجعة" });

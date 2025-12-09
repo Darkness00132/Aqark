@@ -151,8 +151,6 @@ export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
     return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
   }
 
-  ad.increment("views", { by: 1 });
-
   res.status(200).json({ ad });
 });
 

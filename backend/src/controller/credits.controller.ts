@@ -20,6 +20,17 @@ export const getPlans = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const plans = await CreditsPlan.findAll({
       order: [["id", "ASC"]],
+      include: [
+        {
+          model: PlanDiscount,
+          as: "discounts",
+          where: {
+            startsAt: { [Op.lte]: new Date() },
+            endsAt: { [Op.gte]: new Date() },
+          },
+          required: false,
+        },
+      ],
     });
 
     return res.status(200).json({ plans });
