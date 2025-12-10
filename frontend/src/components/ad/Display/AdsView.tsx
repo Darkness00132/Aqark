@@ -1,7 +1,13 @@
 "use client";
+import dynamic from "next/dynamic";
 import { useState, memo } from "react";
-import { AdCard, Pagination, AdCardsLoading } from "./index";
+import { Pagination, AdCardsLoading } from "./index";
 import { useGetAds } from "@/hooks/ad";
+
+const AdCard = dynamic(() => import("./AdCard"), {
+  ssr: false,
+  loading: () => <AdCardsLoading />,
+});
 
 interface AdsViewProps {
   mine?: boolean;

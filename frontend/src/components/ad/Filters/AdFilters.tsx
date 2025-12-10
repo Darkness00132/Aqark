@@ -1,7 +1,8 @@
 "use client";
 
-import Select from "react-select";
+import dynamic from "next/dynamic";
 import { useForm, Controller } from "react-hook-form";
+import { useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   FaFilter,
@@ -21,7 +22,14 @@ import useAd from "@/store/useAd";
 type AdFiltersForm = z.infer<typeof AdfiltersSchema>;
 type Option = { value: string; label: string };
 
+// Defer heavy react-select until drawer opens
+const Select = dynamic(() => import("react-select"), {
+  ssr: false,
+  loading: () => <div className="skeleton h-10 w-full rounded-lg" />,
+});
+
 export default function AdFilters() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const setFilters = useAd((state) => state.setFilters);
   const filters = useAd((state) => state.filters);
   const {
@@ -44,13 +52,20 @@ export default function AdFilters() {
 
   const selectedCity = watch("city");
 
-  const cityOptions: Option[] = CITIES.map((c) => ({ value: c, label: c }));
-  const areaOptions: Option[] = selectedCity
-    ? (CITIES_WITH_AREAS[selectedCity] || []).map((a) => ({
-        value: a,
-        label: a,
-      }))
-    : [];
+  const cityOptions: Option[] = useMemo(
+    () => CITIES.map((c) => ({ value: c, label: c })),
+    []
+  );
+  const areaOptions: Option[] = useMemo(
+    () =>
+      selectedCity
+        ? (CITIES_WITH_AREAS[selectedCity] || []).map((a) => ({
+            value: a,
+            label: a,
+          }))
+        : [],
+    [selectedCity]
+  );
 
   const types = ["تمليك", "إيجار"];
 
@@ -105,7 +120,12 @@ export default function AdFilters() {
 
       {/* Drawer structure */}
       <div className="drawer drawer-end fixed inset-0 pointer-events-none z-[9999]">
-        <input id="filter-drawer" type="checkbox" className="drawer-toggle" />
+        <input
+          id="filter-drawer"
+          type="checkbox"
+          className="drawer-toggle"
+          onChange={(e) => setIsDrawerOpen(e.target.checked)}
+        />
 
         {/* Overlay */}
         <div className="drawer-side pointer-events-auto">
@@ -132,10 +152,11 @@ export default function AdFilters() {
             </div>
 
             {/* Form Content */}
-            <form
-              className="flex-1 overflow-y-auto p-6 space-y-5"
-              onSubmit={handleSubmit(onSubmit)}
-            >
+            {isDrawerOpen && (
+              <form
+                className="flex-1 overflow-y-auto p-6 space-y-5"
+                onSubmit={handleSubmit(onSubmit)}
+              >
               {/* Location Section */}
               <div className="bg-white rounded-xl p-4 shadow-sm border border-base-300">
                 <div className="flex items-center gap-2 mb-4 pb-2 border-b border-base-300">
@@ -397,7 +418,8 @@ export default function AdFilters() {
                   <option value="highPrice">السعر الأعلى</option>
                 </select>
               </div>
-            </form>
+              </form>
+            )}
 
             {/* Footer Actions */}
             <div className="sticky bottom-0 bg-base-100 p-4 border-t border-base-300 shadow-lg">
