@@ -27,8 +27,8 @@ function AdsView({ mine = false }: AdsViewProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {data.ads.map((ad) => (
-          <AdCard key={ad.id} ad={ad} mine={mine} />
+        {data.ads.map((ad, index) => (
+          <AdCard key={ad.id} ad={ad} mine={mine} priority={index === 0} />
         ))}
       </div>
       <Pagination
