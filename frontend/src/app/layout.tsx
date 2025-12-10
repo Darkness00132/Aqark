@@ -4,7 +4,7 @@ import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
 import GAListener from "@/components/UI/GAListener";
-import Script from "next/script";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 const geistCairo = Cairo({ subsets: ["arabic"], display: "swap" });
@@ -71,37 +71,20 @@ export default function RootLayout({
       className={geistCairo.className}
       dir="rtl"
     >
-      <head>
-        <link
-          rel="preload"
-          href="/_next/static/css/app/layout.css"
-          as="style"
-        />
-      </head>
-      <body className="antialiased bg-gradient-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen">
+      <head />
+      <body className="antialiased bg-linear-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen">
         <Provider>
           <Header />
           <main className="min-h-screen pb-15">{children}</main>
           <Footer />
         </Provider>
-        {/* Defer analytics to keep LCP path light */}
+        {/* Lightweight GA via Next third-parties */}
         {process.env.NEXT_PUBLIC_GA_ID ? (
           <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
-              strategy="lazyOnload"
-            />
-            <Script id="ga-init" strategy="lazyOnload">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', { send_page_view: false });
-              `}
-            </Script>
+            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+            <GAListener />
           </>
         ) : null}
-        <GAListener />
       </body>
     </html>
   );
