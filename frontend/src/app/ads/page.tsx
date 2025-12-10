@@ -1,5 +1,5 @@
-import AdFilters from "@/components/ad/AdFilters";
-import AdsView from "@/components/ad/AdsView";
+import AdFilters from "@/components/ad/Filters/AdFilters";
+import AdsView from "@/components/ad/Display/AdsView";
 
 export default function Ads() {
   return (

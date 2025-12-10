@@ -1,5 +1,4 @@
-import AdForm from "@/components/ad/AdForm";
-
+import AdForm from "@/components/ad/Forms/AdForm";
 export default function CreateAd() {
   return (
     <div className="min-h-screen py-12 px-4">

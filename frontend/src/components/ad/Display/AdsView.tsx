@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
-import AdCard from "./AdCard";
-import useGetAds from "@/hooks/ad/useGetAds";
-import Pagination from "./Pagination";
-import AdCardsLoading from "./AdCardSkeleton";
+import { useState, memo } from "react";
+import { AdCard, Pagination, AdCardsLoading } from "./index";
+import { useGetAds } from "@/hooks/ad";
 
-export default function AdsView({ mine = false }: { mine?: boolean }) {
+interface AdsViewProps {
+  mine?: boolean;
+}
+
+function AdsView({ mine = false }: AdsViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isFetching } = useGetAds(mine, currentPage);
@@ -26,7 +28,7 @@ export default function AdsView({ mine = false }: { mine?: boolean }) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {data.ads.map((ad) => (
-          <AdCard key={ad.slug} ad={ad} mine={mine} />
+          <AdCard key={ad.id} ad={ad} mine={mine} />
         ))}
       </div>
       <Pagination
@@ -37,3 +39,6 @@ export default function AdsView({ mine = false }: { mine?: boolean }) {
     </div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+export default memo(AdsView);

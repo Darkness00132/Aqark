@@ -1,4 +1,5 @@
 "use client";
+import { memo } from "react";
 import type { Ad } from "@/store/useAd";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,13 +13,12 @@ import {
 } from "react-icons/fa";
 import formatDateFromNow from "@/lib/formatDateFromNow";
 
-export default function AdCard({
-  ad,
-  mine = false,
-}: {
+interface AdCardProps {
   ad: Ad;
   mine?: boolean;
-}) {
+}
+
+function AdCard({ ad, mine = false }: AdCardProps) {
   return (
     <div className="group relative w-full max-w-md bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 mx-auto overflow-hidden border border-gray-100 hover:border-blue-200 hover:-translate-y-2">
       {/* Image */}
@@ -28,6 +28,7 @@ export default function AdCard({
           alt={ad.title}
           fill
           priority={false}
+          loading="lazy"
           className="object-cover object-center w-full h-full transition-transform duration-700 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 400px"
         />
@@ -138,3 +139,6 @@ export default function AdCard({
     </div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+export default memo(AdCard);

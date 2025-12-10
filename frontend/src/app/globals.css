@@ -15,17 +15,56 @@
   default: true;
   color-scheme: "light";
 
-  --color-primary: #059669;
+  /* Primary - Emerald with better contrast */
+  --color-primary: #10b981;
   --color-primary-content: #ffffff;
-  --color-secondary: #2563eb;
-  --color-secondary-content: #ffffff;
-  --color-accent: #0d9488;
-  --color-accent-content: #ffffff;
+  --color-primary-focus: #059669;
 
-  --color-neutral: #1f2937;
-  --color-neutral-content: #f9fafb;
-  --color-base-100: #f8fafc;
-  --color-base-200: #e2e8f0;
-  --color-base-300: #cbd5e1;
-  --color-base-content: #1e293b;
+  /* Secondary - Vibrant Blue */
+  --color-secondary: #3b82f6;
+  --color-secondary-content: #ffffff;
+  --color-secondary-focus: #2563eb;
+
+  /* Accent - Teal */
+  --color-accent: #14b8a6;
+  --color-accent-content: #ffffff;
+  --color-accent-focus: #0d9488;
+
+  /* Neutral - Slate Gray */
+  --color-neutral: #334155;
+  --color-neutral-content: #f8fafc;
+  --color-neutral-focus: #1e293b;
+
+  /* Base Colors - Light Mode */
+  --color-base-100: #ffffff;
+  --color-base-200: #f8fafc;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #0f172a;
+
+  /* Success - Green */
+  --color-success: #22c55e;
+  --color-success-content: #ffffff;
+
+  /* Warning - Amber */
+  --color-warning: #f59e0b;
+  --color-warning-content: #ffffff;
+
+  /* Error - Red */
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+
+  /* Info - Sky Blue */
+  --color-info: #0ea5e9;
+  --color-info-content: #ffffff;
+
+  /* Border and Divider */
+  --rounded-box: 0.75rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.95;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
 }

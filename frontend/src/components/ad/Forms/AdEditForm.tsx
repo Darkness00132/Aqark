@@ -9,12 +9,12 @@ import { AdEditSchema } from "@/validation/adValidates";
 import { Ad } from "@/store/useAd";
 
 import useEditAd from "@/hooks/ad/useEditAd";
-import FormTitleSection from "./FormSections/FormTitleSection";
-import FormLocationSection from "./FormSections/FormLocationSection";
-import FormPropertyDetailsSection from "./FormSections/FormPropertyDetailsSection";
-import FormAdditionalDetailsSection from "./FormSections/FormAdditionalDetailsSection";
-import FormContactSection from "./FormSections/FormContactSection";
-import FormImagesSection from "./FormSections/FormImagesSection";
+import FormTitleSection from "./Fields/FormTitleSection";
+import FormLocationSection from "./Fields/FormLocationSection";
+import FormPropertyDetailsSection from "./Fields/FormPropertyDetailsSection";
+import FormAdditionalDetailsSection from "./Fields/FormAdditionalDetailsSection";
+import FormContactSection from "./Fields/FormContactSection";
+import FormImagesSection from "./Fields/FormImagesSection";
 
 const ROOM_BASED_PROPERTIES = ["شقة", "فيلا", "منزل"];
 

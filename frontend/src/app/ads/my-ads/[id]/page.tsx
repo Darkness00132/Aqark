@@ -1,5 +1,5 @@
 "use client";
-import AdEditForm from "@/components/ad/AdEditForm";
+import AdEditForm from "@/components/ad/Forms/AdEditForm";
 import useGetAdById from "@/hooks/ad/useGetAdById";
 import { useParams } from "next/navigation";
 

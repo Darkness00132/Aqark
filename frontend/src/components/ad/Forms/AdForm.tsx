@@ -21,9 +21,9 @@ import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
 import useCreateAd from "@/hooks/ad/useCreateAd";
-import CitySelect from "@/components/ad/Select/CitySelect";
-import AreaSelect from "@/components/ad/Select/AreaSelect";
-import ImageUpload from "@/components/ad/ImagesUpload";
+import CitySelect from "@/components/ad/Forms/Selects/CitySelect";
+import AreaSelect from "@/components/ad/Forms/Selects/AreaSelect";
+import ImageUpload from "@/components/ad/Forms/Fields/ImagesUpload";
 import adCostInCredits from "@/lib/adCostInCredits";
 
 const ROOM_BASED_PROPERTIES = ["شقة", "فيلا", "منزل"];

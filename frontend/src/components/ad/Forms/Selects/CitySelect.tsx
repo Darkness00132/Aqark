@@ -1,6 +1,8 @@
-import { CITIES } from "@/lib/data";
+"use client";
+
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import Select from "react-select";
+import { CITIES } from "@/lib/data";
 
 interface CitySelectProps<T extends FieldValues> {
   control: Control<T>;

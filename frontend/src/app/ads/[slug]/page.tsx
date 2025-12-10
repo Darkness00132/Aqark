@@ -12,7 +12,7 @@ import {
   FaPhone,
 } from "react-icons/fa";
 import Link from "next/link";
-import AdImagesSwiper from "@/components/ad/AdImagesSwiper";
+import AdImagesSwiper from "@/components/ad/Display/AdImagesSwiper";
 import formatDateFromNow from "@/lib/formatDateFromNow";
 
 export const revalidate = 300;

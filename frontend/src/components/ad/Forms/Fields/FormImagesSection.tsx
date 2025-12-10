@@ -1,13 +1,15 @@
 "use client";
 
 import { MdImage } from "react-icons/md";
-import ImageUpload from "../ImagesUpload";
+import ImageUpload from "./ImagesUpload";
+
+type DefaultImage = { url: string; key: string };
 
 interface FormImagesSectionProps {
   images: File[];
-  setImages: (images: File[]) => void;
+  setImages: React.Dispatch<React.SetStateAction<File[]>>;
   defaultImages?: Array<{ url: string; key: string }>;
-  setDeletedImages?: (images: Array<{ url: string; key: string }>) => void;
+  setDeletedImages?: React.Dispatch<React.SetStateAction<DefaultImage[]>>;
 }
 
 export default function FormImagesSection({
@@ -31,4 +33,3 @@ export default function FormImagesSection({
     </div>
   );
 }
-
