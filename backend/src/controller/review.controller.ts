@@ -52,6 +52,24 @@ export const createReview = asyncHandler(
   }
 );
 
+export const changeLoves = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const { reviewId } = sanitizeXSS(req.params);
+    const review = await Review.findByPk(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "لم يتم العثور على المراجعة" });
+    }
+
+    const { increment } = req.secureQuery;
+    if (increment !== 1 || increment !== -1) {
+      return res.status(404).json({ message: "قيمة increment غير صحيحة" });
+    }
+    review.increment("loves", { by: increment });
+
+    return res.status(200).json({ message: "تم التحديث بنجاح" });
+  }
+);
+
 export const updateReview = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { reviewId } = sanitizeXSS(req.params);

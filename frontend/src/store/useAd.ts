@@ -25,6 +25,7 @@ export interface Ad {
   slug: string;
   whatsappNumber: string;
   images: Array<{ url: string; key: string }>;
+  map?: { lat: number; lng: number };
   createdAt: string;
 }
 

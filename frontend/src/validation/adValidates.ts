@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "./data";
+import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "../lib/data";
 
 export const createAdSchema = z
   .object({

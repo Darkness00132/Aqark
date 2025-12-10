@@ -16,6 +16,11 @@ export interface getAds {
   order?: string;
 }
 
+type Map = {
+  lat: number;
+  lng: number;
+};
+
 interface createAd {
   title: string;
   city: string;
@@ -25,6 +30,7 @@ interface createAd {
   price: number;
   propertyType: string;
   address: string;
+  map: Map;
   type: string;
   description: string;
   whatsappNumber: string;
@@ -40,6 +46,7 @@ interface updateAd {
   price?: number;
   propertyType?: string;
   address?: string;
+  map?: Map;
   type?: string;
   description?: string;
   whatsappNumber?: string;

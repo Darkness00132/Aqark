@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/lib/userValidates";
+import { loginSchema } from "@/validation/userValidates";
 import { FaExclamationCircle } from "react-icons/fa";
 import useLogin from "@/hooks/user/useLogin";
 

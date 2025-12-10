@@ -1,4 +1,3 @@
-// src/controllers/ad.controller.ts
 import { Request, Response } from "express";
 import { AuthRequest } from "../middlewares/auth.js";
 import {

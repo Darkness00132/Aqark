@@ -10,7 +10,6 @@ import userRouter from "./routes/user.route.js";
 import reviewsRouter from "./routes/review.route.js";
 import adsRouter from "./routes/ads.route.js";
 import creditsRouter from "./routes/credits.routes.js";
-import dataAnlysisRouter from "./routes/dataAnalysis.route.js";
 import adminRouter from "./routes/admin.route.js";
 import sanitizeXSS from "./utils/sanitizeXSS.js";
 import { getClientIP } from "./utils/getClientIp.js";
@@ -83,7 +82,6 @@ app
     .use("/api", googleRouter)
     .use("/api/reviews", reviewsRouter)
     .use("/api/ads", adsRouter)
-    .use("/api/data-analysis", dataAnlysisRouter)
     .use("/api/credits", creditsRouter)
     .use("/api/admin", adminRouter);
 app.use((err, _req, res, _next) => {

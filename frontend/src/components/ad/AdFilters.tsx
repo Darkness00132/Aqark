@@ -13,7 +13,7 @@ import {
   FaTag,
 } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
-import { AdfiltersSchema } from "@/lib/adValidates";
+import { AdfiltersSchema } from "@/validation/adValidates";
 import { CITIES, CITIES_WITH_AREAS, PROPERTY_TYPES } from "@/lib/data";
 import type { z } from "zod";
 import useAd from "@/store/useAd";

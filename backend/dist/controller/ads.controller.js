@@ -113,7 +113,6 @@ export const getAdBySlug = asyncHandler(async (req, res) => {
     if (!ad) {
         return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
     }
-    ad.increment("views", { by: 1 });
     res.status(200).json({ ad });
 });
 // ========== CREATE AD (WITH IMAGES) ==========

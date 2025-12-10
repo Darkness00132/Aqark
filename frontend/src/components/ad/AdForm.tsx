@@ -14,7 +14,7 @@ import {
   MdWarning,
 } from "react-icons/md";
 
-import { createAdSchema } from "@/lib/adValidates";
+import { createAdSchema } from "@/validation/adValidates";
 import { PROPERTY_TYPES } from "@/lib/data";
 
 import PhoneInput from "react-phone-number-input";
@@ -45,6 +45,7 @@ export default function AdForm() {
 
   const selectedCity = watch("city");
   const selectedPropertyType = watch("propertyType");
+  const selectedArea = watch("area");
   const showRoomsInput = ROOM_BASED_PROPERTIES.includes(
     selectedPropertyType || ""
   );

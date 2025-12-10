@@ -13,14 +13,6 @@ export const getReviews = asyncHandler(async (req, res) => {
     });
     res.status(200).json({ reviews });
 });
-export const getMyReviews = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
-    const reviews = await Review.findAll({
-        where: { reviewerId: userId },
-        include: [{ model: User, as: "reviewedUser" }],
-    });
-    res.status(200).json({ reviews });
-});
 export const createReview = asyncHandler(async (req, res) => {
     const { slug } = sanitizeXSS(req.params);
     const { rating, comment } = req.body;
@@ -47,9 +39,22 @@ export const createReview = asyncHandler(async (req, res) => {
     });
     res.status(201).json({ review });
 });
+export const changeLoves = asyncHandler(async (req, res) => {
+    const { reviewId } = sanitizeXSS(req.params);
+    const review = await Review.findByPk(reviewId);
+    if (!review) {
+        return res.status(404).json({ message: "لم يتم العثور على المراجعة" });
+    }
+    const { increment } = req.secureQuery;
+    if (increment !== 1 || increment !== -1) {
+        return res.status(404).json({ message: "قيمة increment غير صحيحة" });
+    }
+    review.increment("loves", { by: increment });
+    return res.status(200).json({ message: "تم التحديث بنجاح" });
+});
 export const updateReview = asyncHandler(async (req, res) => {
     const { reviewId } = sanitizeXSS(req.params);
-    const { rating, comment } = req.body;
+    const { rating, comment } = req.secureBody;
     const review = await Review.findByPk(reviewId);
     if (!review) {
         return res.status(404).json({ message: "لم يتم العثور على المراجعة" });

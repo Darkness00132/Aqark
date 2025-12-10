@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FaExclamationCircle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema } from "@/lib/userValidates";
+import { signupSchema } from "@/validation/userValidates";
 
 export default function SignupForm({ role }: { role: string }) {
   const { mutate, isPending } = useSignup();

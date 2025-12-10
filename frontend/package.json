@@ -16,12 +16,14 @@
     "browser-image-compression": "^2.0.2",
     "daisyui": "^5.5.5",
     "dayjs": "^1.11.18",
+    "maplibre-gl": "^5.14.0",
     "next": "^16.0.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.62.0",
     "react-icons": "^5.5.0",
+    "react-map-gl": "^8.1.0",
     "react-phone-number-input": "^3.4.13",
     "react-select": "^5.10.2",
     "react-slick": "^0.31.0",
@@ -48,7 +50,9 @@
     "webpack-bundle-analyzer": "^5.0.1"
   },
   "browserslist": [
-    "defaults",
-    "supports es6-module"
+    "chrome >= 90",
+    "firefox >= 88",
+    "safari >= 14",
+    "edge >= 90"
   ]
 }
