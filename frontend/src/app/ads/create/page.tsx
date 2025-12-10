@@ -1,4 +1,18 @@
-import AdForm from "@/components/ad/Forms/AdForm";
+"use client";
+
+import dynamic from "next/dynamic";
+
+const AdForm = dynamic(() => import("@/components/ad/Forms/AdForm"), {
+  loading: () => (
+    <div className="space-y-4">
+      {Array.from({ length: 5 }).map((_, idx) => (
+        <div key={idx} className="skeleton h-16 w-full rounded-xl" />
+      ))}
+      <div className="skeleton h-40 w-full rounded-2xl" />
+    </div>
+  ),
+  ssr: false,
+});
 export default function CreateAd() {
   return (
     <div className="min-h-screen py-12 px-4">

@@ -1,7 +1,19 @@
-import Hero from "@/components/UI/Hero";
+"use client";
+
+import dynamic from "next/dynamic";
 import { FaSearch, FaHome, FaCheckCircle } from "react-icons/fa";
 
-export default async function Home() {
+// Lazy-load hero to keep the landing page shell light
+const Hero = dynamic(() => import("@/components/UI/Hero"), {
+  loading: () => (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <span className="loading loading-dots w-20"></span>
+    </div>
+  ),
+  ssr: false,
+});
+
+export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
