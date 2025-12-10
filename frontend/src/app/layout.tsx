@@ -3,8 +3,8 @@ import { Cairo } from "next/font/google";
 import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
 import Provider from "@/components/UI/Provider";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import GAListener from "@/components/UI/GAListener";
+import Script from "next/script";
 import "./globals.css";
 
 const geistCairo = Cairo({ subsets: ["arabic"], display: "swap" });
@@ -84,10 +84,23 @@ export default function RootLayout({
           <main className="min-h-screen pb-15">{children}</main>
           <Footer />
         </Provider>
-        <GoogleAnalytics
-          gaId={process.env.NEXT_PUBLIC_GA_ID!}
-          dataLayerName="dataLayer"
-        />
+        {/* Defer analytics to keep LCP path light */}
+        {process.env.NEXT_PUBLIC_GA_ID ? (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+              strategy="lazyOnload"
+            />
+            <Script id="ga-init" strategy="lazyOnload">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', { send_page_view: false });
+              `}
+            </Script>
+          </>
+        ) : null}
         <GAListener />
       </body>
     </html>
