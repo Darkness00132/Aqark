@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
+import dynamic from "next/dynamic"; // Import dynamic for code splitting
 import Header from "@/components/UI/Header";
-import Footer from "@/components/UI/Footer";
-
-const Provider = dynamic(() => import("@/components/UI/Provider"), {
-  ssr: true, // Keep Server-Side Rendering for the Provider to avoid issues
-});
-
+// import Footer from "@/components/UI/Footer"; // Moved to dynamic import
+// import Provider from "@/components/UI/Provider"; // Moved to dynamic import
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
-import dynamic from "next/dynamic";
+
+// Dynamic Imports for non-critical components to reduce initial JS bundle size
+const DynamicProvider = dynamic(() => import("@/components/UI/Provider"), {
+  ssr: true, // Keep Server-Side Rendering for the Provider to avoid issues
+});
+const DynamicFooter = dynamic(() => import("@/components/UI/Footer"), {
+  ssr: false, // Client-side rendering is fine for the footer
+});
 
 const geistCairo = Cairo({
   subsets: ["arabic"],
@@ -93,12 +97,25 @@ export default function RootLayout({
         <style
           dangerouslySetInnerHTML={{
             __html: `
+              /* 1. Critical Styles for LCP Background - الان تم تضمين التدرج اللوني الفعلي */
               body { 
                 margin: 0; 
                 min-height: 100vh; 
                 overflow-x: hidden;
-                background-color: #f0f0f0; 
+                /* Tailwind Antialiased properties */
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+
+                /* *************************************************************** */
+                /* تم تحويل: bg-linear-to-bl from-primary/30 via-base-100 to-secondary/30
+                   إلى CSS مباشر باستخدام قيم الألوان (#RRGGBB) والشفافية (30% = 4D).
+                */
+                background-color: #ffffff; /* Fallback for older browsers */
+                background-image: linear-gradient(to bottom left, rgba(16, 185, 129, 0.3), #ffffff, rgba(59, 130, 246, 0.3));
+                /* *************************************************************** */
               }
+              
+              /* 2. Critical Utility Classes */
               .min-h-screen { min-height: 100vh; }
               .grid { display: grid; }
               .gap-4 { gap: 1rem; }
@@ -117,11 +134,11 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased bg-linear-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen">
-        <Provider>
+        <DynamicProvider>
           <Header />
           <main className="min-h-screen pb-15">{children}</main>
-          <Footer />
-        </Provider>
+          <DynamicFooter />
+        </DynamicProvider>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}
