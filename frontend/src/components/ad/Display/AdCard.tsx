@@ -30,8 +30,9 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
           fill
           priority={priority}
           loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           className="object-cover object-center w-full h-full transition-transform duration-700 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 400px"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10" />
 
@@ -44,6 +45,7 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
       {/* Content */}
       <Link
         href={`/ads/${mine ? "my-ads/" + ad.id : ad.slug}`}
+        prefetch={false}
         className="p-6 space-y-4 block"
       >
         {/* Title */}
@@ -101,6 +103,7 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
                 height={40}
                 className="w-full h-full object-cover"
                 sizes="40px"
+                loading="lazy"
               />
             ) : (
               <FaUser className="text-gray-400" size={18} />

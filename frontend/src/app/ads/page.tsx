@@ -1,13 +1,10 @@
-"use client";
-
 import AdsView from "@/components/ad/Display/AdsView";
-import dynamic from "next/dynamic";
+import AdFilters from "@/components/ad/Filters/AdFilters";
+import { Metadata } from "next";
 
-const AdFilters = dynamic(() => import("@/components/ad/Filters/AdFilters"), {
-  loading: () => (
-    <div className="skeleton h-24 w-full rounded-2xl mb-4" aria-hidden />
-  ),
-});
+export const metadata: Metadata = {};
+
+export const revalidate = 60;
 
 export default function Ads() {
   return (

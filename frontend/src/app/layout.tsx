@@ -6,7 +6,12 @@ import Provider from "@/components/UI/Provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
-const geistCairo = Cairo({ subsets: ["arabic"], display: "swap" });
+const geistCairo = Cairo({
+  subsets: ["arabic"],
+  display: "swap",
+  preload: true,
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: {
@@ -70,7 +75,23 @@ export default function RootLayout({
       className={geistCairo.className}
       dir="rtl"
     >
-      <head />
+      <head>
+        <link
+          rel="preconnect"
+          href="https://aqark-s3.s3.us-east-1.amazonaws.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://aqark-s3.s3.us-east-1.amazonaws.com"
+        />
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <link rel="preconnect" href="https://www.googletagmanager.com" />
+            <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+          </>
+        )}
+      </head>
       <body className="antialiased bg-linear-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen">
         <Provider>
           <Header />

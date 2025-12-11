@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compiler: { removeConsole: process.env.NODE_ENV === "production" },
   experimental: {
-    optimizePackageImports: ["react-icons"],
+    optimizePackageImports: ["react-icons", "react-hook-form"],
   },
   images: {
     remotePatterns: [

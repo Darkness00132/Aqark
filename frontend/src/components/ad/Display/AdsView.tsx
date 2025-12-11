@@ -4,6 +4,7 @@ import AdCard from "./AdCard";
 import AdCardsLoading from "./AdCardSkeleton";
 import { useGetAds } from "@/hooks/ad";
 import Pagination from "@/components/ad/Shared/Pagination";
+import { useTransition } from "react";
 
 interface AdsViewProps {
   mine?: boolean;
@@ -12,6 +13,7 @@ interface AdsViewProps {
 export default function AdsView({ mine = false }: AdsViewProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const currentPage = Number(searchParams.get("page")) || 1;
 
   // Use isLoading instead of isFetching!
@@ -20,7 +22,9 @@ export default function AdsView({ mine = false }: AdsViewProps) {
   const setCurrentPage = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
-    router.push(`?${params.toString()}`); // Enable scroll to top
+    startTransition(() => {
+      router.push(`?${params.toString()}`);
+    });
   };
 
   // Only show skeleton on INITIAL load, not on pagination
