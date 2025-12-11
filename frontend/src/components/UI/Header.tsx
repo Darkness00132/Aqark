@@ -31,7 +31,9 @@ export default function Header() {
               alt="logo"
               width={50}
               height={50}
+              quality={80}
               className="w-8 h-8 sm:w-10 sm:h-10"
+              sizes="(max-width: 640px) 32px, 40px"
             />
             <span className="font-extrabold text-xl sm:text-2xl lg:text-3xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Aqark
