@@ -8,12 +8,8 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 // Dynamic Imports for non-critical components to reduce initial JS bundle size
-const DynamicProvider = dynamic(() => import("@/components/UI/Provider"), {
-  ssr: true, // Keep Server-Side Rendering for the Provider to avoid issues
-});
-const DynamicFooter = dynamic(() => import("@/components/UI/Footer"), {
-  ssr: false, // Client-side rendering is fine for the footer
-});
+const DynamicProvider = dynamic(() => import("@/components/UI/Provider"));
+const DynamicFooter = dynamic(() => import("@/components/UI/Footer"));
 
 const geistCairo = Cairo({
   subsets: ["arabic"],
