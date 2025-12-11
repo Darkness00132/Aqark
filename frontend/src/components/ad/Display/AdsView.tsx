@@ -1,16 +1,26 @@
-"use client";
-import { useState, memo } from "react";
-import { AdCard, Pagination, AdCardsLoading } from "./index";
+import { useSearchParams, useRouter } from "next/navigation";
+import { AdCard, AdCardsLoading } from "./index";
 import { useGetAds } from "@/hooks/ad";
+import dynamic from "next/dynamic";
+
+const Pagination = dynamic(() => import("@/components/ad/Shared/Pagination"));
 
 interface AdsViewProps {
   mine?: boolean;
 }
 
-function AdsView({ mine = false }: AdsViewProps) {
-  const [currentPage, setCurrentPage] = useState(1);
+export default function AdsView({ mine = false }: AdsViewProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const currentPage = Number(searchParams.get("page")) || 1;
 
   const { data, isFetching } = useGetAds(mine, currentPage);
+
+  const setCurrentPage = (page: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", page.toString());
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   if (isFetching) {
     return <AdCardsLoading />;
@@ -39,6 +49,3 @@ function AdsView({ mine = false }: AdsViewProps) {
     </div>
   );
 }
-
-// Memoize to prevent unnecessary re-renders
-export default memo(AdsView);
