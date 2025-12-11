@@ -1,6 +1,6 @@
 "use client";
 
-import { AdsView } from "@/components/ad/Display";
+import AdsView from "@/components/ad/Display/AdsView";
 import dynamic from "next/dynamic";
 
 const AdFilters = dynamic(() => import("@/components/ad/Filters/AdFilters"), {
