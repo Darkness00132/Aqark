@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import Header from "@/components/UI/Header";
 import Footer from "@/components/UI/Footer";
-import Provider from "@/components/UI/Provider";
+
+const Provider = dynamic(() => import("@/components/UI/Provider"), {
+  ssr: true, // Keep Server-Side Rendering for the Provider to avoid issues
+});
+
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+import dynamic from "next/dynamic";
 
 const geistCairo = Cairo({
   subsets: ["arabic"],
