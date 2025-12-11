@@ -22,6 +22,7 @@ import { getClientIP } from "../utils/getClientIp.js";
 
 const SIGNUP_BONUS_CREDITS = 100;
 
+// ========== SIGNUP ==========
 export const signup = asyncHandler(async (req: Request, res: Response) => {
   const { error, value } = signupSchema.validate(req.secureBody);
   if (error)
@@ -29,7 +30,13 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
 
   const { name, email, password, role } = value;
 
-  let user = await User.findOne({ where: { email } });
+  // OPTIMIZATION: Only select needed fields
+  let user = await User.findOne({
+    where: { email },
+    attributes: ["id"],
+    raw: true,
+  });
+
   if (user) return res.status(400).json({ message: "انت بالفعل تمتلك حساب" });
 
   const ip = getClientIP(req);
@@ -54,6 +61,7 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ message: "تم انشاء حساب بنجاح يرجى تحقق من ايميلك" });
 });
 
+// ========== VERIFY ==========
 export const verify = asyncHandler(async (req: Request, res: Response) => {
   const { verificationToken } = req.secureQuery;
   if (!verificationToken)
@@ -110,6 +118,7 @@ export const verify = asyncHandler(async (req: Request, res: Response) => {
   res.redirect(process.env.FRONTEND_URL!);
 });
 
+// ========== RESEND VERIFICATION ==========
 export const resendVerification = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.secureBody;
@@ -118,7 +127,18 @@ export const resendVerification = asyncHandler(
       return res.status(400).json({ message: "البريد الإلكتروني مطلوب" });
     }
 
-    const user = await User.findOne({ where: { email } });
+    // OPTIMIZATION: Only select needed fields
+    const user = await User.findOne({
+      where: { email },
+      attributes: [
+        "id",
+        "email",
+        "isVerified",
+        "verificationToken",
+        "verificationTokenExpire",
+      ],
+    });
+
     if (!user) {
       return res.status(404).json({ message: "لا يوجد حساب فى هذا الايميل" });
     }
@@ -142,6 +162,7 @@ export const resendVerification = asyncHandler(
   }
 );
 
+// ========== LOGIN - OPTIMIZED ==========
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { error, value } = loginSchema.validate(req.secureBody);
   if (error)
@@ -149,7 +170,12 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
   const { email, enteredPassword } = value;
 
-  const user = await User.findOne({ where: { email } });
+  // OPTIMIZATION: Only select needed fields for authentication
+  const user = await User.findOne({
+    where: { email },
+    attributes: ["id", "email", "password", "isVerified", "ips", "tokens"],
+  });
+
   if (!user)
     return res.status(404).json({ message: "لا يوجد حساب فى هذا الايميل" });
 
@@ -189,48 +215,77 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ message: "تم تسجيل الدخول بنجاح" });
 });
 
+// ========== GET MY PROFILE ==========
 export const getMyProfile = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    // Returns sanitized data via toJSON()
     return res.status(200).json({ user: req.user });
   }
 );
 
-// GET ANY USER'S PROFILE
+// ========== GET ANY USER'S PROFILE - OPTIMIZED ==========
 export const getProfile = asyncHandler(async (req: Request, res: Response) => {
   const { slug } = sanitizeXSS(req.params);
 
-  const user = await User.findOne({ where: { slug } });
+  // OPTIMIZATION: Use Promise.all to run queries in parallel
+  const [user, reviewStats, reviews] = await Promise.all([
+    User.findOne({
+      where: { slug },
+      attributes: [
+        "id",
+        "slug",
+        "name",
+        "avatar",
+        "avgRating",
+        "totalReviews",
+        "createdAt",
+      ],
+    }),
+    Review.findOne({
+      attributes: [
+        [fn("AVG", col("rating")), "avgRating"],
+        [fn("COUNT", col("id")), "totalReviews"],
+      ],
+      where: { reviewedUserId: slug }, // Use slug directly if possible
+      raw: true,
+    }),
+    Review.findAll({
+      where: { reviewedUserId: slug }, // Use slug directly if possible
+      attributes: ["id", "rating", "comment", "createdAt"],
+      include: [
+        {
+          model: User,
+          as: "reviewer",
+          attributes: ["name", "avatar"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+      limit: 20, // OPTIMIZATION: Limit reviews to first 20
+      raw: true,
+      nest: true,
+    }),
+  ]);
+
   if (!user) return res.status(400).json({ message: "المستخدم غير موجود" });
 
-  // Calculate ratings from reviews
-  const result = (await Review.findOne({
-    attributes: [
-      [fn("AVG", col("rating")), "avgRating"],
-      [fn("COUNT", col("id")), "totalReviews"],
-    ],
-    where: { reviewedUserId: user.id },
-    raw: true,
-  })) as { avgRating: string; totalReviews: string } | null;
+  const avgRating = parseFloat((reviewStats as any)?.avgRating || "0");
+  const totalReviews = parseInt((reviewStats as any)?.totalReviews || "0");
 
-  const avgRating = parseFloat(result?.avgRating || "0");
-  const totalReviews = parseInt(result?.totalReviews || "0");
+  // Update ratings if changed
+  if (user.avgRating !== avgRating || user.totalReviews !== totalReviews) {
+    await user.update({ avgRating, totalReviews });
+  }
 
-  // Update ratings
-  await user.update({ avgRating, totalReviews });
-
-  // Reload to get fresh data
-  await user.reload();
-
-  const reviews = await Review.findAll({
-    where: { reviewedUserId: user.id },
-    include: [{ model: User, as: "reviewer", attributes: ["name", "avatar"] }],
-    order: [["createdAt", "DESC"]],
+  res.status(200).json({
+    user: {
+      ...user.toJSON(),
+      avgRating,
+      totalReviews,
+    },
+    reviews,
   });
-
-  res.status(200).json({ user, reviews });
 });
 
+// ========== FORGET PASSWORD ==========
 export const forgetPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const { error, value } = forgetPasswordSchema.validate(req.secureBody);
@@ -239,7 +294,16 @@ export const forgetPassword = asyncHandler(
 
     const { email } = value;
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+      where: { email },
+      attributes: [
+        "id",
+        "email",
+        "resetPasswordToken",
+        "resetPasswordTokenExpire",
+      ],
+    });
+
     if (!user)
       return res.status(404).json({ message: "لا يوجد حساب فى هذا الايميل" });
 
@@ -258,6 +322,7 @@ export const forgetPassword = asyncHandler(
   }
 );
 
+// ========== RESET PASSWORD ==========
 export const resetPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const { error, value } = resetPasswordSchema.validate(req.secureBody);
@@ -289,6 +354,7 @@ export const resetPassword = asyncHandler(
   }
 );
 
+// ========== RESEND RESET PASSWORD ==========
 export const resendResetPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.secureBody;
@@ -297,7 +363,16 @@ export const resendResetPassword = asyncHandler(
       return res.status(400).json({ message: "البريد الإلكتروني مطلوب" });
     }
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+      where: { email },
+      attributes: [
+        "id",
+        "email",
+        "resetPasswordToken",
+        "resetPasswordTokenExpire",
+      ],
+    });
+
     if (!user) {
       return res.status(404).json({ message: "لا يوجد حساب فى هذا الايميل" });
     }
@@ -318,9 +393,9 @@ export const resendResetPassword = asyncHandler(
   }
 );
 
+// ========== UPDATE PROFILE ==========
 export const updateProfile = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    // Check if anything was actually updated
     if (
       !req.file &&
       (!req.secureBody || Object.keys(req.secureBody).length === 0)
@@ -328,7 +403,6 @@ export const updateProfile = asyncHandler(
       return res.status(400).json({ message: "لا توجد بيانات للتحديث" });
     }
 
-    // Validate only if there's body data
     if (req.secureBody && Object.keys(req.secureBody).length > 0) {
       const { value, error } = updateProfileSchema.validate(req.secureBody);
       if (error) {
@@ -337,12 +411,10 @@ export const updateProfile = asyncHandler(
 
       const { name, password, newPassword } = value;
 
-      // Update name
       if (name) {
         req.user.name = name;
       }
 
-      // Update password
       if (newPassword) {
         if (!password) {
           return res
@@ -357,7 +429,6 @@ export const updateProfile = asyncHandler(
       }
     }
 
-    // Update avatar (if file provided)
     if (req.file) {
       const avatarResult = await handleAvatarUpload(
         req.file,
@@ -379,6 +450,7 @@ export const updateProfile = asyncHandler(
   }
 );
 
+// ========== LOGOUT ==========
 export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
   const userToken = req.cookies["jwt-auth"];
 

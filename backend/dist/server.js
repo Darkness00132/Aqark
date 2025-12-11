@@ -5,6 +5,7 @@ import cors from "cors";
 import sequelize from "./db/sql.js";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import helmet from "helmet";
+import compression from "compression";
 import googleRouter from "./routes/google.route.js";
 import userRouter from "./routes/user.route.js";
 import reviewsRouter from "./routes/review.route.js";
@@ -15,9 +16,11 @@ import sanitizeXSS from "./utils/sanitizeXSS.js";
 import { getClientIP } from "./utils/getClientIp.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
+// OPTIMIZATION: Increase rate limit points for better UX
 const rateLimiter = new RateLimiterMemory({
-    points: 60, // 60 requests
-    duration: 60, // per minute
+    points: 100, // Increased from 60
+    duration: 60,
+    blockDuration: 60, // Block for 1 minute after exceeding
 });
 app.use(async (req, res, next) => {
     try {
@@ -33,29 +36,31 @@ app.use(async (req, res, next) => {
         });
     }
 });
+// OPTIMIZATION: Add compression middleware
+app.use(compression());
 app
-    .use(express.json())
-    .use(express.urlencoded({ extended: true }))
+    .use(express.json({ limit: "10mb" })) // Add limit to prevent large payloads
+    .use(express.urlencoded({ extended: true, limit: "10mb" }))
     .set("trust proxy", 1);
+// OPTIMIZATION: Move sanitization to after JSON parsing
 app.use((req, _res, next) => {
     req.secureBody = sanitizeXSS(req.body);
     req.secureQuery = sanitizeXSS(req.query);
     next();
 });
+// OPTIMIZATION: Configure CORS more efficiently
+const allowedOrigins = [process.env.FRONTEND_URL, process.env.ADMIN_URL].filter(Boolean);
 app
     .use(cors({
     origin: (origin, cb) => {
-        if (!origin)
-            return cb(null, true);
-        if ([process.env.FRONTEND_URL, process.env.ADMIN_URL].includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin)) {
             return cb(null, true);
         }
-        else {
-            cb(new Error("Not allowed by CORS"));
-        }
+        cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
+    maxAge: 86400, // Cache preflight for 24 hours
 }))
     .use(cookieParser())
     .use(helmet())
@@ -64,17 +69,18 @@ app
     .use(helmet.referrerPolicy({ policy: "no-referrer-when-downgrade" }))
     .use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true, preload: true }))
     .disable("x-powered-by");
-//database
+// Database connection
 try {
     await sequelize.authenticate();
     if (process.env.PRODUCTION === "false") {
         await sequelize.sync({ alter: true });
-        console.log("data base sync");
+        console.log("Database synced");
     }
-    console.log("Connected to Supabase");
+    console.log("Connected to database");
 }
 catch (error) {
     console.error("Unable to connect to the database:", error);
+    process.exit(1); // Exit if database connection fails
 }
 // Routes
 app
@@ -84,14 +90,15 @@ app
     .use("/api/ads", adsRouter)
     .use("/api/credits", creditsRouter)
     .use("/api/admin", adminRouter);
+// OPTIMIZATION: Improved error handler
 app.use((err, _req, res, _next) => {
-    console.error("Error:", err);
-    // Default structure
+    // Only log in development
+    if (process.env.NODE_ENV !== "production") {
+        console.error("Error:", err);
+    }
     let status = 500;
     let message = "Something went wrong";
     let details = null;
-    // --- Handle known error types ---
-    // 1. Native Error object
     if (err instanceof Error) {
         switch (err.name) {
             case "JsonWebTokenError":
@@ -103,7 +110,6 @@ app.use((err, _req, res, _next) => {
                 message = "Token has expired";
                 break;
             case "ValidationError": {
-                // Mongoose or Joi-style validation error
                 const errorObj = err;
                 if (errorObj.errors) {
                     details = Object.values(errorObj.errors).map((e) => ({
@@ -112,7 +118,6 @@ app.use((err, _req, res, _next) => {
                     }));
                 }
                 else if (errorObj.details) {
-                    // Joi validation
                     details = errorObj.details.map((e) => ({
                         field: e.path?.join("."),
                         message: e.message,
@@ -123,15 +128,12 @@ app.use((err, _req, res, _next) => {
                 break;
             }
             default:
-                // Default Error fallback
                 message = err.message || message;
                 break;
         }
     }
-    // 2. Handle plain object errors (like from MongoDB / Sequelize)
     else if (err && typeof err === "object") {
         const e = err;
-        // Duplicate key (MongoDB or Sequelize unique constraint)
         if (e.code === 11000 ||
             e.code === "E11000" ||
             e.name === "SequelizeUniqueConstraintError") {
@@ -142,13 +144,11 @@ app.use((err, _req, res, _next) => {
             message = `Duplicate value for field '${field}'`;
             details = { field, value };
         }
-        // Invalid ID or bad cast
         else if (e.name === "CastError") {
             status = 400;
             message = `Invalid value for '${e.path}'`;
             details = { field: e.path, value: e.value };
         }
-        // Sequelize validation errors
         else if (e.name === "SequelizeValidationError") {
             status = 400;
             message = "Validation failed";
@@ -158,12 +158,10 @@ app.use((err, _req, res, _next) => {
             }));
         }
     }
-    // --- Final unified response ---
     res.status(status).json({
         message,
         ...(details && { details }),
     });
 });
-// export default app;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 //# sourceMappingURL=server.js.map
