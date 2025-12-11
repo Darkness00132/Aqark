@@ -19,7 +19,7 @@ import sanitizeXSS from "../utils/sanitizeXSS.js";
 import adCostInCredits from "../utils/adCostInCredits.js";
 import validateAdImageUpdate from "../validates/validateAdImageUpdate.js";
 
-// ========== GET ALL ADS ==========
+// ========== GET ALL ADS (OPTIMIZED) ==========
 export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
   const { value, error } = getAdsSchema.validate(req.secureQuery);
   if (error) {
@@ -45,21 +45,49 @@ export const getAllAds = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const offset = (page - 1) * limit;
-  const { count, rows } = await Ad.findAndCountAll({
-    where,
-    include: [{ model: User, as: "user" }],
-    limit,
-    offset,
-    order: orderChoice,
-  });
+
+  // OPTIMIZATION: Use separate count and findAll for better performance
+  const [ads, count] = await Promise.all([
+    Ad.findAll({
+      where,
+      attributes: [
+        "id",
+        "title",
+        "slug",
+        "city",
+        "area",
+        "rooms",
+        "space",
+        "propertyType",
+        "type",
+        "price",
+        "images",
+        "createdAt",
+      ],
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["slug", "name", "avatar"],
+          required: false,
+        },
+      ],
+      limit,
+      offset,
+      order: orderChoice,
+      raw: true,
+      nest: true,
+    }),
+    Ad.count({ where }),
+  ]);
 
   res.status(200).json({
     totalPages: Math.ceil(count / limit),
-    ads: rows,
+    ads,
   });
 });
 
-// ========== GET MY ADS ==========
+// ========== GET MY ADS (OPTIMIZED) ==========
 export const getMyAds = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { value, error } = getAdsSchema.validate(req.secureQuery);
@@ -67,7 +95,7 @@ export const getMyAds = asyncHandler(
       return res.status(400).json({ message: error.details });
     }
 
-    const where = adsFilters(value);
+    const where = { ...adsFilters(value), userId: req.user.id };
     const { page = 1, limit = 8, order } = value;
 
     let orderChoice: Order;
@@ -86,17 +114,45 @@ export const getMyAds = asyncHandler(
     }
 
     const offset = (page - 1) * limit;
-    const { count, rows } = await Ad.findAndCountAll({
-      where: { ...where, userId: req.user.id },
-      include: [{ model: User, as: "user" }],
-      limit,
-      offset,
-      order: orderChoice,
-    });
+
+    const [ads, count] = await Promise.all([
+      Ad.findAll({
+        where,
+        attributes: [
+          "id",
+          "title",
+          "slug",
+          "city",
+          "area",
+          "rooms",
+          "space",
+          "propertyType",
+          "type",
+          "price",
+          "images",
+          "createdAt",
+          "isDeleted",
+        ],
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["slug", "name", "avatar"],
+            required: false,
+          },
+        ],
+        limit,
+        offset,
+        order: orderChoice,
+        raw: true,
+        nest: true,
+      }),
+      Ad.count({ where }),
+    ]);
 
     res.status(200).json({
       totalPages: Math.ceil(count / limit),
-      ads: rows,
+      ads,
     });
   }
 );
@@ -107,17 +163,21 @@ export const getSitemapAds = asyncHandler(
     const part = parseInt(req.query?.part as string) || 1;
     const limit = 50000;
 
-    const { count, rows } = await Ad.findAndCountAll({
-      attributes: ["slug", "updatedAt"],
-      limit,
-      offset: (part - 1) * limit,
-    });
+    const [ads, count] = await Promise.all([
+      Ad.findAll({
+        attributes: ["slug", "updatedAt"],
+        limit,
+        offset: (part - 1) * limit,
+        raw: true,
+      }),
+      Ad.count(),
+    ]);
 
-    res.status(200).json({ ads: rows, total: count });
+    res.status(200).json({ ads, total: count });
   }
 );
 
-// ========== GET MY AD BY ID ==========
+// ========== GET MY AD BY ID (OPTIMIZED) ==========
 export const getMyAd = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = sanitizeXSS(req.params);
 
@@ -125,7 +185,11 @@ export const getMyAd = asyncHandler(async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
   }
 
-  const ad = await Ad.findOne({ where: { id, userId: req.user.id } });
+  const ad = await Ad.findOne({
+    where: { id, userId: req.user.id },
+    raw: true,
+  });
+
   if (!ad) {
     return res.status(404).json({ message: "لم يتم العثور على الإعلان" });
   }
@@ -133,7 +197,7 @@ export const getMyAd = asyncHandler(async (req: AuthRequest, res: Response) => {
   res.status(200).json({ ad });
 });
 
-// ========== GET AD BY SLUG (PUBLIC) ==========
+// ========== GET AD BY SLUG (PUBLIC) - CRITICAL OPTIMIZATION ==========
 export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
   const { slug } = sanitizeXSS(req.params);
 
@@ -141,9 +205,37 @@ export const getAdBySlug = asyncHandler(async (req: Request, res: Response) => {
     return res.status(400).json({ message: "المعرف غير موجود في الرابط" });
   }
 
+  // CRITICAL: Use raw query with specific attributes and isDeleted filter
   const ad = await Ad.findOne({
-    where: { slug },
-    include: [{ model: User, as: "user" }],
+    where: { slug, isDeleted: false },
+    attributes: [
+      "id",
+      "title",
+      "slug",
+      "city",
+      "area",
+      "rooms",
+      "space",
+      "propertyType",
+      "address",
+      "type",
+      "description",
+      "images",
+      "price",
+      "whatsappNumber",
+      "createdAt",
+      "updatedAt",
+    ],
+    include: [
+      {
+        model: User,
+        as: "user",
+        attributes: ["slug", "name", "avatar", "avgRating", "totalReviews"],
+        required: false,
+      },
+    ],
+    raw: true,
+    nest: true,
   });
 
   if (!ad) {
@@ -173,12 +265,10 @@ export const createAd = asyncHandler(
         .json({ message: "رصيدك الحالى لا يكفى لعمل اعلان" });
     }
 
-    // Upload images if provided
     const files = req.files as Express.Multer.File[] | undefined;
     const uploadedImages =
       files && files.length > 0 ? await handleAdImagesUpload(files, 5) : [];
 
-    // Create ad in transaction
     const result = await sequelize.transaction(async (t) => {
       const ad = await Ad.create(
         {
@@ -217,7 +307,6 @@ export const createAd = asyncHandler(
       return ad;
     });
 
-    // If transaction fails, rollback S3 uploads (asyncHandler catches errors)
     if (!result && uploadedImages.length > 0) {
       await deleteAdImages(uploadedImages);
     }
@@ -239,7 +328,6 @@ export const updateAd = asyncHandler(
     }
 
     req.secureBody = sanitizeXSS(req.body);
-    //ensure deletedImages is array
     req.secureBody.deletedImages = JSON.parse(
       req.secureBody.deletedImages || "[]"
     );
@@ -249,7 +337,6 @@ export const updateAd = asyncHandler(
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    // Handle image updates if provided
     const files = req.files as Express.Multer.File[] | undefined;
     const deletedImages = value.deletedImages as
       | Array<{ key: string }>
@@ -271,10 +358,8 @@ export const updateAd = asyncHandler(
         keysToDelete || []
       );
 
-      // Update ad with new images
       await ad.update({ ...value, images: updatedImages });
     } else {
-      // Update ad without touching images
       await ad.update(value);
     }
 
@@ -301,12 +386,10 @@ export const deleteAd = asyncHandler(
         .json({ message: "الإعلان غير موجود أو لا تملك صلاحية الحذف عليه" });
     }
 
-    // Delete images from S3
     if (ad.images && ad.images.length > 0) {
       await deleteAdImages(ad.images);
     }
 
-    // Soft delete
     ad.images = [];
     ad.isDeleted = true;
     await ad.save();
