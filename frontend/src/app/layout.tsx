@@ -85,12 +85,26 @@ export default function RootLayout({
           rel="dns-prefetch"
           href="https://aqark-s3.s3.us-east-1.amazonaws.com"
         />
-        {process.env.NEXT_PUBLIC_GA_ID && (
-          <>
-            <link rel="preconnect" href="https://www.googletagmanager.com" />
-            <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-          </>
-        )}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+      /* Only the absolute minimum CSS needed for first paint */
+      body { margin: 0; font-family: system-ui, -apple-system; }
+      .min-h-screen { min-height: 100vh; }
+      .grid { display: grid; }
+      .gap-4 { gap: 1rem; }
+      @media (min-width: 640px) { 
+        .sm\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
+      }
+      @media (min-width: 1024px) { 
+        .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } 
+      }
+      @media (min-width: 1280px) { 
+        .xl\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } 
+      }
+    `,
+          }}
+        />
       </head>
       <body className="antialiased bg-linear-to-bl from-primary/30 via-base-100 to-secondary/30 overflow-x-hidden min-h-screen">
         <Provider>
@@ -98,10 +112,9 @@ export default function RootLayout({
           <main className="min-h-screen pb-15">{children}</main>
           <Footer />
         </Provider>
-        {/* Lightweight GA via Next third-parties */}
-        {process.env.NEXT_PUBLIC_GA_ID ? (
+        {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
-        ) : null}
+        )}
       </body>
     </html>
   );

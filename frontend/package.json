@@ -26,7 +26,7 @@
     "react-select": "^5.10.2",
     "sonner": "^2.0.7",
     "swiper": "^12.0.1",
-    "zod": "^4.1.5",
+    "zod": "^4.1.13",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -44,10 +44,13 @@
     "tailwindcss": "^4.1.17",
     "typescript": "^5"
   },
-  "browserslist": [
-    "chrome >= 90",
-    "firefox >= 88",
-    "safari >= 14",
-    "edge >= 90"
-  ]
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all",
+      "not IE 11",
+      "not safari < 13"
+    ]
+  }
 }

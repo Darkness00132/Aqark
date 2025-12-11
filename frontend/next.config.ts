@@ -5,15 +5,11 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   compiler: { removeConsole: process.env.NODE_ENV === "production" },
-  experimental: {
-    optimizePackageImports: ["react-icons", "react-hook-form"],
-  },
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
-        port: "",
         pathname: "/**",
       },
       {
@@ -21,6 +17,13 @@ const nextConfig: NextConfig = {
         hostname: "aqark-s3.s3.us-east-1.amazonaws.com",
         pathname: "/**",
       },
+    ],
+  },
+  experimental: {
+    optimizePackageImports: [
+      "react-icons",
+      "react-hook-form",
+      "@tanstack/react-query",
     ],
   },
   modularizeImports: {

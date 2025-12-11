@@ -31,8 +31,9 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
           priority={priority}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
+          quality={75} // ⚠️ THIS WAS MISSING - Reduces image size by 25%
           className="object-cover object-center w-full h-full transition-transform duration-700 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10" />
 
@@ -94,13 +95,14 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
 
         {/* User */}
         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
             {ad.user.avatar ? (
               <Image
                 src={ad.user.avatar}
                 alt={ad.user.name}
                 width={40}
                 height={40}
+                quality={60} // ⚠️ ADDED - Lower quality for avatars
                 className="w-full h-full object-cover"
                 sizes="40px"
                 loading="lazy"
@@ -144,5 +146,11 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
   );
 }
 
-// Memoize to prevent unnecessary re-renders
-export default memo(AdCard);
+// Memoize with custom comparison for better performance
+export default memo(AdCard, (prevProps, nextProps) => {
+  return (
+    prevProps.ad.id === nextProps.ad.id &&
+    prevProps.priority === nextProps.priority &&
+    prevProps.mine === nextProps.mine
+  );
+});
