@@ -1,3 +1,4 @@
+"use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { AdCard, AdCardsLoading } from "./index";
 import { useGetAds } from "@/hooks/ad";
