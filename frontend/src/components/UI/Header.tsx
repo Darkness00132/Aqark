@@ -29,9 +29,9 @@ export default function Header() {
               priority
               src="/favicon.ico"
               alt="logo"
-              width={50}
-              height={50}
-              quality={80}
+              width={40}
+              height={40}
+              quality={75}
               className="w-8 h-8 sm:w-10 sm:h-10"
               sizes="(max-width: 640px) 32px, 40px"
             />

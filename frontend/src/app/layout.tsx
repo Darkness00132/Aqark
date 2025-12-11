@@ -88,21 +88,26 @@ export default function RootLayout({
         <style
           dangerouslySetInnerHTML={{
             __html: `
-      /* Only the absolute minimum CSS needed for first paint */
-      body { margin: 0; font-family: system-ui, -apple-system; }
-      .min-h-screen { min-height: 100vh; }
-      .grid { display: grid; }
-      .gap-4 { gap: 1rem; }
-      @media (min-width: 640px) { 
-        .sm\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
-      }
-      @media (min-width: 1024px) { 
-        .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } 
-      }
-      @media (min-width: 1280px) { 
-        .xl\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } 
-      }
-    `,
+              body { 
+                margin: 0; 
+                min-height: 100vh; 
+                overflow-x: hidden;
+                background-color: #f0f0f0; 
+              }
+              .min-h-screen { min-height: 100vh; }
+              .grid { display: grid; }
+              .gap-4 { gap: 1rem; }
+              
+              @media (min-width: 640px) { 
+                .sm\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
+              }
+              @media (min-width: 1024px) { 
+                .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } 
+              }
+              @media (min-width: 1280px) { 
+                .xl\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } 
+              }
+            `,
           }}
         />
       </head>
