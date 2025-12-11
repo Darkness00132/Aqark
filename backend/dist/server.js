@@ -13,13 +13,14 @@ import adsRouter from "./routes/ads.route.js";
 import creditsRouter from "./routes/credits.routes.js";
 import adminRouter from "./routes/admin.route.js";
 import sanitizeXSS from "./utils/sanitizeXSS.js";
+import errorHandler from "./middlewares/errorHandler.js";
 import { getClientIP } from "./utils/getClientIp.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
-// OPTIMIZATION: Increase rate limit points for better UX
+// RATE LIMITING
 const rateLimiter = new RateLimiterMemory({
-    points: 100, // Increased from 60
-    duration: 60,
+    points: 100, // Number of requests
+    duration: 60, // Per 60 seconds
     blockDuration: 60, // Block for 1 minute after exceeding
 });
 app.use(async (req, res, next) => {
@@ -33,135 +34,98 @@ app.use(async (req, res, next) => {
         const retrySecs = Math.ceil(rejRes.msBeforeNext / 1000);
         res.status(429).json({
             message: `لقد وصلت الحد الأقصى للطلبات. حاول مرة أخرى بعد ${retrySecs} ثانية.`,
+            retryAfter: retrySecs,
         });
     }
 });
-// OPTIMIZATION: Add compression middleware
+// MIDDLEWARE CONFIGURATION
+// Trust proxy - important for rate limiting and IP detection behind reverse proxy
+app.set("trust proxy", 1);
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+// Compression for performance (reduces response size)
 app.use(compression());
-app
-    .use(express.json({ limit: "10mb" })) // Add limit to prevent large payloads
-    .use(express.urlencoded({ extended: true, limit: "10mb" }))
-    .set("trust proxy", 1);
-// OPTIMIZATION: Move sanitization to after JSON parsing
+// XSS sanitization - sanitize request data
 app.use((req, _res, next) => {
     req.secureBody = sanitizeXSS(req.body);
     req.secureQuery = sanitizeXSS(req.query);
     next();
 });
-// OPTIMIZATION: Configure CORS more efficiently
-const allowedOrigins = [process.env.FRONTEND_URL, process.env.ADMIN_URL].filter(Boolean);
-app
-    .use(cors({
-    origin: (origin, cb) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            return cb(null, true);
+// CORS CONFIGURATION
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, Postman)
+        if (!origin)
+            return callback(null, true);
+        const allowedOrigins = [
+            process.env.FRONTEND_URL,
+            process.env.ADMIN_URL,
+        ].filter(Boolean);
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
         }
-        cb(new Error("Not allowed by CORS"));
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
-    maxAge: 86400, // Cache preflight for 24 hours
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Set-Cookie"],
+    maxAge: 600, // Cache preflight requests for 10 minutes
+}));
+// SECURITY HEADERS (HELMET)
+app.use(cookieParser());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
+// Additional helmet middlewares for enhanced security
+app.use(helmet.noSniff()); // Prevent MIME type sniffing
+app.use(helmet.dnsPrefetchControl({ allow: false })); // Control DNS prefetching
+app.use(helmet.referrerPolicy({ policy: "strict-origin-when-cross-origin" }));
+app
+    .use(helmet.hsts({
+    maxAge: 31536000, // 1 year in seconds
+    includeSubDomains: true,
+    preload: true,
 }))
-    .use(cookieParser())
-    .use(helmet())
-    .use(helmet.noSniff())
-    .use(helmet.dnsPrefetchControl({ allow: false }))
-    .use(helmet.referrerPolicy({ policy: "no-referrer-when-downgrade" }))
-    .use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true, preload: true }))
     .disable("x-powered-by");
-// Database connection
+// DATABASE CONNECTION
 try {
     await sequelize.authenticate();
+    console.log("✓ Database connection established");
     if (process.env.PRODUCTION === "false") {
         await sequelize.sync({ alter: true });
-        console.log("Database synced");
+        console.log("✓ Database schema synchronized");
     }
-    console.log("Connected to database");
 }
 catch (error) {
-    console.error("Unable to connect to the database:", error);
-    process.exit(1); // Exit if database connection fails
+    console.error("✗ Unable to connect to database:", error);
+    process.exit(1);
 }
-// Routes
+// API ROUTES
 app
     .use("/api/users", userRouter)
     .use("/api", googleRouter)
     .use("/api/reviews", reviewsRouter)
     .use("/api/ads", adsRouter)
     .use("/api/credits", creditsRouter)
-    .use("/api/admin", adminRouter);
-// OPTIMIZATION: Improved error handler
-app.use((err, _req, res, _next) => {
-    // Only log in development
-    if (process.env.NODE_ENV !== "production") {
-        console.error("Error:", err);
-    }
-    let status = 500;
-    let message = "Something went wrong";
-    let details = null;
-    if (err instanceof Error) {
-        switch (err.name) {
-            case "JsonWebTokenError":
-                status = 401;
-                message = "Invalid or malformed token";
-                break;
-            case "TokenExpiredError":
-                status = 401;
-                message = "Token has expired";
-                break;
-            case "ValidationError": {
-                const errorObj = err;
-                if (errorObj.errors) {
-                    details = Object.values(errorObj.errors).map((e) => ({
-                        field: e.path,
-                        message: e.message,
-                    }));
-                }
-                else if (errorObj.details) {
-                    details = errorObj.details.map((e) => ({
-                        field: e.path?.join("."),
-                        message: e.message,
-                    }));
-                }
-                status = 400;
-                message = "Validation failed";
-                break;
-            }
-            default:
-                message = err.message || message;
-                break;
-        }
-    }
-    else if (err && typeof err === "object") {
-        const e = err;
-        if (e.code === 11000 ||
-            e.code === "E11000" ||
-            e.name === "SequelizeUniqueConstraintError") {
-            const field = Object.keys(e.keyValue || e.fields || {})[0] ||
-                (e.errors?.[0]?.path ?? "unknown");
-            const value = e.keyValue?.[field] || e.errors?.[0]?.value;
-            status = 409;
-            message = `Duplicate value for field '${field}'`;
-            details = { field, value };
-        }
-        else if (e.name === "CastError") {
-            status = 400;
-            message = `Invalid value for '${e.path}'`;
-            details = { field: e.path, value: e.value };
-        }
-        else if (e.name === "SequelizeValidationError") {
-            status = 400;
-            message = "Validation failed";
-            details = e.errors.map((x) => ({
-                field: x.path,
-                message: x.message,
-            }));
-        }
-    }
-    res.status(status).json({
-        message,
-        ...(details && { details }),
-    });
+    .use("/api/admin", adminRouter)
+    .use((_req, res) => {
+    res.status(404).json({ message: "Route not found" });
+})
+    .use(errorHandler);
+app.listen(PORT, () => {
+    console.log(`✓ Server running on port ${PORT}`);
+    console.log(`✓ Environment: ${process.env.NODE_ENV || "development"}`);
 });
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 //# sourceMappingURL=server.js.map
