@@ -11,13 +11,35 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
+            // Cache data for 5 minutes - good for most use cases
             staleTime: 5 * 60_000,
+
+            // Don't refetch on window focus - prevents unnecessary API calls
             refetchOnWindowFocus: false,
+
+            // Refetch when internet reconnects - good for mobile users
             refetchOnReconnect: true,
+
+            // Only retry once on failure - prevents hammering failed endpoints
             retry: 1,
-            retryDelay: (i) => Math.min(1000 * 2 ** i, 10_000),
+
+            // Exponential backoff - prevents API spam
+            retryDelay: (attemptIndex) =>
+              Math.min(1000 * 2 ** attemptIndex, 10_000),
+
+            // NEW: Add gcTime (garbage collection) - clears unused cache after 10 minutes
+            gcTime: 10 * 60_000,
+
+            // NEW: Add networkMode - handles offline behavior better
+            networkMode: "online",
           },
-          mutations: { retry: 0 },
+          mutations: {
+            // Don't retry mutations - user should manually retry failed actions
+            retry: 0,
+
+            // NEW: Add networkMode for mutations too
+            networkMode: "online",
+          },
         },
       })
   );
@@ -29,6 +51,8 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         richColors
         position="top-left"
         duration={5000}
+        // NEW: Close button for better UX
+        closeButton
         toastOptions={{
           classNames: {
             toast: "text-lg",
