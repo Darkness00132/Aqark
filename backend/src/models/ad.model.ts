@@ -121,6 +121,13 @@ Ad.init(
     schema: "public",
     tableName: "ads",
     timestamps: true,
+    indexes: [
+      { fields: ["slug"], unique: true },
+      { fields: ["userId"] },
+      { fields: ["isDeleted"] },
+      { fields: ["isDeleted", "createdAt"] },
+      { fields: ["price"] },
+    ],
   }
 );
 
