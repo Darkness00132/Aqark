@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FaStar, FaRegStar, FaUserCircle, FaAward } from "react-icons/fa";
+import { Star, User, Award } from "lucide-react";
 import { Metadata } from "next";
 import ReviewForm from "@/components/reviews/ReviewForm";
 import formatDateFromNow from "@/lib/formatDateFromNow";
@@ -31,9 +31,9 @@ const StarRating = ({ rating }: { rating: number }) => {
     <div className="flex gap-1">
       {Array.from({ length: 5 }).map((_, i) =>
         i < rating ? (
-          <FaStar key={i} className="text-warning" />
+          <Star key={i} className="text-warning" />
         ) : (
-          <FaRegStar key={i} className="text-warning opacity-30" />
+          <Star key={i} className="text-warning opacity-30" />
         )
       )}
     </div>
@@ -88,7 +88,7 @@ export default async function UserProfile({
           </div>
 
           <div className="badge badge-lg badge-soft badge-secondary p-5 rounded-3xl">
-            <FaUserCircle className="ml-2" />
+            <User className="ml-2" />
             {user.totalReviews} تقييمات
           </div>
         </div>
@@ -117,7 +117,7 @@ export default async function UserProfile({
         {false && (
           <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
             <div className="card-body items-center text-center">
-              <FaAward className="text-5xl text-accent mb-2" />
+              <Award className="text-5xl text-accent mb-2" />
               <p className="text-base-content/70 font-medium">عضو موثوق</p>
             </div>
           </div>

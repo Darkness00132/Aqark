@@ -1,7 +1,7 @@
 "use client";
 
 import { Control, FieldErrors } from "react-hook-form";
-import { MdLocationOn } from "react-icons/md";
+import { MapPin } from "lucide-react";
 import CitySelect from "../Selects/CitySelect";
 import AreaSelect from "../Selects/AreaSelect";
 
@@ -21,7 +21,7 @@ export default function FormLocationSection({
   return (
     <div>
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <MdLocationOn className="text-secondary text-2xl" />
+        <MapPin className="text-secondary text-2xl" />
         الموقع
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

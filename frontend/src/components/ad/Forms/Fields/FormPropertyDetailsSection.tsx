@@ -1,7 +1,7 @@
 "use client";
 
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { MdHome, MdWarning } from "react-icons/md";
+import { Home, AlertCircle } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/data";
 
 interface FormPropertyDetailsSectionProps {
@@ -18,7 +18,7 @@ export default function FormPropertyDetailsSection({
   return (
     <div>
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <MdHome className="text-accent text-2xl" />
+        <Home className="text-accent text-2xl" />
         تفاصيل العقار
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -41,7 +41,7 @@ export default function FormPropertyDetailsSection({
           {errors.propertyType && (
             <label className="label">
               <span className="label-text-alt text-error flex items-center gap-1">
-                <MdWarning />
+                <AlertCircle />
                 {errors.propertyType.message as string}
               </span>
             </label>
@@ -53,7 +53,10 @@ export default function FormPropertyDetailsSection({
           <label className="label">
             <span className="label-text font-semibold">نوع الإعلان</span>
           </label>
-          <select {...register("type")} className="select select-bordered w-full">
+          <select
+            {...register("type")}
+            className="select select-bordered w-full"
+          >
             <option value="">اختر نوع الإعلان</option>
             <option value="تمليك">تمليك</option>
             <option value="إيجار">إيجار</option>
@@ -61,7 +64,7 @@ export default function FormPropertyDetailsSection({
           {errors.type && (
             <label className="label">
               <span className="label-text-alt text-error flex items-center gap-1">
-                <MdWarning />
+                <AlertCircle />
                 {errors.type.message as string}
               </span>
             </label>
@@ -85,7 +88,7 @@ export default function FormPropertyDetailsSection({
           {errors.price && (
             <label className="label">
               <span className="label-text-alt text-error flex items-center gap-1">
-                <MdWarning />
+                <AlertCircle />
                 {errors.price.message as string}
               </span>
             </label>
@@ -114,7 +117,7 @@ export default function FormPropertyDetailsSection({
             {errors.rooms && (
               <label className="label">
                 <span className="label-text-alt text-error flex items-center gap-1">
-                  <MdWarning />
+                  <AlertCircle />
                   {errors.rooms.message as string}
                 </span>
               </label>
@@ -139,7 +142,7 @@ export default function FormPropertyDetailsSection({
           {errors.space && (
             <label className="label">
               <span className="label-text-alt text-error flex items-center gap-1">
-                <MdWarning />
+                <AlertCircle />
                 {errors.space.message as string}
               </span>
             </label>
@@ -149,4 +152,3 @@ export default function FormPropertyDetailsSection({
     </div>
   );
 }
-

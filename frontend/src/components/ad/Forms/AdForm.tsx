@@ -5,14 +5,14 @@ import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  MdDriveFileRenameOutline,
-  MdLocationOn,
-  MdHome,
-  MdDescription,
-  MdPhone,
-  MdImage,
-  MdWarning,
-} from "react-icons/md";
+  Edit2,
+  MapPin,
+  Home,
+  FileText,
+  Phone,
+  Image,
+  AlertTriangle,
+} from "lucide-react";
 
 import { createAdSchema } from "@/validation/adValidates";
 import { PROPERTY_TYPES } from "@/lib/data";
@@ -70,7 +70,7 @@ export default function AdForm() {
         {/* Title */}
         <div className="form-control">
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <MdDriveFileRenameOutline className="text-primary text-xl" />
+            <Edit2 className="text-primary text-xl" />
             عنوان الإعلان
           </h3>
           <input
@@ -82,7 +82,7 @@ export default function AdForm() {
           {errors.title && (
             <label className="label">
               <span className="label-text-alt text-error flex items-center gap-1">
-                <MdWarning />
+                <AlertTriangle />
                 {errors.title.message}
               </span>
             </label>
@@ -94,7 +94,7 @@ export default function AdForm() {
         {/* Location */}
         <div>
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <MdLocationOn className="text-secondary text-2xl" />
+            <MapPin className="text-secondary text-2xl" />
             الموقع
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -112,7 +112,7 @@ export default function AdForm() {
         {/* Property Details */}
         <div>
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <MdHome className="text-accent text-2xl" />
+            <Home className="text-accent text-2xl" />
             تفاصيل العقار
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -135,7 +135,7 @@ export default function AdForm() {
               {errors.propertyType && (
                 <label className="label">
                   <span className="label-text-alt text-error flex items-center gap-1">
-                    <MdWarning />
+                    <AlertTriangle />
                     {errors.propertyType.message}
                   </span>
                 </label>
@@ -158,7 +158,7 @@ export default function AdForm() {
               {errors.type && (
                 <label className="label">
                   <span className="label-text-alt text-error flex items-center gap-1">
-                    <MdWarning />
+                    <AlertTriangle />
                     {errors.type.message}
                   </span>
                 </label>
@@ -182,7 +182,7 @@ export default function AdForm() {
               {errors.price && (
                 <label className="label">
                   <span className="label-text-alt text-error flex items-center gap-1">
-                    <MdWarning />
+                    <AlertTriangle />
                     {errors.price.message}
                   </span>
                 </label>
@@ -211,7 +211,7 @@ export default function AdForm() {
                 {errors.rooms && (
                   <label className="label">
                     <span className="label-text-alt text-error flex items-center gap-1">
-                      <MdWarning />
+                      <AlertTriangle />
                       {errors.rooms.message}
                     </span>
                   </label>
@@ -236,7 +236,7 @@ export default function AdForm() {
               {errors.space && (
                 <label className="label">
                   <span className="label-text-alt text-error flex items-center gap-1">
-                    <MdWarning />
+                    <AlertTriangle />
                     {errors.space.message}
                   </span>
                 </label>
@@ -250,7 +250,7 @@ export default function AdForm() {
         {/* Additional Details */}
         <div>
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <MdDescription className="text-info text-2xl" />
+            <FileText className="text-info text-2xl" />
             تفاصيل إضافية
           </h3>
 
@@ -268,7 +268,7 @@ export default function AdForm() {
             {errors.address && (
               <label className="label">
                 <span className="label-text-alt text-error flex items-center gap-1">
-                  <MdWarning />
+                  <AlertTriangle />
                   {errors.address.message}
                 </span>
               </label>
@@ -288,7 +288,7 @@ export default function AdForm() {
             {errors.description && (
               <label className="label">
                 <span className="label-text-alt text-error flex items-center gap-1">
-                  <MdWarning />
+                  <AlertTriangle />
                   {errors.description.message}
                 </span>
               </label>
@@ -301,7 +301,7 @@ export default function AdForm() {
         {/* Contact Info */}
         <div>
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <MdPhone className="text-success text-2xl" />
+            <Phone className="text-success text-2xl" />
             معلومات التواصل
           </h3>
           <div className="form-control">
@@ -326,7 +326,7 @@ export default function AdForm() {
             {errors.whatsappNumber && (
               <label className="label">
                 <span className="label-text-alt text-error flex items-center gap-1">
-                  <MdWarning />
+                  <AlertTriangle />
                   {errors.whatsappNumber.message}
                 </span>
               </label>
@@ -339,7 +339,7 @@ export default function AdForm() {
         {/* Images Upload */}
         <div>
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <MdImage className="text-warning text-2xl" />
+            <Image className="text-warning text-2xl" />
             صور العقار
           </h3>
           <ImageUpload images={images} setImages={setImages} />
@@ -348,7 +348,7 @@ export default function AdForm() {
         {/* Credits Cost Alert */}
         {creditsCost !== null && (
           <div className="alert alert-warning">
-            <MdWarning className="text-2xl" />
+            <AlertTriangle className="text-2xl" />
             <span className="font-bold">
               سيتم خصم {creditsCost} عملة من حسابك عند إنشاء الإعلان
             </span>

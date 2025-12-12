@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { FaStar, FaClock } from "react-icons/fa";
+import { Star, Clock } from "lucide-react";
 import formatDateFromNow from "@/lib/formatDateFromNow";
 
 interface AdUserSidebarProps {
@@ -33,7 +33,7 @@ export default function AdUserSidebar({ user, createdAt }: AdUserSidebarProps) {
           <div className="flex items-center justify-center gap-2">
             <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
-                <FaStar
+                <Star
                   key={i}
                   className={`w-4 h-4 ${
                     i < Math.floor(user.avgRating || 0)
@@ -54,7 +54,7 @@ export default function AdUserSidebar({ user, createdAt }: AdUserSidebarProps) {
 
         {/* Created Date */}
         <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-6 bg-gray-50 rounded-xl p-3">
-          <FaClock className="text-gray-400" size={16} />
+          <Clock className="text-gray-400" size={16} />
           <span className="font-medium">
             نُشر {formatDateFromNow(createdAt)}
           </span>

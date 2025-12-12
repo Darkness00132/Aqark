@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from "react-icons/fa";
+import { Users, Play, Camera, Music } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -70,28 +70,28 @@ export default function Footer() {
                 aria-label="فيسبوك"
                 className="btn btn-circle btn-outline btn-sm hover:btn-primary transition-colors"
               >
-                <FaFacebookF className="w-4 h-4" />
+                <Users className="text-blue-600 w-6 h-6" />
               </a>
               <a
                 href="#"
                 aria-label="إنستغرام"
                 className="btn btn-circle btn-outline btn-sm hover:btn-secondary transition-colors"
               >
-                <FaInstagram className="w-4 h-4" />
+                <Play className="text-red-600 w-6 h-6" />
               </a>
               <a
                 href="#"
                 aria-label="تيك توك"
                 className="btn btn-circle btn-outline btn-sm hover:btn-accent transition-colors"
               >
-                <FaTiktok className="w-4 h-4" />
+                <Camera className="text-pink-500 w-6 h-6" />
               </a>
               <a
                 href="#"
                 aria-label="يوتيوب"
                 className="btn btn-circle btn-outline btn-sm hover:btn-error transition-colors"
               >
-                <FaYoutube className="w-4 h-4" />
+                <Music className="text-black w-6 h-6" />
               </a>
             </div>
           </div>

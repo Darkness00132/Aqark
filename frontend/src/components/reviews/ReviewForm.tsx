@@ -1,15 +1,7 @@
 "use client";
 import { useState } from "react";
 import useCreateReview from "@/hooks/reviews/createReview";
-import {
-  FaStar,
-  FaRegStar,
-  FaPaperPlane,
-  FaEdit,
-  FaLock,
-  FaUserCheck,
-  FaInfoCircle,
-} from "react-icons/fa";
+import { Star, Send, Edit2, Lock, UserCheck, Info } from "lucide-react";
 import useAuth from "@/store/useAuth";
 import { toast } from "sonner";
 
@@ -41,7 +33,7 @@ export default function ReviewForm({ slug }: { slug: string }) {
       <div className="card shadow-xl border border-base-300">
         <div className="card-body items-center text-center py-12">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <FaLock className="text-4xl text-primary" />
+            <Lock className="text-4xl text-primary" />
           </div>
           <h3 className="text-2xl font-bold text-base-content mb-2">
             سجل الدخول لكتابة تقييم
@@ -50,7 +42,7 @@ export default function ReviewForm({ slug }: { slug: string }) {
             يجب عليك تسجيل الدخول أولاً لتتمكن من مشاركة تجربتك وتقييم الخدمة
           </p>
           <button className="btn btn-primary btn-lg gap-2">
-            <FaLock />
+            <Lock />
             تسجيل الدخول
           </button>
         </div>
@@ -64,7 +56,7 @@ export default function ReviewForm({ slug }: { slug: string }) {
       <div className="card bg-gradient-to-br from-warning/5 to-warning/10 shadow-xl border border-warning/30">
         <div className="card-body items-center text-center py-12">
           <div className="w-20 h-20 rounded-full bg-warning/20 flex items-center justify-center mb-4">
-            <FaUserCheck className="text-4xl text-warning" />
+            <UserCheck className="text-4xl text-warning" />
           </div>
           <h3 className="text-2xl font-bold text-base-content mb-2">
             لا يمكنك تقييم ملفك الشخصي
@@ -108,7 +100,7 @@ export default function ReviewForm({ slug }: { slug: string }) {
                           : "text-base-content/15 hover:text-warning/60 hover:scale-110"
                       }`}
                     >
-                      {isFilled ? <FaStar /> : <FaRegStar />}
+                      {isFilled ? <Star /> : <Star />}
                     </button>
                   );
                 })}
@@ -130,7 +122,7 @@ export default function ReviewForm({ slug }: { slug: string }) {
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <h3 className="text-2xl font-bold text-base-content flex items-center gap-2">
-              <FaEdit className="text-primary" />
+              <Edit2 className="text-primary" />
               شاركنا رأيك
             </h3>
             <span className="text-sm text-base-content/60 font-medium">
@@ -165,13 +157,13 @@ export default function ReviewForm({ slug }: { slug: string }) {
           }`}
           disabled={rating === 0}
         >
-          <FaPaperPlane className="text-xl" />
+          <Send className="text-xl" />
           نشر التقييم
         </button>
 
         {/* Info Alert */}
         <div className="alert bg-info/70">
-          <FaInfoCircle className="text-info-content" size={18} />
+          <Info className="text-info-content" size={18} />
           <span className="text-info-content">
             تقييمك سيظهر للجميع ويساهم في بناء مجتمع موثوق وشفاف
           </span>

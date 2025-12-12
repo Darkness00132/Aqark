@@ -2,7 +2,7 @@
 
 import Select from "react-select";
 import { Controller, Control, FieldErrors } from "react-hook-form";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { MapPin } from "lucide-react";
 import { CITIES, CITIES_WITH_AREAS } from "@/lib/data";
 import type { z } from "zod";
 import { AdfiltersSchema } from "@/validation/adValidates";
@@ -34,7 +34,7 @@ export default function LocationFilter({
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-base-300">
       <div className="flex items-center gap-2 mb-4 pb-2 border-b border-base-300">
-        <FaMapMarkerAlt className="text-primary w-4 h-4" />
+        <MapPin className="text-primary w-4 h-4" />
         <h3 className="font-semibold text-base-content">الموقع</h3>
       </div>
 
@@ -50,9 +50,7 @@ export default function LocationFilter({
               <Select
                 options={cityOptions}
                 placeholder="اختر المحافظة"
-                value={
-                  cityOptions.find((o) => o.value === field.value) || null
-                }
+                value={cityOptions.find((o) => o.value === field.value) || null}
                 onChange={(option) => field.onChange(option?.value ?? "")}
                 onBlur={field.onBlur}
                 isClearable
@@ -79,9 +77,7 @@ export default function LocationFilter({
               <Select
                 options={areaOptions}
                 placeholder="اختر المنطقة"
-                value={
-                  areaOptions.find((o) => o.value === field.value) || null
-                }
+                value={areaOptions.find((o) => o.value === field.value) || null}
                 onChange={(option) => field.onChange(option?.value ?? "")}
                 onBlur={field.onBlur}
                 isClearable
@@ -101,4 +97,3 @@ export default function LocationFilter({
     </div>
   );
 }
-

@@ -3,14 +3,7 @@ import { memo } from "react";
 import type { Ad } from "@/store/useAd";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  FaBed,
-  FaRulerCombined,
-  FaMapMarkerAlt,
-  FaUser,
-  FaStar,
-  FaClock,
-} from "react-icons/fa";
+import { Bed, Ruler, MapPin, User, Star, Clock } from "lucide-react";
 import formatDateFromNow from "@/lib/formatDateFromNow";
 
 interface AdCardProps {
@@ -57,7 +50,7 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
         {/* Location */}
         <div className="flex items-center text-gray-600 text-sm">
           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center ml-2">
-            <FaMapMarkerAlt className="text-red-600" size={12} />
+            <MapPin className="text-red-600" size={12} />
           </div>
           <span className="font-medium">
             {ad.city} - {ad.area}
@@ -69,7 +62,7 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
           {ad.rooms && (
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-xl">
               <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                <FaBed className="text-primary" size={12} />
+                <Bed className="text-primary" size={12} />
               </div>
               <span className="text-sm font-medium text-gray-700">
                 {ad.rooms} غرف
@@ -79,7 +72,7 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
           {ad.space && (
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-xl">
               <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center">
-                <FaRulerCombined className="text-amber-600" size={12} />
+                <Ruler className="text-amber-600" size={12} />
               </div>
               <span className="text-sm font-medium text-gray-700">
                 {ad.space} م²
@@ -108,13 +101,13 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
                 loading="lazy"
               />
             ) : (
-              <FaUser className="text-gray-400" size={18} />
+              <User className="text-gray-400" size={18} />
             )}
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-gray-900">{ad.user.name}</p>
             <div className="flex items-center gap-2 text-xs text-gray-500">
-              <FaStar className="text-yellow-400" size={12} />
+              <Star className="text-yellow-400" size={12} />
               <span className="font-medium text-gray-700">
                 {ad.user.avgRating?.toFixed(1) || "0.0"}
               </span>
@@ -125,7 +118,7 @@ function AdCard({ ad, mine = false, priority = false }: AdCardProps) {
 
         {/* Date */}
         <div className="flex items-center gap-2 text-xs text-gray-500">
-          <FaClock className="text-gray-400" size={12} />
+          <Clock className="text-gray-400" size={12} />
           <span>{formatDateFromNow(ad.createdAt)}</span>
         </div>
 

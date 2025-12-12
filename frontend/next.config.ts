@@ -33,11 +33,6 @@ const nextConfig: NextConfig = {
       "@tanstack/react-query",
     ],
   },
-  modularizeImports: {
-    "react-icons": {
-      transform: "react-icons/{{member}}",
-    },
-  },
 };
 
 export default nextConfig;

@@ -1,7 +1,6 @@
 "use client";
 
-import { FaFilter } from "react-icons/fa";
-import { FiX } from "react-icons/fi";
+import { Sliders, X } from "lucide-react";
 
 export default function FilterDrawerHeader() {
   return (
@@ -9,7 +8,7 @@ export default function FilterDrawerHeader() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white/10 rounded-lg">
-            <FaFilter className="w-5 h-5" />
+            <Sliders className="w-5 h-5" />
           </div>
           <h2 className="text-2xl font-bold">تصفية الإعلانات</h2>
         </div>
@@ -17,10 +16,9 @@ export default function FilterDrawerHeader() {
           htmlFor="filter-drawer"
           className="btn btn-sm btn-circle btn-ghost hover:bg-white/20 transition-colors cursor-pointer"
         >
-          <FiX className="w-5 h-5" />
+          <X className="w-5 h-5" />
         </label>
       </div>
     </div>
   );
 }
-

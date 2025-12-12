@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 import imageCompression from "browser-image-compression";
-import { FiUploadCloud } from "react-icons/fi";
+import { UploadCloud } from "lucide-react";
 import useUploadAvatar from "@/hooks/user/useUploadAvatar";
 
 export default function AvatarUpload({ userAvatar }: { userAvatar?: string }) {
@@ -54,7 +54,7 @@ export default function AvatarUpload({ userAvatar }: { userAvatar?: string }) {
 
       {/* Overlay icon */}
       <div className="absolute inset-0 flex justify-center items-center">
-        <FiUploadCloud
+        <UploadCloud
           size={50}
           className="opacity-0 group-hover:opacity-85 text-base-100 transition-opacity"
         />

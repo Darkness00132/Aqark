@@ -1,10 +1,4 @@
-import {
-  FaBed,
-  FaRulerCombined,
-  FaMapMarkerAlt,
-  FaWhatsapp,
-  FaPhone,
-} from "react-icons/fa";
+import { Bed, Ruler, MapPin, MessageCircle, Phone } from "lucide-react";
 import type { Ad } from "@/store/useAd";
 
 export default function AdMainInfo({ ad }: { ad: Ad }) {
@@ -32,7 +26,7 @@ export default function AdMainInfo({ ad }: { ad: Ad }) {
       {/* Location */}
       <div className="flex items-center text-gray-600 mb-6 gap-2">
         <div className="p-2 bg-red-50 rounded-lg">
-          <FaMapMarkerAlt className="text-red-500 w-4 h-4" />
+          <MapPin className="text-red-500 w-4 h-4" />
         </div>
         <span className="font-medium text-base">
           {ad.city} - {ad.area}
@@ -57,7 +51,7 @@ export default function AdMainInfo({ ad }: { ad: Ad }) {
         {ad.rooms && (
           <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200/50">
             <div className="p-3 bg-blue-500 rounded-xl">
-              <FaBed className="text-white w-5 h-5" />
+              <Bed className="text-white w-5 h-5" />
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">الغرف</p>
@@ -68,7 +62,7 @@ export default function AdMainInfo({ ad }: { ad: Ad }) {
         {ad.space && (
           <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl border border-yellow-200/50">
             <div className="p-3 bg-yellow-400 rounded-xl">
-              <FaRulerCombined className="text-white w-5 h-5" />
+              <Ruler className="text-white w-5 h-5" />
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">المساحة</p>
@@ -92,11 +86,11 @@ export default function AdMainInfo({ ad }: { ad: Ad }) {
             rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl hover:from-green-600 hover:to-green-700 transition shadow-lg font-semibold"
           >
-            <FaWhatsapp className="w-6 h-6" />
+            <MessageCircle className="w-6 h-6" />
             تواصل عبر واتساب
           </a>
           <button className="sm:w-auto px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition font-semibold flex items-center justify-center gap-2">
-            <FaPhone className="w-5 h-5" />
+            <Phone className="w-5 h-5" />
             اتصل الآن
           </button>
         </div>

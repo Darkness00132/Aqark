@@ -1,6 +1,5 @@
 "use client";
-
-import { MdImage } from "react-icons/md";
+import { Image } from "lucide-react";
 import ImageUpload from "./ImagesUpload";
 
 type DefaultImage = { url: string; key: string };
@@ -21,7 +20,7 @@ export default function FormImagesSection({
   return (
     <div>
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <MdImage className="text-warning text-2xl" />
+        <Image className="text-warning text-2xl" />
         صور العقار
       </h3>
       <ImageUpload

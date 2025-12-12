@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { FaSearch, FaHome, FaCheckCircle } from "react-icons/fa";
+import { Search, Home, CheckCircle } from "lucide-react";
 
 // Lazy-load hero to keep the landing page shell light
 const Hero = dynamic(() => import("@/components/UI/Hero"), {
@@ -13,7 +13,7 @@ const Hero = dynamic(() => import("@/components/UI/Hero"), {
   ssr: false,
 });
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -35,7 +35,7 @@ export default function Home() {
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body items-center text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <FaSearch className="text-3xl text-primary" />
+                  <Search className="text-3xl text-primary" />
                 </div>
                 <h3 className="card-title justify-center">بحث ذكي</h3>
                 <p className="text-base-content/70">
@@ -48,7 +48,7 @@ export default function Home() {
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body items-center text-center">
                 <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
-                  <FaHome className="text-3xl text-secondary" />
+                  <Home className="text-3xl text-secondary" />
                 </div>
                 <h3 className="card-title justify-center">عرض سهل</h3>
                 <p className="text-base-content/70">
@@ -60,7 +60,7 @@ export default function Home() {
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body items-center text-center">
                 <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                  <FaCheckCircle className="text-3xl text-accent" />
+                  <CheckCircle className="text-3xl text-accent" />
                 </div>
                 <h3 className="card-title justify-center">آمن وموثوق</h3>
                 <p className="text-base-content/70">

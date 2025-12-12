@@ -4,14 +4,14 @@ import Image from "next/image";
 import useAuth from "@/store/useAuth";
 import useLogout from "@/hooks/user/useLogout";
 import {
-  FaSearch,
-  FaUser,
-  FaSignOutAlt,
-  FaCoins,
-  FaBuilding,
-  FaClipboardList,
-  FaPlusCircle,
-} from "react-icons/fa";
+  Search,
+  User,
+  LogOut,
+  Coins,
+  Building,
+  Clipboard,
+  PlusCircle,
+} from "lucide-react";
 import useProfile from "@/hooks/user/useProfile";
 
 export default function Header() {
@@ -48,7 +48,7 @@ export default function Header() {
               className="input input-bordered join-item w-full"
             />
             <button className="btn btn-primary join-item">
-              <FaSearch className="text-sm" aria-label="search button" />
+              <Search className="text-sm" aria-label="search button" />
             </button>
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function Header() {
                         href="/credits"
                         className="flex items-center gap-3 p-2 rounded-xl"
                       >
-                        <FaCoins className="text-base text-amber-500" />
+                        <Coins className="text-base text-amber-500" />
                         <span className="text-sm">
                           العملات: <strong>{user?.credits || 0}</strong>
                         </span>
@@ -122,7 +122,7 @@ export default function Header() {
                     href="/ads"
                     className="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300"
                   >
-                    <FaBuilding className="text-base text-blue-500" />
+                    <Building className="text-base text-blue-500" />
                     <span className="text-sm">اعلانات العقارات</span>
                   </Link>
                 </li>
@@ -134,7 +134,7 @@ export default function Header() {
                         href="/ads/create"
                         className="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300"
                       >
-                        <FaPlusCircle className="text-base text-green-500" />
+                        <PlusCircle className="text-base text-green-500" />
                         <span className="text-sm">إنشاء إعلان جديد</span>
                       </Link>
                     </li>
@@ -144,7 +144,7 @@ export default function Header() {
                         href="/ads/my-ads"
                         className="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300"
                       >
-                        <FaClipboardList className="text-base text-amber-500" />
+                        <Clipboard className="text-base text-amber-500" />
                         <span className="text-sm">إعلاناتي</span>
                       </Link>
                     </li>
@@ -164,7 +164,7 @@ export default function Header() {
                     href="/user/profile"
                     className="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300"
                   >
-                    <FaUser className="text-base" />
+                    <User className="text-base" />
                     <span className="text-sm">الملف الشخصي</span>
                   </Link>
                 </li>
@@ -177,7 +177,7 @@ export default function Header() {
                     onClick={() => mutate()}
                     disabled={isPending}
                   >
-                    <FaSignOutAlt className="text-base" />
+                    <LogOut className="text-base" />
                     <span className="text-sm">
                       {isPending ? "جاري تسجيل الخروج..." : "تسجيل الخروج"}
                     </span>

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateProfileSchema } from "@/validation/userValidates";
-import { FaEdit, FaTimes, FaSave } from "react-icons/fa";
+import { Edit2, X, Save } from "lucide-react";
 
 type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
 
@@ -132,7 +132,7 @@ export default function ProfileForm() {
               className="btn btn-secondary flex items-center gap-2"
               onClick={() => setEditProfile(true)}
             >
-              <FaEdit /> تعديل البيانات
+              <Edit2 /> تعديل البيانات
             </button>
           ) : (
             <button
@@ -140,7 +140,7 @@ export default function ProfileForm() {
               className="btn btn-error flex items-center gap-2"
               onClick={() => setEditProfile(false)}
             >
-              <FaTimes /> تجاهل التغييرات
+              <X /> تجاهل التغييرات
             </button>
           )}
           <button
@@ -149,7 +149,7 @@ export default function ProfileForm() {
             }`}
             disabled={isPending || !editProfile}
           >
-            <FaSave /> حفظ التغييرات
+            <Save /> حفظ التغييرات
           </button>
         </div>
       </form>

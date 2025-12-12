@@ -1,7 +1,7 @@
 "use client";
 
 import { UseFormRegister } from "react-hook-form";
-import { FaTag } from "react-icons/fa";
+import { Tag } from "lucide-react";
 import type { z } from "zod";
 import { AdfiltersSchema } from "@/validation/adValidates";
 
@@ -15,7 +15,7 @@ export default function SortFilter({ register }: SortFilterProps) {
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-base-300">
       <div className="flex items-center gap-2 mb-4 pb-2 border-b border-base-300">
-        <FaTag className="text-primary w-4 h-4" />
+        <Tag className="text-primary w-4 h-4" />
         <h3 className="font-semibold text-base-content">الترتيب</h3>
       </div>
 
@@ -32,4 +32,3 @@ export default function SortFilter({ register }: SortFilterProps) {
     </div>
   );
 }
-

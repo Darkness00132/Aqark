@@ -1,7 +1,7 @@
 "use client";
 
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { MdDriveFileRenameOutline, MdWarning } from "react-icons/md";
+import { AlertCircle, Edit } from "lucide-react";
 
 interface FormTitleSectionProps {
   register: UseFormRegister<any>;
@@ -15,7 +15,7 @@ export default function FormTitleSection({
   return (
     <div className="form-control">
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <MdDriveFileRenameOutline className="text-primary text-xl" />
+        <Edit className="text-primary text-xl" />
         عنوان الإعلان
       </h3>
       <input
@@ -27,7 +27,7 @@ export default function FormTitleSection({
       {errors.title && (
         <label className="label">
           <span className="label-text-alt text-error flex items-center gap-1">
-            <MdWarning />
+            <AlertCircle />
             {errors.title.message as string}
           </span>
         </label>
@@ -35,4 +35,3 @@ export default function FormTitleSection({
     </div>
   );
 }
-

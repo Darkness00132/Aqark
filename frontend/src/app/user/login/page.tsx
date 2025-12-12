@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { FcGoogle } from "react-icons/fc";
+import { LogIn } from "lucide-react";
 import LoginForm from "@/components/user/loginForm";
 import ForgetPasswordModal from "@/components/user/forgetPasswordModel";
 import Link from "next/link";
@@ -45,7 +45,7 @@ export default async function Login({
                 href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google?mode=login`}
                 className="btn btn-outline lg:btn-lg w-full rounded-lg border-base-300 hover:bg-base-200 hover:border-primary/50 transition-all duration-300 group"
               >
-                <FcGoogle
+                <LogIn
                   size={20}
                   className="group-hover:scale-110 transition-transform"
                 />

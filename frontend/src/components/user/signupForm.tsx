@@ -1,7 +1,7 @@
 "use client";
 import useSignup from "@/hooks/user/useSignup";
 import { z } from "zod";
-import { FaExclamationCircle } from "react-icons/fa";
+import { AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/validation/userValidates";
@@ -39,7 +39,7 @@ export default function SignupForm({ role }: { role: string }) {
         {errors.name && (
           <label className="label mt-2">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <FaExclamationCircle />
+              <AlertCircle />
               {errors.name.message}
             </span>
           </label>
@@ -62,7 +62,7 @@ export default function SignupForm({ role }: { role: string }) {
         {errors.email && (
           <label className="label mt-2">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <FaExclamationCircle />
+              <AlertCircle />
               {errors.email.message}
             </span>
           </label>
@@ -85,7 +85,7 @@ export default function SignupForm({ role }: { role: string }) {
         {errors.password && (
           <label className="label mt-2">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <FaExclamationCircle />
+              <AlertCircle />
               {errors.password.message}
             </span>
           </label>

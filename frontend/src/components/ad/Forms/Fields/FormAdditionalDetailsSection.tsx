@@ -1,7 +1,7 @@
 "use client";
 
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { MdDescription, MdWarning } from "react-icons/md";
+import { FileText, AlertTriangle } from "lucide-react";
 
 interface FormAdditionalDetailsSectionProps {
   register: UseFormRegister<any>;
@@ -15,7 +15,7 @@ export default function FormAdditionalDetailsSection({
   return (
     <div>
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <MdDescription className="text-info text-2xl" />
+        <FileText className="text-info text-2xl" />
         تفاصيل إضافية
       </h3>
 
@@ -33,7 +33,7 @@ export default function FormAdditionalDetailsSection({
         {errors.address && (
           <label className="label">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <MdWarning />
+              <AlertTriangle />
               {errors.address.message as string}
             </span>
           </label>
@@ -53,7 +53,7 @@ export default function FormAdditionalDetailsSection({
         {errors.description && (
           <label className="label">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <MdWarning />
+              <AlertTriangle />
               {errors.description.message as string}
             </span>
           </label>
@@ -62,4 +62,3 @@ export default function FormAdditionalDetailsSection({
     </div>
   );
 }
-

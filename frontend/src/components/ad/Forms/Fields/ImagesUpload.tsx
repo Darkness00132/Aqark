@@ -3,7 +3,7 @@
 import { useDropzone } from "react-dropzone";
 import imageCompression from "browser-image-compression";
 import Image from "next/image";
-import { FiUpload, FiX } from "react-icons/fi";
+import { Upload, X } from "lucide-react";
 import { useCallback, useState } from "react";
 
 type DefaultImage = { url: string; key: string };
@@ -78,7 +78,7 @@ export default function ImageUpload({
         }`}
       >
         <input {...getInputProps()} />
-        <FiUpload className="w-10 h-10 text-gray-400 mb-2" />
+        <Upload className="w-10 h-10 text-gray-400 mb-2" />
         <p>
           {isDragActive
             ? "ضع الصور هنا..."
@@ -110,7 +110,7 @@ export default function ImageUpload({
                 onClick={() => removeImage("default", idx)}
                 className="absolute top-2 right-2 btn btn-sm btn-circle btn-error text-white"
               >
-                <FiX />
+                <X />
               </button>
             </div>
           ))}
@@ -138,7 +138,7 @@ export default function ImageUpload({
                 onClick={() => removeImage("new", idx)}
                 className="absolute top-2 right-2 btn btn-sm btn-circle btn-error text-white"
               >
-                <FiX />
+                <X />
               </button>
             </div>
           ))}

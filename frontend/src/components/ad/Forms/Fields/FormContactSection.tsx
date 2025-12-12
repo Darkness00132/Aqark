@@ -2,7 +2,7 @@
 
 import { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { MdPhone, MdWarning } from "react-icons/md";
+import { Phone, AlertCircle } from "lucide-react";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
@@ -18,7 +18,7 @@ export default function FormContactSection({
   return (
     <div>
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <MdPhone className="text-success text-2xl" />
+        <Phone className="text-success text-2xl" />
         معلومات التواصل
       </h3>
       <div className="form-control">
@@ -43,7 +43,7 @@ export default function FormContactSection({
         {errors.whatsappNumber && (
           <label className="label">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <MdWarning />
+              <AlertCircle />
               {errors.whatsappNumber.message as string}
             </span>
           </label>
@@ -52,4 +52,3 @@ export default function FormContactSection({
     </div>
   );
 }
-

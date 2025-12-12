@@ -1,7 +1,7 @@
 "use client";
 import useAuth from "@/store/useAuth";
 import Link from "next/link";
-import { FaHome, FaSearch, FaShieldAlt, FaUsers } from "react-icons/fa";
+import { Home, Search, Shield, Users } from "lucide-react";
 
 export default function Hero() {
   const user = useAuth((state) => state.user);
@@ -26,7 +26,7 @@ export default function Hero() {
                 href="/ads"
                 className="btn btn-primary btn-sm sm:btn-md lg:btn-lg px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-bold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
               >
-                <FaSearch className="mr-1 sm:mr-2" />
+                <Search className="mr-1 sm:mr-2" />
                 ابحث عن عقار
               </Link>
             ) : (
@@ -34,7 +34,7 @@ export default function Hero() {
                 href="/ads/create"
                 className="btn btn-secondary btn-sm sm:btn-md lg:btn-lg px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-bold shadow-2xl hover:shadow-secondary/25 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
               >
-                <FaHome className="mr-1 sm:mr-2" />
+                <Home className="mr-1 sm:mr-2" />
                 اعرض عقارك
               </Link>
             )}
@@ -44,7 +44,7 @@ export default function Hero() {
           <div className="stats stats-vertical sm:stats-horizontal shadow-2xl bg-base-100/80 backdrop-blur-sm border border-base-300 w-full max-w-4xl mx-auto">
             <div className="stat">
               <div className="stat-figure text-primary">
-                <FaHome className="text-2xl sm:text-3xl lg:text-4xl" />
+                <Home className="text-2xl sm:text-3xl lg:text-4xl" />
               </div>
               <div className="stat-title text-xs sm:text-sm">
                 العقارات المتاحة
@@ -56,7 +56,7 @@ export default function Hero() {
 
             <div className="stat">
               <div className="stat-figure text-secondary">
-                <FaUsers className="text-2xl sm:text-3xl lg:text-4xl" />
+                <Users className="text-2xl sm:text-3xl lg:text-4xl" />
               </div>
               <div className="stat-title text-xs sm:text-sm">
                 أصحاب العقارات
@@ -68,7 +68,7 @@ export default function Hero() {
 
             <div className="stat">
               <div className="stat-figure text-accent">
-                <FaShieldAlt className="text-2xl sm:text-3xl lg:text-4xl" />
+                <Shield className="text-2xl sm:text-3xl lg:text-4xl" />
               </div>
               <div className="stat-title text-xs sm:text-sm">معدل الرضا</div>
               <div className="stat-value text-accent text-lg sm:text-xl lg:text-2xl">

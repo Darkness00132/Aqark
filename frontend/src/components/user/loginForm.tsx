@@ -3,7 +3,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/validation/userValidates";
-import { FaExclamationCircle } from "react-icons/fa";
+import { AlertCircle } from "lucide-react";
 import useLogin from "@/hooks/user/useLogin";
 
 export default function LoginForm() {
@@ -40,7 +40,7 @@ export default function LoginForm() {
         {errors.email && (
           <label className="label mt-2">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <FaExclamationCircle />
+              <AlertCircle />
               {errors.email.message}
             </span>
           </label>
@@ -63,7 +63,7 @@ export default function LoginForm() {
         {errors.password && (
           <label className="label mt-2">
             <span className="label-text-alt text-error flex items-center gap-1">
-              <FaExclamationCircle />
+              <AlertCircle />
               {errors.password.message}
             </span>
           </label>

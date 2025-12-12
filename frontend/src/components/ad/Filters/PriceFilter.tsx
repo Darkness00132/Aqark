@@ -1,7 +1,7 @@
 "use client";
 
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { FaDollarSign } from "react-icons/fa";
+import { DollarSign } from "lucide-react";
 import type { z } from "zod";
 import { AdfiltersSchema } from "@/validation/adValidates";
 
@@ -16,7 +16,7 @@ export default function PriceFilter({ register, errors }: PriceFilterProps) {
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-base-300">
       <div className="flex items-center gap-2 mb-4 pb-2 border-b border-base-300">
-        <FaDollarSign className="text-primary w-4 h-4" />
+        <DollarSign className="text-primary w-4 h-4" />
         <h3 className="font-semibold text-base-content">السعر</h3>
       </div>
 
@@ -37,7 +37,7 @@ export default function PriceFilter({ register, errors }: PriceFilterProps) {
               })}
               className="input input-bordered w-full pr-10 focus:outline-primary"
             />
-            <FaDollarSign className="absolute top-3.5 right-3 text-base-content/40" />
+            <DollarSign className="absolute top-3.5 right-3 text-base-content/40" />
           </div>
           {errors.minPrice && (
             <span className="text-error text-xs mt-1 flex items-center gap-1">
@@ -62,7 +62,7 @@ export default function PriceFilter({ register, errors }: PriceFilterProps) {
               })}
               className="input input-bordered w-full pr-10 focus:outline-primary"
             />
-            <FaDollarSign className="absolute top-3.5 right-3 text-base-content/40" />
+            <DollarSign className="absolute top-3.5 right-3 text-base-content/40" />
           </div>
           {errors.maxPrice && (
             <span className="text-error text-xs mt-1 flex items-center gap-1">
@@ -74,4 +74,3 @@ export default function PriceFilter({ register, errors }: PriceFilterProps) {
     </div>
   );
 }
-

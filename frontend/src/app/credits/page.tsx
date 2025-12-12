@@ -1,4 +1,4 @@
-import { FaClock, FaCheck, FaFire } from "react-icons/fa";
+import { Clock, Check, Flame } from "lucide-react";
 import formatDateFromNow from "@/lib/formatDateFromNow";
 import PayButton from "@/components/credits/PayButton";
 
@@ -75,7 +75,7 @@ export default async function Credits() {
                 {discount && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                     <div className="badge badge-warning badge-lg gap-2 px-6 py-4 shadow-lg animate-pulse">
-                      <FaFire className="text-orange-600" />
+                      <Flame className="text-orange-600" />
                       <span className="font-bold text-base">
                         خصم {discount.percentage}%
                       </span>
@@ -90,7 +90,7 @@ export default async function Credits() {
                 {/* Bonus Badge */}
                 {plan.bonus > 0 ? (
                   <div className="badge badge-success badge-lg gap-2 mb-4 mx-auto">
-                    <FaCheck className="text-xs" />+{plan.bonus} بونص
+                    <Check className="text-xs" />+{plan.bonus} بونص
                   </div>
                 ) : (
                   <div className="badge badge-ghost badge-lg mb-4 mx-auto">
@@ -109,7 +109,7 @@ export default async function Credits() {
                         {formatEgp(finalPrice)}
                       </div>
                       <div className="flex items-center justify-center gap-2 text-sm bg-warning/20 text-warning-content px-4 py-2 rounded-lg mt-3 border border-warning/40">
-                        <FaClock />
+                        <Clock />
                         <span className="font-semibold">
                           ينتهي {formatDateFromNow(discount.endsAt)}
                         </span>
@@ -127,15 +127,15 @@ export default async function Credits() {
                 {/* Features */}
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center gap-3 text-sm">
-                    <FaCheck className="text-success" />
+                    <Check className="text-success" />
                     <span>إجمالي {totalCredits} رصيد</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <FaCheck className="text-success" />
+                    <Check className="text-success" />
                     <span>يضاف فوراً</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <FaCheck className="text-success" />
+                    <Check className="text-success" />
                     <span>لا ينتهي أبداً</span>
                   </div>
                 </div>
