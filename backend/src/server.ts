@@ -19,6 +19,8 @@ import { getClientIP } from "./utils/getClientIp.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
+app.set("etag", "strong");
+
 // RATE LIMITING
 const rateLimiter = new RateLimiterMemory({
   points: 100, // Number of requests
@@ -41,7 +43,6 @@ app.use(async (req, res, next) => {
   }
 });
 
-// MIDDLEWARE CONFIGURATION
 // Trust proxy - important for rate limiting and IP detection behind reverse proxy
 app.set("trust proxy", 1);
 
@@ -122,12 +123,20 @@ try {
   console.log("✓ Database connection established");
 
   if (process.env.PRODUCTION === "false") {
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ force: true });
     console.log("✓ Database schema synchronized");
   }
 } catch (error) {
   console.error("✗ Unable to connect to database:", error);
   process.exit(1);
+}
+
+// Run a tiny query to warm up ORM & query planner
+try {
+  await sequelize.query("SELECT 1");
+  console.log("✓ Warm-up complete");
+} catch (e) {
+  console.log("Warm-up failed:", e);
 }
 
 // API ROUTES

@@ -8,11 +8,17 @@ const sequelize = global.sequelize ??
             ssl: { require: true, rejectUnauthorized: false },
         },
         logging: false,
+        benchmark: false,
         pool: {
-            max: 10,
-            min: 0,
+            max: 20,
+            min: 5,
             acquire: 30000,
             idle: 10000,
+        },
+        define: {
+            timestamps: true,
+            underscored: false,
+            freezeTableName: true,
         },
     });
 if (!global.sequelize)

@@ -27,13 +27,11 @@ export default function Header() {
           <Link href="/" className="btn btn-ghost text-xl hover:opacity-80">
             <Image
               priority
-              src="/favicon.ico"
+              src="/favicon.svg"
               alt="logo"
               width={40}
               height={40}
-              quality={75}
               className="w-8 h-8 sm:w-10 sm:h-10"
-              sizes="(max-width: 640px) 32px, 40px"
             />
             <span className="font-extrabold text-xl sm:text-2xl lg:text-3xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Aqark

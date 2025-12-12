@@ -26,6 +26,7 @@ const nextConfig: NextConfig = {
     contentDispositionType: "attachment",
   },
   experimental: {
+    optimizeCss: true,
     optimizePackageImports: [
       "react-icons",
       "react-hook-form",
