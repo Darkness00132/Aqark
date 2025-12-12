@@ -43,14 +43,5 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
     "typescript": "^5"
-  },
-  "browserslist": {
-    "production": [
-      ">0.5%",
-      "not dead",
-      "not op_mini all",
-      "not IE 11",
-      "not safari < 13"
-    ]
   }
 }
