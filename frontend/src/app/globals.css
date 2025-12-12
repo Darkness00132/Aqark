@@ -67,4 +67,6 @@
   --border-btn: 1px;
   --tab-border: 1px;
   --tab-radius: 0.5rem;
+
+  --font-sans: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
 }
